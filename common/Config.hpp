@@ -9,7 +9,11 @@
                 #define AOUT_API __declspec(dllimport)
         #endif
 #elif defined(AOUT_PLATFORM_LINUX)
-        #define AOUT_API
+        #if __GNUC__ >= 4
+                #define AOUT_API __attribute__((__visibility__("default")))
+        #else
+                #define AOUT_API
+        #endif
 #else
         #error Unsupported platform
 #endif
