@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Types.hpp"
+
 #include <ostream>
 
 #if defined(AOUT_PLATFORM_WINDOWS)
@@ -20,9 +22,9 @@
 
 namespace aout {
 
-constexpr unsigned versionMajor = 0;
-constexpr unsigned versionMinor = 1;
-constexpr unsigned versionPatch = 0;
+constexpr uint32 versionMajor = 0;
+constexpr uint32 versionMinor = 1;
+constexpr uint32 versionPatch = 0;
 
 AOUT_API std::ostream& printVersion(std::ostream& os);
 

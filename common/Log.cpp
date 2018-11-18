@@ -6,7 +6,7 @@
 
 namespace aout { namespace log {
 
-enum class Color {
+enum class Color : uint32 {
         Black = 0,
         Red = 1,
         Green = 2,
@@ -61,7 +61,7 @@ Colorizer::Colorizer(Color color)
 }
 
 std::ostream& Colorizer::operator()(std::ostream& os) const {
-        return os << "\033[3" << static_cast<int>(mColor) << "m";
+        return os << "\033[3" << static_cast<uint32>(mColor) << "m";
 }
 
 } }
