@@ -20,7 +20,7 @@ enum class Color : uint32 {
 
 class Colorizer {
 public:
-        Colorizer(Color color);
+        explicit Colorizer(Color color);
         std::ostream& operator()(std::ostream& os) const;
 
 private:
