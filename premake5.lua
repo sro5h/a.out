@@ -23,18 +23,18 @@ workspace "a.out"
 
 project "common"
         kind "SharedLib"
-        files { "common/**.hpp", "common/**.cpp" }
+        files { "%{prj.name}/**.hpp", "%{prj.name}/**.cpp" }
         defines "AOUT_EXPORTS"
 
 project "client"
         kind "ConsoleApp"
-        files { "client/**.hpp", "client/**.cpp" }
+        files { "%{prj.name}/**.hpp", "%{prj.name}/**.cpp" }
         includedirs { "." }
         links { "common" }
 
 project "server"
         kind "ConsoleApp"
-        files { "server/**.hpp", "server/**.cpp" }
+        files { "%{prj.name}/**.hpp", "%{prj.name}/**.cpp" }
         includedirs { "." }
         links { "common" }
 
