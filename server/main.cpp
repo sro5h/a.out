@@ -1,8 +1,7 @@
-#include <iostream>
-#include "Config.hpp"
+#include <common/Log.hpp>
 
 int main(int argc, char** argv) {
-        std::cout << "Server " << PrintVersion << std::endl;
+        AOUT_LOG_DEBUG("Server v" << aout::printVersion);
 
         return 0;
 }

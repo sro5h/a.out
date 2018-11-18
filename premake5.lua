@@ -2,7 +2,16 @@ workspace "a.out"
         language "C++"
         architecture "x86_64"
 
+        targetdir "bin/%{cfg.longname}/"
+        objdir "obj/%{cfg.longname}/"
+
         configurations { "Debug", "Release" }
+
+        filter { "system:windows" }
+                defines "AOUT_PLATFORM_WINDOWS"
+
+        filter { "system:linux" }
+                defines "AOUT_PLATFORM_LINUX"
 
         filter { "configurations:Debug" }
                 symbols "On"
@@ -12,20 +21,22 @@ workspace "a.out"
 
         filter { }
 
-        targetdir "bin/%{cfg.longname}/"
-        objdir "obj/%{cfg.longname}/"
+project "common"
+        kind "SharedLib"
+        files { "common/**.hpp", "common/**.cpp" }
+        defines "AOUT_EXPORTS"
 
 project "client"
         kind "ConsoleApp"
         files { "client/**.hpp", "client/**.cpp" }
-
-        includedirs "src/client"
+        includedirs { "." }
+        links { "common" }
 
 project "server"
         kind "ConsoleApp"
         files { "server/**.hpp", "server/**.cpp" }
-
-        includedirs "src/server"
+        includedirs { "." }
+        links { "common" }
 
 newaction {
         trigger = "clean",
