@@ -25,6 +25,7 @@ project "common"
         kind "SharedLib"
         files { "%{prj.name}/**.hpp", "%{prj.name}/**.cpp" }
         defines "AOUT_EXPORTS"
+        links { "enet" }
 
 project "client"
         kind "ConsoleApp"
