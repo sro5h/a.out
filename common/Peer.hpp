@@ -41,7 +41,6 @@ private:
 private:
         _ENetPeer* mPeer;
 
-        friend class Event;
         friend class Host;
 };
 

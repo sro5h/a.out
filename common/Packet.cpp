@@ -207,4 +207,9 @@ bool Packet::checkSize(std::size_t size) const {
         return mIsValid;
 }
 
+void Packet::convertFrom(_ENetPacket& enetPacket) {
+        clear();
+        append(enetPacket.data, enetPacket.dataLength);
+}
+
 } }

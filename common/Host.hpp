@@ -4,8 +4,9 @@
 
 #include <unordered_map>
 
-struct _ENetPeer;
 struct _ENetAddress;
+struct _ENetPeer;
+struct _ENetPacket;
 struct _ENetHost;
 
 namespace aout { namespace net {
@@ -40,6 +41,10 @@ public:
         std::size_t getConnectionCount() const;
 
 private:
+        void onConnectEvent(Event& event, _ENetPeer& enetPeer);
+        void onDisconnectEvent(Event& event, _ENetPeer& enetPeer);
+        void onReceiveEvent(Event& event, _ENetPeer& enetPeer, _ENetPacket& enetPacket);
+
         bool setENetAddressHost(_ENetAddress& address, const std::string& host) const;
 
         _ENetHost* mHost;

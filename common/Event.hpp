@@ -17,11 +17,6 @@ struct AOUT_API Event final {
         Type type;
         Peer peer;
         Packet packet;
-
-private:
-        void convertFrom(const _ENetEvent& enetEvent);
-
-        friend class Host;
 };
 
 } }

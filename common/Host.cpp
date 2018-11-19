@@ -80,8 +80,22 @@ bool Host::pollEvent(Event& event) {
 
         _ENetEvent enetEvent;
         if (enet_host_service(mHost, &enetEvent, 0) > 0) {
-                // TODO: Store enetEvent.peer->connectId
-                event.convertFrom(enetEvent);
+                assert(enetEvent.type != ENET_EVENT_TYPE_NONE);
+
+                switch (enetEvent.type) {
+                case ENET_EVENT_TYPE_CONNECT:
+                        onConnectEvent(event, *enetEvent.peer);
+                        break;
+
+                case ENET_EVENT_TYPE_DISCONNECT:
+                        onDisconnectEvent(event, *enetEvent.peer);
+                        break;
+
+                case ENET_EVENT_TYPE_RECEIVE:
+                        onReceiveEvent(event, *enetEvent.peer, *enetEvent.packet);
+                        break;
+                }
+
                 return true;
         }
 
@@ -157,6 +171,37 @@ bool Host::isValid() const {
 
 std::size_t Host::getConnectionCount() const {
         return mHost == nullptr ? 0 : mHost->connectedPeers;
+}
+
+void Host::onConnectEvent(Event& event, _ENetPeer& enetPeer) {
+        event.type = Event::Type::Connect;
+
+        assert(mPeerIds.find(&enetPeer) == mPeerIds.end());
+        mPeerIds[&enetPeer] = enetPeer.connectID;
+
+        event.peer.convertFrom(enetPeer);
+}
+
+void Host::onDisconnectEvent(Event& event, _ENetPeer& enetPeer) {
+        event.type = Event::Type::Disconnect;
+
+        assert(mPeerIds.find(&enetPeer) != mPeerIds.end());
+        enetPeer.connectID = mPeerIds[&enetPeer];
+        mPeerIds.erase(&enetPeer);
+
+        event.peer.convertFrom(enetPeer);
+}
+
+void Host::onReceiveEvent(Event& event, _ENetPeer& enetPeer, _ENetPacket& enetPacket) {
+        event.type = Event::Type::Receive;
+
+        assert(mPeerIds.find(&enetPeer) != mPeerIds.end());
+        assert(mPeerIds[&enetPeer] == enetPeer.connectID);
+
+        event.peer.convertFrom(enetPeer);
+        event.packet.convertFrom(enetPacket);
+
+        enet_packet_destroy(&enetPacket);
 }
 
 bool Host::setENetAddressHost(_ENetAddress& address, const std::string& host) const {

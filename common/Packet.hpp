@@ -5,6 +5,8 @@
 #include <vector>
 #include <limits>
 
+struct _ENetPacket;
+
 namespace aout { namespace net {
 
 static_assert(std::numeric_limits<float>::is_iec559,  "IEC 559 floating point");
@@ -58,11 +60,15 @@ public:
 
 private:
         bool checkSize(std::size_t size) const;
+        void convertFrom(_ENetPacket& enetPacket);
 
+private:
         std::vector<uint8> mData;
         mutable std::size_t mReadPosition;
         mutable bool mIsValid;
         Flag mFlag;
+
+        friend class Host;
 };
 
 } }
