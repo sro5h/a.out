@@ -3,8 +3,12 @@
 #include "Config.hpp"
 
 #include <vector>
+#include <limits>
 
 namespace aout { namespace net {
+
+static_assert(std::numeric_limits<float>::is_iec559,  "IEC 559 floating point");
+static_assert(std::numeric_limits<double>::is_iec559, "IEC 559 floating point");
 
 class AOUT_API Packet final {
 public:
