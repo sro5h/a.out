@@ -1,4 +1,5 @@
 #include "Packet.hpp"
+#include "Endian.hpp"
 
 #include <enet/enet.h>
 #include <cstring>
@@ -80,7 +81,8 @@ const Packet& Packet::operator>>(uint8& data) const {
 
 const Packet& Packet::operator>>(int16& data) const {
         if (checkSize(sizeof(data))) {
-                data = ntohs(*reinterpret_cast<const int16*>(&mData[mReadPosition]));
+                int16 read = *reinterpret_cast<const int16*>(&mData[mReadPosition]);
+                data = ntohi16(read);
                 mReadPosition += sizeof(data);
         }
 
@@ -89,7 +91,8 @@ const Packet& Packet::operator>>(int16& data) const {
 
 const Packet& Packet::operator>>(uint16& data) const {
         if (checkSize(sizeof(data))) {
-                data = ntohs(*reinterpret_cast<const uint16*>(&mData[mReadPosition]));
+                uint16 read = *reinterpret_cast<const uint16*>(&mData[mReadPosition]);
+                data = ntohi16(read);
                 mReadPosition += sizeof(data);
         }
 
@@ -98,7 +101,8 @@ const Packet& Packet::operator>>(uint16& data) const {
 
 const Packet& Packet::operator>>(int32& data) const {
         if (checkSize(sizeof(data))) {
-                data = ntohl(*reinterpret_cast<const int32*>(&mData[mReadPosition]));
+                int32 read = *reinterpret_cast<const int32*>(&mData[mReadPosition]);
+                data = ntohi32(read);
                 mReadPosition += sizeof(data);
         }
 
@@ -107,26 +111,53 @@ const Packet& Packet::operator>>(int32& data) const {
 
 const Packet& Packet::operator>>(uint32& data) const {
         if (checkSize(sizeof(data))) {
-                data = ntohl(*reinterpret_cast<const uint32*>(&mData[mReadPosition]));
+                uint32 read = *reinterpret_cast<const uint32*>(&mData[mReadPosition]);
+                data = ntohi32(read);
                 mReadPosition += sizeof(data);
         }
 
         return *this;
 }
 
-const Packet& Packet::operator>>(float& data) const {
+const Packet& Packet::operator>>(int64& data) const {
         if (checkSize(sizeof(data))) {
-                data = *reinterpret_cast<const float*>(&mData[mReadPosition]);
+                int64 read = *reinterpret_cast<const int64*>(&mData[mReadPosition]);
+                data = ntohi64(read);
                 mReadPosition += sizeof(data);
         }
 
         return *this;
 }
 
-const Packet& Packet::operator>>(double& data) const {
+const Packet& Packet::operator>>(uint64& data) const {
         if (checkSize(sizeof(data))) {
-                data = *reinterpret_cast<const double*>(&mData[mReadPosition]);
+                uint64 read = *reinterpret_cast<const uint64*>(&mData[mReadPosition]);
+                data = ntohi64(read);
                 mReadPosition += sizeof(data);
+        }
+
+        return *this;
+}
+
+const Packet& Packet::operator>>(float32& data) const {
+        static_assert(sizeof(float32) == sizeof(uint32), "Both have same size");
+
+        uint32 read;
+        if (*this >> read) {
+                data = ntohf32(read);
+                mReadPosition += sizeof(read);
+        }
+
+        return *this;
+}
+
+const Packet& Packet::operator>>(float64& data) const {
+        static_assert(sizeof(float64) == sizeof(uint64), "Both have same size");
+
+        uint64 read;
+        if (*this >> read) {
+                data = ntohf64(read);
+                mReadPosition += sizeof(read);
         }
 
         return *this;
@@ -159,33 +190,47 @@ Packet& Packet::operator<<(uint8 data) {
 }
 
 Packet& Packet::operator<<(int16 data) {
-        data = htons(data);
+        data = htoni16(data);
         return append(&data, sizeof(data));
 }
 
 Packet& Packet::operator<<(uint16 data) {
-        data = htons(data);
+        data = htoni16(data);
         return append(&data, sizeof(data));
 }
 
 Packet& Packet::operator<<(int32 data) {
-        data = htonl(data);
+        data = htoni32(data);
         return append(&data, sizeof(data));
 }
 
 Packet& Packet::operator<<(uint32 data) {
-        data = htonl(data);
+        data = htoni32(data);
         return append(&data, sizeof(data));
 }
 
-// TODO: Take byte order into consideration
-Packet& Packet::operator<<(float data) {
+Packet& Packet::operator<<(int64 data) {
+        data = htoni64(data);
         return append(&data, sizeof(data));
 }
 
-// TODO: Take byte order into consideration
-Packet& Packet::operator<<(double data) {
+Packet& Packet::operator<<(uint64 data) {
+        data = htoni64(data);
         return append(&data, sizeof(data));
+}
+
+Packet& Packet::operator<<(float32 data) {
+        static_assert(sizeof(float32) == sizeof(uint32), "Both have same size");
+
+        uint32 encoded = htonf32(data);
+        return append(&encoded, sizeof(encoded));
+}
+
+Packet& Packet::operator<<(float64 data) {
+        static_assert(sizeof(float64) == sizeof(uint64), "Both have same size");
+
+        uint64 encoded = htonf64(data);
+        return append(&encoded, sizeof(encoded));
 }
 
 Packet& Packet::operator<<(const std::string& data) {

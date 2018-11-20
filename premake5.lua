@@ -39,6 +39,12 @@ project "server"
         includedirs { "." }
         links { "common" }
 
+project "test"
+        kind "ConsoleApp"
+        files { "%{prj.name}/**.hpp", "%{prj.name}/**.cpp" }
+        includedirs { "." }
+        links { "common" }
+
 newaction {
         trigger = "clean",
         description = "Clean the workspace",

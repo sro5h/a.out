@@ -3,14 +3,10 @@
 #include "Config.hpp"
 
 #include <vector>
-#include <limits>
 
 struct _ENetPacket;
 
 namespace aout { namespace net {
-
-static_assert(std::numeric_limits<float>::is_iec559,  "IEC 559 floating point");
-static_assert(std::numeric_limits<double>::is_iec559, "IEC 559 floating point");
 
 class AOUT_API Packet final {
 public:
@@ -43,8 +39,10 @@ public:
         const Packet& operator>>(uint16& data) const;
         const Packet& operator>>(int32& data) const;
         const Packet& operator>>(uint32& data) const;
-        const Packet& operator>>(float& data) const;
-        const Packet& operator>>(double& data) const;
+        const Packet& operator>>(int64& data) const;
+        const Packet& operator>>(uint64& data) const;
+        const Packet& operator>>(float32& data) const;
+        const Packet& operator>>(float64& data) const;
         const Packet& operator>>(std::string& data) const;
 
         Packet& operator<<(bool data);
@@ -54,8 +52,10 @@ public:
         Packet& operator<<(uint16 data);
         Packet& operator<<(int32 data);
         Packet& operator<<(uint32 data);
-        Packet& operator<<(float data);
-        Packet& operator<<(double data);
+        Packet& operator<<(int64 data);
+        Packet& operator<<(uint64 data);
+        Packet& operator<<(float32 data);
+        Packet& operator<<(float64 data);
         Packet& operator<<(const std::string& data);
 
 private:
