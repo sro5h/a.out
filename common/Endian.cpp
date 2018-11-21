@@ -18,43 +18,43 @@ static_assert(std::numeric_limits<float64>::is_iec559, "IEC 559 floating point")
 uint64 packIEC559(float64 f, uint32 bits, uint32 expBits);
 float64 unpackIEC559(uint64 i, uint32 bits, uint32 expBits);
 
-uint16 htoni16(uint16 value) {
+uint16 hton16(uint16 value) {
         return htons(value);
 }
 
-uint32 htoni32(uint32 value) {
+uint32 hton32(uint32 value) {
         return htonl(value);
 }
 
-uint64 htoni64(uint64 value) {
+uint64 hton64(uint64 value) {
         return htonll(value);
 }
 
-uint16 ntohi16(uint16 value) {
+uint16 ntoh16(uint16 value) {
         return ntohs(value);
 }
 
-uint32 ntohi32(uint32 value) {
+uint32 ntoh32(uint32 value) {
         return ntohl(value);
 }
 
-uint64 ntohi64(uint64 value) {
+uint64 ntoh64(uint64 value) {
         return ntohll(value);
 }
 
-uint32 packIEC559f32(float32 value) {
+uint32 packIEC559_32(float32 value) {
         return static_cast<uint32>(packIEC559(value, 32, 8));
 }
 
-uint64 packIEC559f64(float64 value) {
+uint64 packIEC559_64(float64 value) {
         return packIEC559(value, 64, 11);
 }
 
-float32 unpackIEC559f32(uint32 value) {
+float32 unpackIEC559_32(uint32 value) {
         return static_cast<float32>(unpackIEC559(value, 32, 8));
 }
 
-float64 unpackIEC559f64(uint64 value) {
+float64 unpackIEC559_64(uint64 value) {
         return unpackIEC559(value, 64, 11);
 }
 
