@@ -1,6 +1,8 @@
 #include "Log.hpp"
 
+#include <chrono>
 #include <ostream>
+#include <sstream>
 #include <iomanip>
 #include <ctime>
 
@@ -31,9 +33,33 @@ std::ostream& operator<<(std::ostream& os, const Colorizer& colorizer) {
         return colorizer(os);
 }
 
+// Uses threadsafe versions of std::localtime
+std::tm localtimeSafe(std::time_t t) {
+#if defined(AOUT_PLATFORM_WINDOWS) && __MSC_VER >= 1400 // MSVCRT (2005+): default is threadsafe
+        return *std::localtime(&t);
+#elif defined(AOUT_PLATFORM_LINUX) // POSIX has localtime_r
+        std::tm temp;
+        return *::localtime_r(&t, &temp);
+#else
+        #error Unsupported platform
+#endif
+}
+
+std::string millisecondsToString(std::chrono::system_clock::time_point time) {
+        std::ostringstream oss;
+
+        auto sinceEpoch = time.time_since_epoch();
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(sinceEpoch) % 1000;
+
+        oss << std::setfill('0') << std::setw(3) << ms.count();
+        return oss.str();
+}
+
 std::ostream& time(std::ostream& os) {
-        std::time_t t = std::time(nullptr);
-        return os << std::put_time(std::localtime(&t), "%H:%M:%S");
+        auto now = std::chrono::system_clock::now();
+        std::tm t = localtimeSafe(std::chrono::system_clock::to_time_t(now));
+
+        return os << std::put_time(&t, "%T") << '.' << millisecondsToString(now);
 }
 
 std::ostream& begin(std::ostream& os, Color color, const std::string& level) {
