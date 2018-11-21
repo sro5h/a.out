@@ -30,16 +30,6 @@ uint64 htoni64(uint64 value) {
         return htonll(value);
 }
 
-uint32 htonf32(float32 value) {
-        uint32 packed = packIEC559f32(value);
-        return htonl(packed);
-}
-
-uint64 htonf64(float64 value) {
-        uint64 packed = packIEC559f64(value);
-        return htonll(packed);
-}
-
 uint16 ntohi16(uint16 value) {
         return ntohs(value);
 }
@@ -50,16 +40,6 @@ uint32 ntohi32(uint32 value) {
 
 uint64 ntohi64(uint64 value) {
         return ntohll(value);
-}
-
-float32 ntohf32(uint32 value) {
-        uint32 packed = ntohl(value);
-        return unpackIEC559f32(packed);
-}
-
-float64 ntohf64(uint64 value) {
-        uint64 packed = ntohll(value);
-        return unpackIEC559f64(packed);
 }
 
 uint32 packIEC559f32(float32 value) {
