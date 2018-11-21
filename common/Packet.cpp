@@ -144,8 +144,7 @@ const Packet& Packet::operator>>(float32& data) const {
 
         uint32 read;
         if (*this >> read) {
-                data = ntohf32(read);
-                mReadPosition += sizeof(read);
+                data = unpackIEC559f32(read);
         }
 
         return *this;
@@ -156,8 +155,7 @@ const Packet& Packet::operator>>(float64& data) const {
 
         uint64 read;
         if (*this >> read) {
-                data = ntohf64(read);
-                mReadPosition += sizeof(read);
+                data = unpackIEC559f64(read);
         }
 
         return *this;
@@ -222,15 +220,15 @@ Packet& Packet::operator<<(uint64 data) {
 Packet& Packet::operator<<(float32 data) {
         static_assert(sizeof(float32) == sizeof(uint32), "Both have same size");
 
-        uint32 encoded = htonf32(data);
-        return append(&encoded, sizeof(encoded));
+        uint32 encoded = packIEC559f32(data);
+        return *this << encoded;
 }
 
 Packet& Packet::operator<<(float64 data) {
         static_assert(sizeof(float64) == sizeof(uint64), "Both have same size");
 
-        uint64 encoded = htonf64(data);
-        return append(&encoded, sizeof(encoded));
+        uint64 encoded = packIEC559f64(data);
+        return *this << encoded;
 }
 
 Packet& Packet::operator<<(const std::string& data) {
