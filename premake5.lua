@@ -42,7 +42,7 @@ project "server"
 project "test"
         kind "ConsoleApp"
         files { "%{prj.name}/**.hpp", "%{prj.name}/**.cpp" }
-        includedirs { "." }
+        includedirs { ".", "external" }
         links { "common" }
 
 newaction {
