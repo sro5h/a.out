@@ -4,7 +4,7 @@
 #include <enet/enet.h>
 #include <cstring>
 
-namespace aout { namespace net {
+namespace aout {
 
 Packet::Packet(Flag flag)
         : mFlag(flag)
@@ -82,7 +82,7 @@ const Packet& Packet::operator>>(uint8& data) const {
 const Packet& Packet::operator>>(int16& data) const {
         if (checkSize(sizeof(data))) {
                 int16 read = *reinterpret_cast<const int16*>(&mData[mReadPosition]);
-                data = ntoh16(read);
+                data = util::ntoh16(read);
                 mReadPosition += sizeof(data);
         }
 
@@ -92,7 +92,7 @@ const Packet& Packet::operator>>(int16& data) const {
 const Packet& Packet::operator>>(uint16& data) const {
         if (checkSize(sizeof(data))) {
                 uint16 read = *reinterpret_cast<const uint16*>(&mData[mReadPosition]);
-                data = ntoh16(read);
+                data = util::ntoh16(read);
                 mReadPosition += sizeof(data);
         }
 
@@ -102,7 +102,7 @@ const Packet& Packet::operator>>(uint16& data) const {
 const Packet& Packet::operator>>(int32& data) const {
         if (checkSize(sizeof(data))) {
                 int32 read = *reinterpret_cast<const int32*>(&mData[mReadPosition]);
-                data = ntoh32(read);
+                data = util::ntoh32(read);
                 mReadPosition += sizeof(data);
         }
 
@@ -112,7 +112,7 @@ const Packet& Packet::operator>>(int32& data) const {
 const Packet& Packet::operator>>(uint32& data) const {
         if (checkSize(sizeof(data))) {
                 uint32 read = *reinterpret_cast<const uint32*>(&mData[mReadPosition]);
-                data = ntoh32(read);
+                data = util::ntoh32(read);
                 mReadPosition += sizeof(data);
         }
 
@@ -122,7 +122,7 @@ const Packet& Packet::operator>>(uint32& data) const {
 const Packet& Packet::operator>>(int64& data) const {
         if (checkSize(sizeof(data))) {
                 int64 read = *reinterpret_cast<const int64*>(&mData[mReadPosition]);
-                data = ntoh64(read);
+                data = util::ntoh64(read);
                 mReadPosition += sizeof(data);
         }
 
@@ -132,7 +132,7 @@ const Packet& Packet::operator>>(int64& data) const {
 const Packet& Packet::operator>>(uint64& data) const {
         if (checkSize(sizeof(data))) {
                 uint64 read = *reinterpret_cast<const uint64*>(&mData[mReadPosition]);
-                data = ntoh64(read);
+                data = util::ntoh64(read);
                 mReadPosition += sizeof(data);
         }
 
@@ -144,7 +144,7 @@ const Packet& Packet::operator>>(float32& data) const {
 
         uint32 read;
         if (*this >> read) {
-                data = unpackIEC559_32(read);
+                data = util::unpackIEC559_32(read);
         }
 
         return *this;
@@ -155,7 +155,7 @@ const Packet& Packet::operator>>(float64& data) const {
 
         uint64 read;
         if (*this >> read) {
-                data = unpackIEC559_64(read);
+                data = util::unpackIEC559_64(read);
         }
 
         return *this;
@@ -188,46 +188,46 @@ Packet& Packet::operator<<(uint8 data) {
 }
 
 Packet& Packet::operator<<(int16 data) {
-        data = hton16(data);
+        data = util::hton16(data);
         return append(&data, sizeof(data));
 }
 
 Packet& Packet::operator<<(uint16 data) {
-        data = hton16(data);
+        data = util::hton16(data);
         return append(&data, sizeof(data));
 }
 
 Packet& Packet::operator<<(int32 data) {
-        data = hton32(data);
+        data = util::hton32(data);
         return append(&data, sizeof(data));
 }
 
 Packet& Packet::operator<<(uint32 data) {
-        data = hton32(data);
+        data = util::hton32(data);
         return append(&data, sizeof(data));
 }
 
 Packet& Packet::operator<<(int64 data) {
-        data = hton64(data);
+        data = util::hton64(data);
         return append(&data, sizeof(data));
 }
 
 Packet& Packet::operator<<(uint64 data) {
-        data = hton64(data);
+        data = util::hton64(data);
         return append(&data, sizeof(data));
 }
 
 Packet& Packet::operator<<(float32 data) {
         static_assert(sizeof(float32) == sizeof(uint32), "Both have same size");
 
-        uint32 encoded = packIEC559_32(data);
+        uint32 encoded = util::packIEC559_32(data);
         return *this << encoded;
 }
 
 Packet& Packet::operator<<(float64 data) {
         static_assert(sizeof(float64) == sizeof(uint64), "Both have same size");
 
-        uint64 encoded = packIEC559_64(data);
+        uint64 encoded = util::packIEC559_64(data);
         return *this << encoded;
 }
 
@@ -255,4 +255,4 @@ void Packet::convertFrom(_ENetPacket& enetPacket) {
         append(enetPacket.data, enetPacket.dataLength);
 }
 
-} }
+}

@@ -4,7 +4,7 @@
 
 struct _ENetPeer;
 
-namespace aout { namespace net {
+namespace aout {
 
 enum class State : uint16 {
         Zombie,
@@ -44,4 +44,4 @@ private:
         friend class Host;
 };
 
-} }
+}

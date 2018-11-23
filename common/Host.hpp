@@ -9,14 +9,11 @@ struct _ENetPeer;
 struct _ENetPacket;
 struct _ENetHost;
 
-namespace aout { namespace net {
+namespace aout {
 
 class Peer;
 class Packet;
-class Event;
-
-AOUT_API bool initialize();
-AOUT_API void deinitialize();
+class Message;
 
 class AOUT_API Host {
 public:
@@ -30,7 +27,7 @@ public:
         void disconnect(const Peer& peer);
         void disconnectAll();
 
-        bool pollEvent(Event& event);
+        bool pollMessage(Message& message);
         void flush();
 
         bool send(const Peer& peer, const Packet& packet);
@@ -41,9 +38,9 @@ public:
         std::size_t getConnectionCount() const;
 
 private:
-        void onConnectEvent(Event& event, _ENetPeer& enetPeer);
-        void onDisconnectEvent(Event& event, _ENetPeer& enetPeer);
-        void onReceiveEvent(Event& event, _ENetPeer& enetPeer, _ENetPacket& enetPacket);
+        void onConnectMessage(Message& message, _ENetPeer& enetPeer);
+        void onDisconnectMessage(Message& message, _ENetPeer& enetPeer);
+        void onReceiveMessage(Message& message, _ENetPeer& enetPeer, _ENetPacket& enetPacket);
 
         bool setENetAddressHost(_ENetAddress& address, const std::string& host) const;
 
@@ -51,4 +48,4 @@ private:
         std::unordered_map<_ENetPeer*, uint32> mPeerIds;
 };
 
-} }
+}

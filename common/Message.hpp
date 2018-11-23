@@ -5,9 +5,9 @@
 
 struct _ENetEvent;
 
-namespace aout { namespace net {
+namespace aout {
 
-struct AOUT_API Event final {
+struct AOUT_API Message final {
         enum class Type : uint16 {
                 Connect,
                 Disconnect,
@@ -19,4 +19,4 @@ struct AOUT_API Event final {
         Packet packet;
 };
 
-} }
+}

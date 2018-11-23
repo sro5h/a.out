@@ -2,7 +2,7 @@
 
 #include "Config.hpp"
 
-namespace aout { namespace net {
+namespace aout { namespace util {
 
 AOUT_API uint16 hton16(uint16 value);
 AOUT_API uint32 hton32(uint32 value);

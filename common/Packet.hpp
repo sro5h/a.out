@@ -6,7 +6,7 @@
 
 struct _ENetPacket;
 
-namespace aout { namespace net {
+namespace aout {
 
 class AOUT_API Packet final {
 public:
@@ -71,4 +71,4 @@ private:
         friend class Host;
 };
 
-} }
+}

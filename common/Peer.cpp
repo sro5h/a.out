@@ -3,7 +3,7 @@
 #include <enet/enet.h>
 #include <functional>
 
-namespace aout { namespace net {
+namespace aout {
 
 std::string convertENetAddress(const _ENetAddress& address);
 
@@ -82,4 +82,4 @@ std::string convertENetAddress(const _ENetAddress& address) {
         return str;
 }
 
-} }
+}

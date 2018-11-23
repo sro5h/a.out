@@ -10,7 +10,7 @@
         #define ntohll(x) be64toh((x)) // WARNING: OpenBSD uses betoh64
 #endif
 
-namespace aout { namespace net {
+namespace aout { namespace util {
 
 static_assert(std::numeric_limits<float32>::is_iec559, "IEC 559 floating point");
 static_assert(std::numeric_limits<float64>::is_iec559, "IEC 559 floating point");

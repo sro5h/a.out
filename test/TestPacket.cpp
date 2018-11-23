@@ -5,7 +5,7 @@
 using namespace aout;
 
 TEST_CASE("Packet getSize, dataLeft and clear") {
-        net::Packet p;
+        Packet p;
 
         CHECK((p << static_cast<bool>(true)));
         CHECK(p.getSize() == sizeof(bool));
@@ -88,7 +88,7 @@ TEST_CASE("Packet getSize, dataLeft and clear") {
 }
 
 TEST_CASE("Packet operator<< then operator>> bool") {
-        net::Packet p;
+        Packet p;
         bool value;
 
         CHECK((p << static_cast<bool>(true)));
@@ -99,7 +99,7 @@ TEST_CASE("Packet operator<< then operator>> bool") {
 }
 
 TEST_CASE("Packet operator<< then operator>> int8") {
-        net::Packet p;
+        Packet p;
         int8 value;
 
         CHECK((p << static_cast<int8>(-42)));
@@ -110,7 +110,7 @@ TEST_CASE("Packet operator<< then operator>> int8") {
 }
 
 TEST_CASE("Packet operator<< then operator>> uint8") {
-        net::Packet p;
+        Packet p;
         uint8 value;
 
         CHECK((p << static_cast<uint8>(42)));
@@ -121,7 +121,7 @@ TEST_CASE("Packet operator<< then operator>> uint8") {
 }
 
 TEST_CASE("Packet operator<< then operator>> int16") {
-        net::Packet p;
+        Packet p;
         int16 value;
 
         CHECK((p << static_cast<int16>(-42)));
@@ -132,7 +132,7 @@ TEST_CASE("Packet operator<< then operator>> int16") {
 }
 
 TEST_CASE("Packet operator<< then operator>> uint16") {
-        net::Packet p;
+        Packet p;
         uint16 value;
 
         CHECK((p << static_cast<uint16>(42)));
@@ -143,7 +143,7 @@ TEST_CASE("Packet operator<< then operator>> uint16") {
 }
 
 TEST_CASE("Packet operator<< then operator>> int32") {
-        net::Packet p;
+        Packet p;
         int32 value;
 
         CHECK((p << static_cast<int32>(-42)));
@@ -154,7 +154,7 @@ TEST_CASE("Packet operator<< then operator>> int32") {
 }
 
 TEST_CASE("Packet operator<< then operator>> uint32") {
-        net::Packet p;
+        Packet p;
         uint32 value;
 
         CHECK((p << static_cast<uint32>(42)));
@@ -165,7 +165,7 @@ TEST_CASE("Packet operator<< then operator>> uint32") {
 }
 
 TEST_CASE("Packet operator<< then operator>> int64") {
-        net::Packet p;
+        Packet p;
         int64 value;
 
         CHECK((p << static_cast<int64>(-42)));
@@ -176,7 +176,7 @@ TEST_CASE("Packet operator<< then operator>> int64") {
 }
 
 TEST_CASE("Packet operator<< then operator>> uint64") {
-        net::Packet p;
+        Packet p;
         uint64 value;
 
         CHECK((p << static_cast<uint64>(42)));
@@ -187,7 +187,7 @@ TEST_CASE("Packet operator<< then operator>> uint64") {
 }
 
 TEST_CASE("Packet operator<< then operator>> float32") {
-        net::Packet p;
+        Packet p;
         float32 value;
 
         CHECK((p << static_cast<float32>(3.1459f)));
@@ -202,7 +202,7 @@ TEST_CASE("Packet operator<< then operator>> float32") {
 }
 
 TEST_CASE("Packet operator<< then operator>> float64") {
-        net::Packet p;
+        Packet p;
         float64 value;
 
         CHECK((p << static_cast<float64>(3.1459)));

@@ -1,18 +1,19 @@
 #include <common/Log.hpp>
+#include <common/Network.hpp>
 #include <common/Host.hpp>
-#include <common/Event.hpp>
+#include <common/Message.hpp>
 
 #include <memory>
 
 using namespace aout;
 
-void run(net::Host& host);
+void run(Host& host);
 
 int main(int argc, char** argv) {
         AOUT_LOG_DEBUG("Client v" << aout::printVersion);
 
-        if (net::initialize()) {
-                std::unique_ptr<net::Host> host = std::make_unique<net::Host>();
+        if (network::initialize()) {
+                std::unique_ptr<Host> host = std::make_unique<Host>();
 
                 if (host->create("localhost", 0, 1)) {
                         run(*host);
@@ -22,18 +23,18 @@ int main(int argc, char** argv) {
                 }
 
         } else {
-                AOUT_LOG_ERROR("Could not initialize net module");
+                AOUT_LOG_ERROR("Could not initialize network module");
         }
 
-        net::deinitialize();
+        network::deinitialize();
         return 0;
 }
 
-void run(net::Host& host) {
+void run(Host& host) {
         if (host.connect("localhost", 42424)) {
                 while (true) {
-                        net::Event event;
-                        while (host.pollEvent(event)) {
+                        Message message;
+                        while (host.pollMessage(message)) {
                                 (void)0;
                         }
                 }

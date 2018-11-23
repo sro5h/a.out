@@ -1,20 +1,12 @@
 #include "Host.hpp"
-#include "Event.hpp"
+#include "Message.hpp"
 
 #include <enet/enet.h>
 #include <cassert>
 
-namespace aout { namespace net {
+namespace aout {
 
 _ENetPacket* createENetPacket(const Packet& packet);
-
-bool initialize() {
-        return enet_initialize() == 0;
-}
-
-void deinitialize() {
-        enet_deinitialize();
-}
 
 Host::Host()
         : mHost(nullptr) {
@@ -75,7 +67,7 @@ void Host::disconnectAll() {
         }
 }
 
-bool Host::pollEvent(Event& event) {
+bool Host::pollMessage(Message& message) {
         assert(mHost != nullptr);
 
         _ENetEvent enetEvent;
@@ -84,15 +76,15 @@ bool Host::pollEvent(Event& event) {
 
                 switch (enetEvent.type) {
                 case ENET_EVENT_TYPE_CONNECT:
-                        onConnectEvent(event, *enetEvent.peer);
+                        onConnectMessage(message, *enetEvent.peer);
                         break;
 
                 case ENET_EVENT_TYPE_DISCONNECT:
-                        onDisconnectEvent(event, *enetEvent.peer);
+                        onDisconnectMessage(message, *enetEvent.peer);
                         break;
 
                 case ENET_EVENT_TYPE_RECEIVE:
-                        onReceiveEvent(event, *enetEvent.peer, *enetEvent.packet);
+                        onReceiveMessage(message, *enetEvent.peer, *enetEvent.packet);
                         break;
                 }
 
@@ -173,33 +165,33 @@ std::size_t Host::getConnectionCount() const {
         return mHost == nullptr ? 0 : mHost->connectedPeers;
 }
 
-void Host::onConnectEvent(Event& event, _ENetPeer& enetPeer) {
-        event.type = Event::Type::Connect;
+void Host::onConnectMessage(Message& message, _ENetPeer& enetPeer) {
+        message.type = Message::Type::Connect;
 
         assert(mPeerIds.find(&enetPeer) == mPeerIds.end());
         mPeerIds[&enetPeer] = enetPeer.connectID;
 
-        event.peer.convertFrom(enetPeer);
+        message.peer.convertFrom(enetPeer);
 }
 
-void Host::onDisconnectEvent(Event& event, _ENetPeer& enetPeer) {
-        event.type = Event::Type::Disconnect;
+void Host::onDisconnectMessage(Message& message, _ENetPeer& enetPeer) {
+        message.type = Message::Type::Disconnect;
 
         assert(mPeerIds.find(&enetPeer) != mPeerIds.end());
         enetPeer.connectID = mPeerIds[&enetPeer];
         mPeerIds.erase(&enetPeer);
 
-        event.peer.convertFrom(enetPeer);
+        message.peer.convertFrom(enetPeer);
 }
 
-void Host::onReceiveEvent(Event& event, _ENetPeer& enetPeer, _ENetPacket& enetPacket) {
-        event.type = Event::Type::Receive;
+void Host::onReceiveMessage(Message& message, _ENetPeer& enetPeer, _ENetPacket& enetPacket) {
+        message.type = Message::Type::Receive;
 
         assert(mPeerIds.find(&enetPeer) != mPeerIds.end());
         assert(mPeerIds[&enetPeer] == enetPeer.connectID);
 
-        event.peer.convertFrom(enetPeer);
-        event.packet.convertFrom(enetPacket);
+        message.peer.convertFrom(enetPeer);
+        message.packet.convertFrom(enetPacket);
 
         enet_packet_destroy(&enetPacket);
 }
@@ -237,4 +229,4 @@ _ENetPacket* createENetPacket(const Packet& packet) {
         return enet_packet_create(packet.getData(), packet.getSize(), enetFlags);
 }
 
-} }
+}
