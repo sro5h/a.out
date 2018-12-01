@@ -28,7 +28,11 @@ void Application::start() {
 
                 while (accumulator >= timeStep) {
                         accumulator -= timeStep;
+
                         mStateStack.onUpdate(timeStep);
+                        if (mStateStack.isEmpty()) {
+                                stop();
+                        }
                 }
 
                 mStateStack.onRender(elapsed);
