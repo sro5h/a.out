@@ -11,11 +11,13 @@ Peer::Peer()
         : mPeer(nullptr) {
 }
 
+Peer::~Peer() = default;
+
 bool Peer::isValid() const {
         return mPeer != nullptr;
 }
 
-State Peer::getState() const {
+Peer::State Peer::getState() const {
         if (mPeer == nullptr) {
                 return State::Zombie;
         }

@@ -12,6 +12,8 @@ Packet::Packet(Flag flag)
         , mIsValid(true) {
 }
 
+Packet::~Packet() = default;
+
 Packet& Packet::append(const void* data, std::size_t size) {
         if (data != nullptr && size > 0) {
                 std::size_t start = mData.size();

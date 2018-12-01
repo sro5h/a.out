@@ -18,7 +18,7 @@ public:
 
 public:
         explicit Packet(Flag flag = Flag::Unreliable);
-        ~Packet() = default;
+        ~Packet();
 
         Packet& append(const void* data, std::size_t size);
         void clear();

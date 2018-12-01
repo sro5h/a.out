@@ -25,19 +25,19 @@ project "common"
         kind "SharedLib"
         files { "%{prj.name}/**.hpp", "%{prj.name}/**.cpp" }
         defines "AOUT_EXPORTS"
-        links { "enet" }
+        links { "enet", "sfml-system" }
 
 project "client"
         kind "ConsoleApp"
         files { "%{prj.name}/**.hpp", "%{prj.name}/**.cpp" }
         includedirs { "." }
-        links { "common" }
+        links { "common", "sfml-system" }
 
 project "server"
         kind "ConsoleApp"
         files { "%{prj.name}/**.hpp", "%{prj.name}/**.cpp" }
         includedirs { "." }
-        links { "common" }
+        links { "common", "sfml-system" }
 
 project "test"
         kind "ConsoleApp"

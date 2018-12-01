@@ -6,23 +6,23 @@ struct _ENetPeer;
 
 namespace aout {
 
-enum class State : uint16 {
-        Zombie,
-        Disconnected,
-        Disconnecting,
-        AcknowledgingDisconnect,
-        DisconnectLater,
-        Connected,
-        Connecting,
-        AcknowledgingConnect,
-        PendingConnect,
-        Succeeded,
-};
-
 class AOUT_API Peer final {
 public:
+        enum class State : uint16 {
+                Zombie,
+                Disconnected,
+                Disconnecting,
+                AcknowledgingDisconnect,
+                DisconnectLater,
+                Connected,
+                Connecting,
+                AcknowledgingConnect,
+                PendingConnect,
+                Succeeded,
+        };
+
         explicit Peer();
-        ~Peer() = default;
+        ~Peer();
 
         bool isValid() const;
         State getState() const;

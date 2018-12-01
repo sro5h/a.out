@@ -1,12 +1,26 @@
+#include "ServerApplication.hpp"
+
 #include <common/Log.hpp>
-#include <common/Network.hpp>
-#include <common/Host.hpp>
-#include <common/Message.hpp>
-#include <common/Peer.hpp>
+//#include <common/Network.hpp>
+//#include <common/Host.hpp>
+//#include <common/Message.hpp>
+//#include <common/Peer.hpp>
 
 #include <memory>
 
-using namespace aout;
+int main(int argc, char** argv) {
+        auto application = std::make_unique<ServerApplication>();
+        if (application) {
+                application->start();
+
+        } else {
+                AOUT_LOG_ERROR("Could not allocate application");
+        }
+
+        return 0;
+}
+
+/*using namespace aout;
 
 void run(Host& host);
 
@@ -66,4 +80,4 @@ void onDisconnectMessage(const Peer& peer) {
 
 void onReceiveMessage(const Peer& peer, const Packet& packet) {
         AOUT_LOG_DEBUG("Received message from " << peer.address << ":" << peer.port);
-}
+}*/
