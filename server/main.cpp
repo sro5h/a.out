@@ -7,12 +7,12 @@
 int main(int argc, char** argv) {
         auto application = std::make_unique<ServerApplication>();
 
-        aout::onSigInt([&application]() {
-                AOUT_LOG_DEBUG("Received sig int, stopping application");
-                application->stop();
-        });
-
         if (application) {
+                aout::onSigInt([&application]() {
+                        AOUT_LOG_DEBUG("Received sig int, stopping application");
+                        application->stop();
+                });
+
                 application->start();
 
         } else {
