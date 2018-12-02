@@ -26,10 +26,6 @@ void StateStack::onRender(sf::Time elapsed) {
         }
 }
 
-void StateStack::push(uint32 id) {
-        mPendingActions.push_back(PendingAction(Action::Push, id));
-}
-
 void StateStack::pop() {
         mPendingActions.push_back(PendingAction(Action::Pop));
 }
@@ -43,10 +39,10 @@ bool StateStack::isEmpty() const {
 }
 
 void StateStack::applyPendingActions() {
-        for (const PendingAction& action : mPendingActions) {
+        for (PendingAction& action : mPendingActions) {
                 switch (action.action) {
                 case Action::Push:
-                        applyPush(action.id);
+                        applyPush(std::move(action.state));
                         break;
 
                 case Action::Pop:
@@ -62,14 +58,12 @@ void StateStack::applyPendingActions() {
         mPendingActions.clear();
 }
 
-void StateStack::applyPush(uint32 id) {
-        std::unique_ptr<State> state = mFactory.create(id);
-
+void StateStack::applyPush(std::unique_ptr<State> state) {
         if (state != nullptr) {
                 mStack.push_back(std::move(state));
 
         } else {
-                AOUT_LOG_ERROR("Couldn't create state with id " << id);
+                AOUT_LOG_ERROR("Couldn't push state");
                 assert(false);
         }
 }
@@ -84,9 +78,9 @@ void StateStack::applyPop() {
         }
 }
 
-StateStack::PendingAction::PendingAction(Action action, uint32 id)
+StateStack::PendingAction::PendingAction(Action action, std::unique_ptr<State> state)
         : action(action)
-        , id(id) {
+        , state(std::move(state)) {
 }
 
 }

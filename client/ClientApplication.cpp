@@ -1,6 +1,5 @@
 #include "ClientApplication.hpp"
 #include "MainState.hpp"
-#include "States.hpp"
 
 #include <common/Config.hpp>
 #include <common/Log.hpp>
@@ -32,8 +31,7 @@ bool ClientApplication::onStart() {
                 return false;
         }
 
-        getStateStack().registerState<MainState>(states::Main, *mHost);
-        getStateStack().push(states::Main);
+        getStateStack().push<MainState>(*mHost);
 
         return true;
 }

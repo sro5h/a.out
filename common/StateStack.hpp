@@ -2,7 +2,6 @@
 
 #include "Config.hpp"
 #include "State.hpp"
-#include "Factory.hpp"
 
 #include <SFML/System/Time.hpp>
 #include <vector>
@@ -10,20 +9,16 @@
 
 namespace aout {
 
-using StateFactory = Factory<State, uint32>;
-
 class AOUT_API StateStack final {
 public:
         explicit StateStack();
         ~StateStack();
 
-        template <typename ConcreteState, typename... Args>
-        void registerState(uint32 id, Args&&... args);
-
         void onUpdate(sf::Time elapsed);
         void onRender(sf::Time elapsed);
 
-        void push(uint32 id);
+        template <typename ConcreteState, typename... Args>
+        void push(Args&&... args);
         void pop();
         void clear();
 
@@ -37,25 +32,24 @@ private:
         };
 
         struct PendingAction final {
-                explicit PendingAction(Action action, uint32 id = 0);
+                explicit PendingAction(Action action, std::unique_ptr<State> state = nullptr);
 
                 Action action;
-                uint32 id;
+                std::unique_ptr<State> state;
         };
 
         void applyPendingActions();
-        void applyPush(uint32 id);
+        void applyPush(std::unique_ptr<State> state);
         void applyPop();
 
         std::vector<std::unique_ptr<State>> mStack;
         std::vector<PendingAction> mPendingActions;
-        StateFactory mFactory;
 };
 
 template <typename ConcreteState, typename... Args>
-void StateStack::registerState(uint32 id, Args&&... args) {
-        mFactory.registerType<ConcreteState, StateStack&, Args...>(id, *this,
-                        std::forward<Args>(args)...);
+void StateStack::push(Args&&... args) {
+        auto state = std::make_unique<ConcreteState>(*this, std::forward<Args>(args)...);
+        mPendingActions.push_back(PendingAction(Action::Push, std::move(state)));
 }
 
 }
