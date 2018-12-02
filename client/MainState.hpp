@@ -9,6 +9,8 @@ public:
         explicit MainState(aout::StateStack& stateStack, aout::Host& host);
         ~MainState();
 
+        bool onStart() override;
+
         bool onUpdate(sf::Time elapsed) override;
         void onRender(sf::Time elapsed) override;
 

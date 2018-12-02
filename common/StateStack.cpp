@@ -60,16 +60,23 @@ void StateStack::applyPendingActions() {
 
 void StateStack::applyPush(std::unique_ptr<State> state) {
         if (state != nullptr) {
-                mStack.push_back(std::move(state));
+                if (state->onStart()) {
+                        mStack.push_back(std::move(state));
+
+                } else {
+                        AOUT_LOG_ERROR("Can't push state, onStart returned false");
+                        assert(false);
+                }
 
         } else {
-                AOUT_LOG_ERROR("Couldn't push state");
+                AOUT_LOG_ERROR("Can't push state, is nullptr");
                 assert(false);
         }
 }
 
 void StateStack::applyPop() {
         if (!mStack.empty()) {
+                mStack.back()->onStop();
                 mStack.pop_back();
 
         } else {

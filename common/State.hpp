@@ -13,6 +13,9 @@ public:
         explicit State(StateStack& stateStack);
         virtual ~State();
 
+        virtual bool onStart();
+        virtual void onStop();
+
         virtual bool onUpdate(sf::Time elapsed) = 0;
         virtual void onRender(sf::Time elapsed) = 0;
 

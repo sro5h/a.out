@@ -20,11 +20,6 @@ bool ClientApplication::onStart() {
                 return false;
         }
 
-        if (!mHost->connect("localhost", 42424)) {
-                AOUT_LOG_ERROR("Connection attempt failed");
-                return false;
-        }
-
         getStateStack().push<MainState>(*mHost);
 
         return true;

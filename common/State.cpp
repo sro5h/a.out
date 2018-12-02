@@ -9,6 +9,13 @@ State::State(StateStack& stateStack)
 
 State::~State() = default;
 
+bool State::onStart() {
+        return true;
+}
+
+void State::onStop() {
+}
+
 StateStack& State::getStateStack() {
         return mStateStack;
 }
