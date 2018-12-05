@@ -41,6 +41,7 @@ private:
         void applyPendingActions();
         void applyPush(std::unique_ptr<State> state);
         void applyPop();
+        void applyClear();
 
         std::vector<std::unique_ptr<State>> mStack;
         std::vector<PendingAction> mPendingActions;

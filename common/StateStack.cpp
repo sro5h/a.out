@@ -7,7 +7,9 @@ namespace aout {
 
 StateStack::StateStack() = default;
 
-StateStack::~StateStack() = default;
+StateStack::~StateStack() {
+        applyClear();
+}
 
 void StateStack::onUpdate(Time elapsed) {
         // Stop when State::update returns false
@@ -50,7 +52,7 @@ void StateStack::applyPendingActions() {
                         break;
 
                 case Action::Clear:
-                        mStack.clear();
+                        applyClear();
                         break;
                 }
         }
@@ -83,6 +85,14 @@ void StateStack::applyPop() {
                 AOUT_LOG_ERROR("Couldn't pop state, stack is empty");
                 assert(false);
         }
+}
+
+void StateStack::applyClear() {
+        for (auto& state: mStack) {
+                state->onStop();
+        }
+
+        mStack.clear();
 }
 
 StateStack::PendingAction::PendingAction(Action action, std::unique_ptr<State> state)
