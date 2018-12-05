@@ -29,11 +29,11 @@ void StateStack::onRender(Time elapsed) {
 }
 
 void StateStack::pop() {
-        mPendingActions.push_back(PendingAction(Action::Pop));
+        mPendingActions.push_back(Action(Action::Type::Pop));
 }
 
 void StateStack::clear() {
-        mPendingActions.push_back(PendingAction(Action::Clear));
+        mPendingActions.push_back(Action(Action::Type::Clear));
 }
 
 bool StateStack::isEmpty() const {
@@ -41,17 +41,17 @@ bool StateStack::isEmpty() const {
 }
 
 void StateStack::applyPendingActions() {
-        for (PendingAction& action : mPendingActions) {
-                switch (action.action) {
-                case Action::Push:
+        for (Action& action : mPendingActions) {
+                switch (action.type) {
+                case Action::Type::Push:
                         applyPush(std::move(action.state));
                         break;
 
-                case Action::Pop:
+                case Action::Type::Pop:
                         applyPop();
                         break;
 
-                case Action::Clear:
+                case Action::Type::Clear:
                         applyClear();
                         break;
                 }
@@ -95,8 +95,8 @@ void StateStack::applyClear() {
         mStack.clear();
 }
 
-StateStack::PendingAction::PendingAction(Action action, std::unique_ptr<State> state)
-        : action(action)
+StateStack::Action::Action(Type type, std::unique_ptr<State> state)
+        : type(type)
         , state(std::move(state)) {
 }
 

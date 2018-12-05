@@ -25,16 +25,14 @@ public:
         bool isEmpty() const;
 
 private:
-        enum class Action {
-                Push,
-                Pop,
-                Clear,
-        };
+        struct Action final {
+                enum class Type {
+                        Push, Pop, Clear,
+                };
 
-        struct PendingAction final {
-                explicit PendingAction(Action action, std::unique_ptr<State> state = nullptr);
+                explicit Action(Type type, std::unique_ptr<State> state = nullptr);
 
-                Action action;
+                Type type;
                 std::unique_ptr<State> state;
         };
 
@@ -44,13 +42,13 @@ private:
         void applyClear();
 
         std::vector<std::unique_ptr<State>> mStack;
-        std::vector<PendingAction> mPendingActions;
+        std::vector<Action> mPendingActions;
 };
 
 template <typename ConcreteState, typename... Args>
 void StateStack::push(Args&&... args) {
         auto state = std::make_unique<ConcreteState>(*this, std::forward<Args>(args)...);
-        mPendingActions.push_back(PendingAction(Action::Push, std::move(state)));
+        mPendingActions.push_back(Action(Action::Type::Push, std::move(state)));
 }
 
 }
