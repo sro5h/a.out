@@ -2,8 +2,7 @@
 
 #include "Config.hpp"
 #include "StateStack.hpp"
-
-#include <SFML/System/Time.hpp>
+#include "Time.hpp"
 
 namespace aout {
 
@@ -18,7 +17,7 @@ public:
         virtual bool onStart() = 0;
         virtual void onStop() = 0;
 
-        virtual sf::Time getTimeStep() = 0;
+        virtual Time getTimeStep() = 0;
 
 protected:
         StateStack& getStateStack();

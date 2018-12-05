@@ -9,8 +9,8 @@ public:
         explicit MainState(aout::StateStack& stateStack, aout::Host& host);
         ~MainState();
 
-        bool onUpdate(sf::Time elapsed) override;
-        void onRender(sf::Time elapsed) override;
+        bool onUpdate(aout::Time elapsed) override;
+        void onRender(aout::Time elapsed) override;
 
 private:
         void onConnectMessage(const aout::Peer& peer);

@@ -9,7 +9,7 @@ StateStack::StateStack() = default;
 
 StateStack::~StateStack() = default;
 
-void StateStack::onUpdate(sf::Time elapsed) {
+void StateStack::onUpdate(Time elapsed) {
         // Stop when State::update returns false
         for (auto itr = mStack.rbegin(); itr != mStack.rend(); ++itr) {
                 if (!(*itr)->onUpdate(elapsed)) {
@@ -20,7 +20,7 @@ void StateStack::onUpdate(sf::Time elapsed) {
         applyPendingActions();
 }
 
-void StateStack::onRender(sf::Time elapsed) {
+void StateStack::onRender(Time elapsed) {
         for (auto& state : mStack) {
                 state->onRender(elapsed);
         }

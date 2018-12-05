@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Config.hpp"
-
-#include <SFML/System/Time.hpp>
+#include "Time.hpp"
 
 namespace aout {
 
@@ -16,8 +15,8 @@ public:
         virtual bool onStart();
         virtual void onStop();
 
-        virtual bool onUpdate(sf::Time elapsed) = 0;
-        virtual void onRender(sf::Time elapsed) = 0;
+        virtual bool onUpdate(Time elapsed) = 0;
+        virtual void onRender(Time elapsed) = 0;
 
 protected:
         StateStack& getStateStack();

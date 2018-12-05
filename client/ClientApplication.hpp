@@ -11,7 +11,7 @@ public:
         bool onStart() override;
         void onStop() override;
 
-        sf::Time getTimeStep() override;
+        aout::Time getTimeStep() override;
 
 private:
         std::unique_ptr<aout::Host> mHost;

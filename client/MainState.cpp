@@ -19,7 +19,7 @@ bool MainState::onStart() {
         return true;
 }
 
-bool MainState::onUpdate(sf::Time elapsed) {
+bool MainState::onUpdate(aout::Time elapsed) {
         aout::Message message;
         while (mHost.pollMessage(message)) {
                 AOUT_LOG_DEBUG("Message received");
@@ -28,5 +28,5 @@ bool MainState::onUpdate(sf::Time elapsed) {
         return true;
 }
 
-void MainState::onRender(sf::Time elapsed) {
+void MainState::onRender(aout::Time elapsed) {
 }

@@ -1,7 +1,6 @@
 #include "Application.hpp"
 #include "Log.hpp"
-
-#include <SFML/System/Clock.hpp>
+#include "Clock.hpp"
 
 namespace aout {
 
@@ -12,8 +11,8 @@ Application::Application()
 Application::~Application() = default;
 
 void Application::start() {
-        sf::Clock clock;
-        sf::Time accumulator, elapsed;
+        Clock clock;
+        Time accumulator, elapsed;
 
         if (!onStart()) {
                 AOUT_LOG_ERROR("Could not start the application");
@@ -24,9 +23,9 @@ void Application::start() {
                 elapsed = clock.restart();
                 accumulator += elapsed;
 
-                const sf::Time timeStep = getTimeStep();
+                const Time timeStep = getTimeStep();
 
-                while (accumulator >= timeStep) {
+                while (accumulator > timeStep) {
                         accumulator -= timeStep;
 
                         mStateStack.onUpdate(timeStep);

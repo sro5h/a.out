@@ -11,8 +11,8 @@ public:
 
         bool onStart() override;
 
-        bool onUpdate(sf::Time elapsed) override;
-        void onRender(sf::Time elapsed) override;
+        bool onUpdate(aout::Time elapsed) override;
+        void onRender(aout::Time elapsed) override;
 
 private:
         aout::Host& mHost;

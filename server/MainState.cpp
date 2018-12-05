@@ -10,7 +10,7 @@ MainState::MainState(aout::StateStack& stateStack, aout::Host& host)
 
 MainState::~MainState() = default;
 
-bool MainState::onUpdate(sf::Time elapsed) {
+bool MainState::onUpdate(aout::Time elapsed) {
         aout::Message message;
         while (mHost.pollMessage(message)) {
                 switch (message.type) {
@@ -31,7 +31,7 @@ bool MainState::onUpdate(sf::Time elapsed) {
         return true;
 }
 
-void MainState::onRender(sf::Time elapsed) {
+void MainState::onRender(aout::Time elapsed) {
 }
 
 void MainState::onConnectMessage(const aout::Peer& peer) {

@@ -28,6 +28,6 @@ bool ClientApplication::onStart() {
 void ClientApplication::onStop() {
 }
 
-sf::Time ClientApplication::getTimeStep() {
-        return sf::microseconds(31250);
+aout::Time ClientApplication::getTimeStep() {
+        return aout::Time(31250000);
 }

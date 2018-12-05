@@ -2,8 +2,8 @@
 
 #include "Config.hpp"
 #include "State.hpp"
+#include "Time.hpp"
 
-#include <SFML/System/Time.hpp>
 #include <vector>
 #include <memory>
 
@@ -14,8 +14,8 @@ public:
         explicit StateStack();
         ~StateStack();
 
-        void onUpdate(sf::Time elapsed);
-        void onRender(sf::Time elapsed);
+        void onUpdate(Time elapsed);
+        void onRender(Time elapsed);
 
         template <typename ConcreteState, typename... Args>
         void push(Args&&... args);
