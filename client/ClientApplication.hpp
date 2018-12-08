@@ -14,5 +14,5 @@ public:
         aout::Time getTimeStep() override;
 
 private:
-        std::unique_ptr<aout::Host> mHost;
+        aout::Host mHost;
 };
