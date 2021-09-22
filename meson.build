@@ -12,3 +12,4 @@ project(
 subdir('common')
 subdir('client')
 subdir('server')
+subdir('test')
