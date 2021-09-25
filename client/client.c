@@ -64,7 +64,7 @@ void aout_client_update(
         }
 }
 
-aout_client_res aout_client_connect(
+aout_res aout_client_connect(
                 aout_client* client,
                 uint32_t ip,
                 uint16_t port) {
@@ -79,10 +79,10 @@ aout_client_res aout_client_connect(
         ENetPeer* peer = enet_host_connect(client->host, &address, 2, 0);
 
         if (!peer) {
-                return AOUT_CLIENT_ERR;
+                return AOUT_ERR(AOUT_CLIENT_ERR);
         }
 
-        return AOUT_CLIENT_OK;
+        return AOUT_OK;
 }
 
 bool aout_client_is_running(

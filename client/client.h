@@ -1,6 +1,7 @@
 #ifndef CLIENT_CLIENT_H
 #define CLIENT_CLIENT_H
 
+#include <common/result.h>
 #include <common/types.h>
 
 typedef struct _ENetHost ENetHost;
@@ -31,7 +32,7 @@ void aout_client_destroy(
 void aout_client_update(
                 aout_client* client);
 
-aout_client_res aout_client_connect(
+aout_res aout_client_connect(
                 aout_client* client,
                 uint32_t ip,
                 uint16_t port);

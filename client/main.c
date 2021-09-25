@@ -32,7 +32,7 @@ int main(void) {
 
         printf("client created\n");
 
-        if (aout_client_connect(client, 0x7f000001, 42424) != AOUT_CLIENT_OK) {
+        if (AOUT_IS_ERR(aout_client_connect(client, 0x7f000001, 42424))) {
                 fprintf(stderr, "could not connect to foreign host\n");
                 cleanup(client);
                 return EXIT_FAILURE;
