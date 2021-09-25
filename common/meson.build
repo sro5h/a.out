@@ -1,5 +1,6 @@
 common_sources = [
-  'dummy.c'
+  'dummy.c',
+  'console.c'
 ]
 
 build_args = [
