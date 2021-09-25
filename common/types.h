@@ -1,7 +1,9 @@
 #ifndef COMMON_TYPES_H
 #define COMMON_TYPES_H
 
+#include <assert.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef float  float32_t;
 typedef double float64_t;

@@ -1,5 +1,6 @@
 client_sources = [
-  'main.c'
+  'main.c',
+  'client.c'
 ]
 
 client_public_headers = include_directories(

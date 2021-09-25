@@ -1,5 +1,6 @@
 server_sources = [
-  'main.c'
+  'main.c',
+  'server.c'
 ]
 
 server_public_headers = include_directories(
