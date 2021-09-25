@@ -9,7 +9,7 @@ int main(void) {
                 return EXIT_FAILURE;
         }
 
-        if (aout_dummy() == AOUT_DUMMY_OK) {
+        if (AOUT_IS_OK(aout_dummy(true))) {
                 printf("client\n");
         }
 

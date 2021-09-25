@@ -2,12 +2,18 @@
 #include <common/dummy.h>
 
 TEST dummy_should_return_ok(void) {
-        ASSERT(aout_dummy() == AOUT_DUMMY_OK);
+        ASSERT(AOUT_IS_OK(aout_dummy(true)));
+        PASS();
+}
+
+TEST dummy_should_return_err(void) {
+        ASSERT(AOUT_IS_ERR(aout_dummy(false)));
         PASS();
 }
 
 SUITE(test_dummy) {
         RUN_TEST(dummy_should_return_ok);
+        RUN_TEST(dummy_should_return_err);
 }
 
 GREATEST_MAIN_DEFS();

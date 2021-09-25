@@ -1,5 +1,9 @@
 #include "dummy.h"
 
-aout_dummy_res_t aout_dummy(void) {
-        return AOUT_DUMMY_OK;
+aout_res aout_dummy(bool test) {
+        if (!test) {
+                return AOUT_ERR(AOUT_DUMMY_ERR);
+        }
+
+        return AOUT_OK;
 }
