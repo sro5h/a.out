@@ -106,8 +106,9 @@ static void aout_client_on_receive(
                 ENetPeer* peer,
                 ENetPacket* packet) {
         (void) client;
-        (void) peer;
-        (void) packet;
+
+        aout_connection* connection = (aout_connection*) peer->data;
+        printf("packet received from %u: %s\n", connection->id, packet->data);
 }
 
 static void aout_client_on_disconnect(

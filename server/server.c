@@ -89,6 +89,18 @@ static void aout_server_on_connect(
         peer->data = connection;
 
         printf("connection from %u\n", connection->id);
+
+        // Send dummy packet
+        ENetPacket* packet = enet_packet_create(
+                "message",
+                strlen("message") + 1,
+                ENET_PACKET_FLAG_RELIABLE
+        );
+
+        if (packet) {
+                enet_peer_send(peer, 0, packet);
+                enet_host_flush(server->host);
+        }
 }
 
 static void aout_server_on_receive(
