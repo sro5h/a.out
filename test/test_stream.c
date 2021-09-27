@@ -1,5 +1,5 @@
-#include <common/stream.h>
 #include <common/byte_order.h>
+#include <common/stream.h>
 #include <greatest/greatest.h>
 
 TEST stream_write_u8(void) {
