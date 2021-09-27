@@ -156,3 +156,9 @@ aout_res aout_buffer_read_bytes(
 
         return AOUT_OK;
 }
+
+void aout_buffer_reset(
+                aout_buffer* buffer) {
+        assert(buffer);
+        buffer->index = 0;
+}

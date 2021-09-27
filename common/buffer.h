@@ -95,4 +95,7 @@ COMMON_API aout_res aout_buffer_read_bytes(
                 uint8_t* values,
                 size_t size);
 
+COMMON_API void aout_buffer_reset( // TODO: Find better name
+                aout_buffer* buffer);
+
 #endif
