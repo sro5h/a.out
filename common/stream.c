@@ -50,9 +50,8 @@ aout_res aout_stream_write_bytes(
                 uint8_t* values,
                 size_t size) {
         assert(stream); assert(values);
-        assert(stream->index <= stream->data_size); // TODO: Treat as error?
 
-        if (stream->index + size > stream->data_size) {
+        if (!aout_stream_has_capacity(stream, size)) {
                 return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
         }
 
@@ -144,10 +143,8 @@ aout_res aout_stream_read_bytes(
                 uint8_t* values,
                 size_t size) {
         assert(stream); assert(values);
-        assert(stream->index <= stream->data_size);
 
-        if (stream->index + size > stream->data_size) {
-                // TODO: Add new error code
+        if (!aout_stream_has_capacity(stream, size)) {
                 return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
         }
 
@@ -155,6 +152,22 @@ aout_res aout_stream_read_bytes(
         stream->index += size;
 
         return AOUT_OK;
+}
+
+// If aout_stream_has_capacity(stream, size) returns true a call to
+// aout_stream_write_bytes(stream, data, size) will never fail. Thus a call to
+// aout_stream_write_*(stream, value) will never fail if sizeof(value) is less
+// than or equal to size.
+// The same is true for the read functions.
+bool aout_stream_has_capacity(
+                aout_stream* stream,
+                size_t size) {
+        assert(stream);
+        assert(stream->index <= stream->data_size); // TODO: Treat as error?
+        // No don't treat that as an error. The index should only be modified
+        // by aout_stream_* functions and thus never be invalid.
+
+        return (stream->index + size) <= stream->data_size;
 }
 
 void aout_stream_reset(

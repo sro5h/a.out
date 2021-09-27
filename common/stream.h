@@ -95,6 +95,10 @@ COMMON_API aout_res aout_stream_read_bytes(
                 uint8_t* values,
                 size_t size);
 
+COMMON_API bool aout_stream_has_capacity(
+                aout_stream* stream,
+                size_t size);
+
 COMMON_API void aout_stream_reset( // TODO: Find better name
                 aout_stream* stream);
 
