@@ -12,26 +12,6 @@ typedef struct aout_stream {
         size_t index;
 } aout_stream;
 
-#if 0
-typedef struct aout_stream_writer {
-        aout_stream stream; // struct { uint8_t* data; size_t data_size; };
-        size_t index;
-} aout_stream_writer;
-
-aout_stream_writer writer = {
-        .stream.data = data,
-        .stream.data_size = size
-};
-
-aout_stream_writer aout_stream_writer_make(
-                aout_stream stream);
-
-void aout_stream_writer_reset(
-                aout_stream_writer* writer) {
-        writer->index = 0;
-}
-#endif
-
 typedef enum aout_stream_res {
         AOUT_STREAM_OK,
         AOUT_STREAM_ERR_END_REACHED,
