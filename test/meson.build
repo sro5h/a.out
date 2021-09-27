@@ -6,6 +6,10 @@ test_dummy_sources = [
   'test_dummy.c'
 ]
 
+test_messages_sources = [
+  'test_messages.c'
+]
+
 test_stream_sources = [
   'test_stream.c'
 ]
@@ -22,13 +26,6 @@ if get_option('default_library') == 'shared'
   build_args += '-DCOMMON_IMPORTS'
 endif
 
-test('Stream test', executable(
-  'test_stream',
-  test_stream_sources,
-  include_directories: test_public_headers,
-  link_with: common_target
-))
-
 test('Byte order test', executable(
   'test_byte_order',
   test_byte_order_sources,
@@ -39,6 +36,20 @@ test('Byte order test', executable(
 test('Dummy test', executable(
   'test_dummy',
   test_dummy_sources,
+  include_directories: test_public_headers,
+  link_with: common_target
+))
+
+test('Messages test', executable(
+  'test_messages',
+  test_messages_sources,
+  include_directories: test_public_headers,
+  link_with: common_target
+))
+
+test('Stream test', executable(
+  'test_stream',
+  test_stream_sources,
   include_directories: test_public_headers,
   link_with: common_target
 ))
