@@ -503,6 +503,250 @@ TEST buffer_write_f64(void) {
         PASS();
 }
 
+TEST buffer_read_u8(void) {
+        uint8_t data[] = { 32, 129, -32, 239, 12, 4, 9, 94, 49, 3 };
+        aout_buffer buffer = {
+                .data = data,
+                .data_size = sizeof(data)
+        };
+
+        aout_res res = { 0 };
+        uint8_t u = 0;
+
+        res = aout_buffer_read_u8(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, data[0]);
+
+        res = aout_buffer_read_u8(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, data[1]);
+
+        res = aout_buffer_read_u8(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, data[2]);
+
+        res = aout_buffer_read_u8(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, data[3]);
+
+        res = aout_buffer_read_u8(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, data[4]);
+
+        res = aout_buffer_read_u8(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, data[5]);
+
+        res = aout_buffer_read_u8(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, data[6]);
+
+        res = aout_buffer_read_u8(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, data[7]);
+
+        res = aout_buffer_read_u8(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, data[8]);
+
+        res = aout_buffer_read_u8(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, data[9]);
+
+        res = aout_buffer_read_u8(&buffer, &u);
+
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT_EQ(res.code, AOUT_BUFFER_ERR_FULL);
+
+        PASS();
+}
+
+TEST buffer_read_u16(void) {
+        uint8_t data[] = { 32, 129, -32, 239, 12, 4, 9, 94, 49, 3 };
+        aout_buffer buffer = {
+                .data = data,
+                .data_size = sizeof(data)
+        };
+
+        aout_res res = { 0 };
+        uint16_t u = 0;
+        uint16_t h = aout_ntoh_u16(*((uint16_t*) &data[0]));
+
+        res = aout_buffer_read_u16(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        h = aout_ntoh_u16(*((uint16_t*) &data[2]));
+
+        res = aout_buffer_read_u16(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        h = aout_ntoh_u16(*((uint16_t*) &data[4]));
+
+        res = aout_buffer_read_u16(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        h = aout_ntoh_u16(*((uint16_t*) &data[6]));
+
+        res = aout_buffer_read_u16(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        h = aout_ntoh_u16(*((uint16_t*) &data[8]));
+
+        res = aout_buffer_read_u16(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        res = aout_buffer_read_u16(&buffer, &u);
+
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT_EQ(res.code, AOUT_BUFFER_ERR_FULL);
+
+        PASS();
+}
+
+TEST buffer_read_u32(void) {
+        uint8_t data[] = { 32, 129, -32, 239, 12, 4, 9, 94, 49, 3 };
+        aout_buffer buffer = {
+                .data = data,
+                .data_size = sizeof(data)
+        };
+
+        aout_res res = { 0 };
+        uint32_t u = 0;
+        uint32_t h = aout_ntoh_u32(*((uint32_t*) &data[0]));
+
+        res = aout_buffer_read_u32(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        h = aout_ntoh_u32(*((uint32_t*) &data[4]));
+
+        res = aout_buffer_read_u32(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        res = aout_buffer_read_u32(&buffer, &u);
+
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT_EQ(res.code, AOUT_BUFFER_ERR_FULL);
+
+        PASS();
+}
+
+TEST buffer_read_u64(void) {
+        uint8_t data[] = { 32, 129, -32, 239, 12, 4, 9, 94, 49, 3, 31, 221, 169, 64, 98, 132, 21, 17, 83 };
+        aout_buffer buffer = {
+                .data = data,
+                .data_size = sizeof(data)
+        };
+
+        aout_res res = { 0 };
+        uint64_t u = 0;
+        uint64_t h = aout_ntoh_u64(*((uint64_t*) &data[0]));
+
+        res = aout_buffer_read_u64(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        h = aout_ntoh_u64(*((uint64_t*) &data[8]));
+
+        res = aout_buffer_read_u64(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        res = aout_buffer_read_u64(&buffer, &u);
+
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT_EQ(res.code, AOUT_BUFFER_ERR_FULL);
+
+        PASS();
+}
+
+TEST buffer_read_f32(void) {
+        uint8_t data[] = { 32, 129, -32, 239, 12, 4, 9, 94, 49, 3 };
+        aout_buffer buffer = {
+                .data = data,
+                .data_size = sizeof(data)
+        };
+
+        aout_res res = { 0 };
+        float32_t u = 0;
+        float32_t h = aout_ntoh_f32(*((uint32_t*) &data[0]));
+
+        res = aout_buffer_read_f32(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        h = aout_ntoh_f32(*((uint32_t*) &data[4]));
+
+        res = aout_buffer_read_f32(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        res = aout_buffer_read_f32(&buffer, &u);
+
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT_EQ(res.code, AOUT_BUFFER_ERR_FULL);
+
+        PASS();
+}
+
+TEST buffer_read_f64(void) {
+        uint8_t data[] = { 32, 129, -32, 239, 12, 4, 9, 94, 49, 3, 31, 221, 169, 64, 98, 132, 21, 17, 83 };
+        aout_buffer buffer = {
+                .data = data,
+                .data_size = sizeof(data)
+        };
+
+        aout_res res = { 0 };
+        float64_t u = 0;
+        float64_t h = aout_ntoh_f64(*((uint64_t*) &data[0]));
+
+        res = aout_buffer_read_f64(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        h = aout_ntoh_f64(*((uint64_t*) &data[8]));
+
+        res = aout_buffer_read_f64(&buffer, &u);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(u, h);
+
+        res = aout_buffer_read_f64(&buffer, &u);
+
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT_EQ(res.code, AOUT_BUFFER_ERR_FULL);
+
+        PASS();
+}
+
 SUITE(test_buffer) {
         RUN_TEST(buffer_write_u8);
         RUN_TEST(buffer_write_u16);
@@ -510,6 +754,13 @@ SUITE(test_buffer) {
         RUN_TEST(buffer_write_u64);
         RUN_TEST(buffer_write_f32);
         RUN_TEST(buffer_write_f64);
+
+        RUN_TEST(buffer_read_u8);
+        RUN_TEST(buffer_read_u16);
+        RUN_TEST(buffer_read_u32);
+        RUN_TEST(buffer_read_u64);
+        RUN_TEST(buffer_read_f32);
+        RUN_TEST(buffer_read_f64);
 }
 
 GREATEST_MAIN_DEFS();
