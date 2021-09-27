@@ -1,8 +1,8 @@
 common_sources = [
-  'buffer.c',
   'byte_order.c',
   'console.c',
-  'dummy.c'
+  'dummy.c',
+  'stream.c'
 ]
 
 build_args = [
