@@ -101,7 +101,7 @@ static void aout_client_on_connect(
         connection->peer_id = peer->outgoingPeerID;
         peer->data = connection;
 
-        printf("connection from %u\n", connection->id);
+        printf("connection from 0x%x\n", connection->id);
 }
 
 static void aout_client_on_receive(
@@ -112,7 +112,7 @@ static void aout_client_on_receive(
         assert(packet->data);
 
         aout_connection* connection = (aout_connection*) peer->data;
-        printf("packet received from %u\n", connection->id);
+        printf("packet received from 0x%x\n", connection->id);
 
         aout_stream stream = {
                 .data = packet->data,
@@ -146,7 +146,7 @@ static void aout_client_on_receive_msg_connection(
                 return;
         }
 
-        printf("received sv_msg_connection: id = %u, peer_id = %u\n",
+        printf("received sv_msg_connection: id = 0x%x, peer_id = 0x%x\n",
                         msg.id, msg.peer_id);
 }
 
@@ -156,7 +156,7 @@ static void aout_client_on_disconnect(
         (void) client;
 
         aout_connection* connection = (aout_connection*) peer->data;
-        printf("disconnection from %u\n", connection->id);
+        printf("disconnection from 0x%x\n", connection->id);
 
         peer->data = NULL;
 }
