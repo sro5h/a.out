@@ -109,7 +109,7 @@ aout_res aout_server_send_msg_connection(
         );
 
         if (AOUT_IS_ERR(res)) {
-                printf("error: could not write sv_msg_type\n");
+                printf("error: could not write sv_msg_connection header\n");
                 goto error;
         }
 
@@ -126,7 +126,7 @@ aout_res aout_server_send_msg_connection(
         enet_packet_resize(packet, aout_stream_get_count(&stream));
 
         ENetPeer* peer = &server->host->peers[peer_id];
-        // Ownership is transferred, if enet_peer_send succeeds!
+        // Ownership of packet is transferred, if enet_peer_send succeeds!
         if (enet_peer_send(peer, 0, packet) < 0) {
                 printf("error: could not send packet\n");
                 goto error;
