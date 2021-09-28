@@ -1,4 +1,7 @@
 #include "client.h"
+
+#include <common/byte_order.h>
+#include <common/messages.h>
 #include <enet/enet.h>
 #include <stdio.h>
 
@@ -8,8 +11,12 @@ static void aout_client_on_connect(
 
 static void aout_client_on_receive(
                 aout_client* client,
-                ENetPeer* peer,
+                ENetPeer* peer, // TODO: Maybe use peer_id or aout_connection
                 ENetPacket* packet);
+
+static void aout_client_on_receive_msg_connection(
+                aout_client* client,
+                aout_stream* stream);
 
 static void aout_client_on_disconnect(
                 aout_client* client,
@@ -69,12 +76,8 @@ aout_res aout_client_connect(
                 uint32_t ip,
                 uint16_t port) {
         ENetAddress address;
-        address.host = htonl(ip); // TODO: Make portable
+        address.host = aout_hton_u32(ip);
         address.port = port;
-
-        /*if (enet_address_set_host_ip(&address, ip) < 0) {
-                return AOUT_CLIENT_ERR;
-        }*/
 
         ENetPeer* peer = enet_host_connect(client->host, &address, 2, 0);
 
@@ -105,10 +108,46 @@ static void aout_client_on_receive(
                 aout_client* client,
                 ENetPeer* peer,
                 ENetPacket* packet) {
-        (void) client;
+        assert(client); assert(peer); assert(packet);
+        assert(packet->data);
 
         aout_connection* connection = (aout_connection*) peer->data;
-        printf("packet received from %u: %s\n", connection->id, packet->data);
+        printf("packet received from %u\n", connection->id);
+
+        aout_stream stream = {
+                .data = packet->data,
+                .data_size = packet->dataLength
+        };
+
+        aout_sv_msg_type type;
+        if (AOUT_IS_ERR(aout_stream_read_sv_msg_type(&stream, &type))) {
+                printf("error: could not read sv_msg_type\n");
+                return;
+        }
+
+        switch (type) {
+        case AOUT_SV_MSG_TYPE_CONNECTION:
+                aout_client_on_receive_msg_connection(client, &stream);
+                break;
+        default:
+                printf("error: unknown sv_msg_type\n");
+                break;
+        }
+}
+
+static void aout_client_on_receive_msg_connection(
+                aout_client* client,
+                aout_stream* stream) {
+        assert(client); assert(stream);
+
+        aout_sv_msg_connection msg;
+        if (AOUT_IS_ERR(aout_stream_read_sv_msg_connection(stream, &msg))) {
+                printf("error: could not read sv_msg_connection\n");
+                return;
+        }
+
+        printf("received sv_msg_connection: id = %u, peer_id = %u\n",
+                        msg.id, msg.peer_id);
 }
 
 static void aout_client_on_disconnect(
