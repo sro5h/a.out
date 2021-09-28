@@ -4,9 +4,13 @@
 #include "result.h"
 #include "stream.h"
 
+#define AOUT_TYPE_CL_MSG_TYPE uint32_t
+
 typedef enum aout_cl_msg_type {
         AOUT_CL_MSG_TYPE_INPUT,
 } aout_cl_msg_type;
+
+#define AOUT_TYPE_SV_MSG_TYPE uint32_t
 
 typedef enum aout_sv_msg_type {
         AOUT_SV_MSG_TYPE_CONNECTION,

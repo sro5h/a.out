@@ -5,6 +5,8 @@ aout_res aout_stream_write_cl_msg_type(
                 aout_stream* stream,
                 aout_cl_msg_type type) {
         assert(stream);
+        static_assert(sizeof(AOUT_TYPE_CL_MSG_TYPE) == sizeof(uint32_t));
+        // TODO: Use AOUT_CL_MSG_TYPE_TYPE
         return aout_stream_write_u32(stream, (uint32_t) type);
 }
 
@@ -12,6 +14,8 @@ aout_res aout_stream_write_sv_msg_type(
                 aout_stream* stream,
                 aout_sv_msg_type type) {
         assert(stream);
+        static_assert(sizeof(AOUT_TYPE_SV_MSG_TYPE) == sizeof(uint32_t));
+        // TODO: Use AOUT_SV_MSG_TYPE_TYPE
         return aout_stream_write_u32(stream, (uint32_t) type);
 }
 
@@ -39,7 +43,9 @@ aout_res aout_stream_read_cl_msg_type(
                 aout_stream* stream,
                 aout_cl_msg_type* type) {
         assert(stream); assert(type);
+        static_assert(sizeof(AOUT_TYPE_CL_MSG_TYPE) == sizeof(uint32_t));
 
+        // TODO: Use AOUT_CL_MSG_TYPE_TYPE
         uint32_t tmp;
         aout_res res = aout_stream_read_u32(stream, &tmp);
 
@@ -54,7 +60,9 @@ aout_res aout_stream_read_sv_msg_type(
                 aout_stream* stream,
                 aout_sv_msg_type* type) {
         assert(stream); assert(type);
+        static_assert(sizeof(AOUT_TYPE_SV_MSG_TYPE) == sizeof(uint32_t));
 
+        // TODO: Use AOUT_SV_MSG_TYPE_TYPE
         uint32_t tmp;
         aout_res res = aout_stream_read_u32(stream, &tmp);
 
