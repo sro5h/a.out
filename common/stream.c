@@ -170,6 +170,13 @@ bool aout_stream_has_capacity(
         return (stream->index + size) <= stream->data_size;
 }
 
+size_t aout_stream_get_count(
+                aout_stream* stream) {
+        assert(stream);
+        return stream->index <= stream->data_size ?
+                        stream->index : stream->data_size;
+}
+
 void aout_stream_reset(
                 aout_stream* stream) {
         assert(stream);

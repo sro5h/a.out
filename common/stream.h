@@ -79,6 +79,9 @@ COMMON_API bool aout_stream_has_capacity(
                 aout_stream* stream,
                 size_t size);
 
+COMMON_API size_t aout_stream_get_count(
+                aout_stream* stream);
+
 COMMON_API void aout_stream_reset( // TODO: Find better name
                 aout_stream* stream);
 
