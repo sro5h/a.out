@@ -3,7 +3,8 @@ common_sources = [
   'console.c',
   'dummy.c',
   'messages.c',
-  'stream.c'
+  'stream.c',
+  'util.c'
 ]
 
 build_args = [
