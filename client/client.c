@@ -16,6 +16,7 @@ static void aout_client_on_receive(
 
 static void aout_client_on_receive_msg_connection(
                 aout_client* client,
+                aout_connection* connection,
                 aout_stream* stream);
 
 static void aout_client_on_disconnect(
@@ -109,7 +110,7 @@ static void aout_client_on_connect(
         connection->peer_id = peer->outgoingPeerID;
         peer->data = connection;
 
-        printf("connection from 0x%x\n", connection->id);
+        printf("[0x%08x] connection\n", connection->id);
 }
 
 static void aout_client_on_receive(
@@ -120,7 +121,7 @@ static void aout_client_on_receive(
         assert(packet->data);
 
         aout_connection* connection = (aout_connection*) peer->data;
-        printf("packet received from 0x%x\n", connection->id);
+        printf("[0x%08x] packet received\n", connection->id);
 
         aout_stream stream = {
                 .data = packet->data,
@@ -135,7 +136,8 @@ static void aout_client_on_receive(
 
         switch (type) {
         case AOUT_SV_MSG_TYPE_CONNECTION:
-                aout_client_on_receive_msg_connection(client, &stream);
+                aout_client_on_receive_msg_connection(client, connection,
+                                &stream);
                 break;
         default:
                 printf("error: unknown sv_msg_type\n");
@@ -145,8 +147,9 @@ static void aout_client_on_receive(
 
 static void aout_client_on_receive_msg_connection(
                 aout_client* client,
+                aout_connection* connection,
                 aout_stream* stream) {
-        assert(client); assert(stream);
+        assert(client); assert(connection); assert(stream);
 
         aout_sv_msg_connection msg;
         if (AOUT_IS_ERR(aout_stream_read_sv_msg_connection(stream, &msg))) {
@@ -154,8 +157,8 @@ static void aout_client_on_receive_msg_connection(
                 return;
         }
 
-        printf("received sv_msg_connection: id = 0x%x, peer_id = 0x%x\n",
-                        msg.id, msg.peer_id);
+        printf("[0x%08x] sv_msg_connection received: ", connection->id);
+        printf("{ .id = 0x%x, .peer_id = 0x%x }\n", msg.id, msg.peer_id);
 }
 
 static void aout_client_on_disconnect(
@@ -165,7 +168,7 @@ static void aout_client_on_disconnect(
         assert(peer->data);
 
         aout_connection* connection = (aout_connection*) peer->data;
-        printf("disconnection from 0x%x\n", connection->id);
+        printf("[0x%08x] disconnection\n", connection->id);
 
         peer->data = NULL;
 }

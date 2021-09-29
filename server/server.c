@@ -163,7 +163,7 @@ static void aout_server_on_connect(
         connection->peer_id = peer_id;
         peer->data = connection;
 
-        printf("connection from 0x%x\n", connection->id);
+        printf("[0x%08x] connection\n", connection->id);
 
         // Should be sent to all the other connected peers!
         aout_res res = aout_server_send_msg_connection(
@@ -190,7 +190,7 @@ static void aout_server_on_disconnect(
         assert(peer->data);
 
         aout_connection* connection = (aout_connection*) peer->data;
-        printf("disconnection from 0x%x\n", connection->id);
+        printf("[0x%08x] disconnection\n", connection->id);
 
         peer->data = NULL;
 }
