@@ -58,14 +58,17 @@ aout_server* aout_server_create(
 
 void aout_server_destroy(
                 aout_server* server) {
-        enet_host_destroy(server->host);
-        free(server);
+        if (server) {
+                enet_host_destroy(server->host);
+                free(server);
+        }
 }
 
 void aout_server_update(
                 aout_server* server) {
-        ENetEvent event;
+        assert(server);
 
+        ENetEvent event;
         while (enet_host_service(server->host, &event, 0) > 0) {
                 switch (event.type) {
                 case ENET_EVENT_TYPE_CONNECT:
@@ -145,12 +148,15 @@ error:
 
 bool aout_server_is_running(
                 aout_server* server) {
+        assert(server);
         return server->is_running;
 }
 
 static void aout_server_on_connect(
                 aout_server* server,
                 ENetPeer* peer) {
+        assert(server); assert(peer);
+
         uint16_t peer_id = peer->incomingPeerID;
         aout_connection* connection = &server->connections[peer_id];
         connection->id = peer->connectID;
@@ -173,15 +179,15 @@ static void aout_server_on_receive(
                 aout_server* server,
                 ENetPeer* peer,
                 ENetPacket* packet) {
-        (void) server;
-        (void) peer;
-        (void) packet;
+        assert(server); assert(peer); assert(packet);
+        assert(packet->data);
 }
 
 static void aout_server_on_disconnect(
                 aout_server* server,
                 ENetPeer* peer) {
-        (void) server;
+        assert(server); assert(peer);
+        assert(peer->data);
 
         aout_connection* connection = (aout_connection*) peer->data;
         printf("disconnection from 0x%x\n", connection->id);
@@ -194,7 +200,7 @@ static aout_res aout_server_create_packet(
                 size_t size,
                 ENetPacket** packet,
                 aout_stream* stream) {
-        assert(packet);
+        assert(packet); assert(stream);
 
         *packet = enet_packet_create(
                 NULL,

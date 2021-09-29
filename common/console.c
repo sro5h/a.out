@@ -12,6 +12,7 @@ static void priv_sa_handler(int signal) {
         priv_sig_int_handler.callback(priv_sig_int_handler.context);
 }
 
+// TODO: Remove sigaction if NULL is passed
 aout_res aout_on_sig_int(
                 aout_sig_handler handler) {
         priv_sig_int_handler = handler;

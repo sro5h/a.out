@@ -51,7 +51,7 @@ int main(void) {
 
         while (aout_client_is_running(client)) {
                 if (sig_int_raised) {
-                        printf("\n");
+                        printf("\n"); // CTRL-C
                         break;
                 }
 

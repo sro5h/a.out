@@ -45,14 +45,17 @@ aout_client* aout_client_create(
 
 void aout_client_destroy(
                 aout_client* client) {
-        enet_host_destroy(client->host);
-        free(client);
+        if (client) {
+                enet_host_destroy(client->host);
+                free(client);
+        }
 }
 
 void aout_client_update(
                 aout_client* client) {
-        ENetEvent event;
+        assert(client);
 
+        ENetEvent event;
         while (enet_host_service(client->host, &event, 0) > 0) {
                 switch (event.type) {
                 case ENET_EVENT_TYPE_CONNECT:
@@ -75,6 +78,8 @@ aout_res aout_client_connect(
                 aout_client* client,
                 uint32_t ip,
                 uint16_t port) {
+        assert(client);
+
         ENetAddress address;
         address.host = aout_hton_u32(ip);
         address.port = port;
@@ -90,12 +95,15 @@ aout_res aout_client_connect(
 
 bool aout_client_is_running(
                 aout_client* client) {
+        assert(client);
         return client->is_running;
 }
 
 static void aout_client_on_connect(
                 aout_client* client,
                 ENetPeer* peer) {
+        assert(client); assert(peer);
+
         aout_connection* connection = &client->connection;
         connection->id = peer->connectID;
         connection->peer_id = peer->outgoingPeerID;
@@ -153,7 +161,8 @@ static void aout_client_on_receive_msg_connection(
 static void aout_client_on_disconnect(
                 aout_client* client,
                 ENetPeer* peer) {
-        (void) client;
+        assert(client); assert(peer);
+        assert(peer->data);
 
         aout_connection* connection = (aout_connection*) peer->data;
         printf("disconnection from 0x%x\n", connection->id);

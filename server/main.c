@@ -45,7 +45,7 @@ int main(void) {
 
         while (aout_server_is_running(server)) {
                 if (sig_int_raised) {
-                        printf("\n");
+                        printf("\n"); // CTRL-C
                         break;
                 }
 
