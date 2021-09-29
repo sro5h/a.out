@@ -151,9 +151,10 @@ bool aout_server_is_running(
 static void aout_server_on_connect(
                 aout_server* server,
                 ENetPeer* peer) {
-        aout_connection* connection = &server->connections[peer->outgoingPeerID];
+        uint16_t peer_id = peer->incomingPeerID;
+        aout_connection* connection = &server->connections[peer_id];
         connection->id = peer->connectID;
-        connection->peer_id = peer->outgoingPeerID;
+        connection->peer_id = peer_id;
         peer->data = connection;
 
         printf("connection from 0x%x\n", connection->id);
