@@ -1,16 +1,11 @@
 #ifndef CLIENT_CLIENT_H
 #define CLIENT_CLIENT_H
 
+#include <common/connection.h>
 #include <common/result.h>
 #include <common/types.h>
 
 typedef struct _ENetHost ENetHost;
-
-// TODO: Move to common
-typedef struct aout_connection {
-        uint32_t id;
-        uint16_t peer_id;
-} aout_connection;
 
 typedef struct aout_client {
         ENetHost* host;

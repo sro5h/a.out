@@ -1,18 +1,13 @@
 #ifndef SERVER_SERVER_H
 #define SERVER_SERVER_H
 
+#include <common/connection.h>
 #include <common/messages.h>
 #include <common/result.h>
 
 #define MAX_CONNECTIONS 10
 
 typedef struct _ENetHost ENetHost;
-
-// TODO: Maybe move to libcommon
-typedef struct aout_connection {
-        uint32_t id;
-        uint16_t peer_id;
-} aout_connection;
 
 typedef struct aout_server {
         ENetHost* host;
