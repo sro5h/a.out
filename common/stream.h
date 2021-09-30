@@ -78,6 +78,9 @@ COMMON_API aout_res aout_stream_read_bytes(
 COMMON_API bool aout_stream_has_capacity(
                 aout_stream* stream,
                 size_t size);
+// TODO: Maybe rename
+// bool aout_stream_query_capacity
+// bool aout_stream_query_overflow
 
 COMMON_API size_t aout_stream_get_count(
                 aout_stream* stream);

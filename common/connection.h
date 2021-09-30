@@ -6,6 +6,6 @@
 typedef struct aout_connection {
         uint32_t id;
         uint16_t peer_id;
-} aout_connection;
+} aout_connection; // TODO: Maybe rename to aout_peer
 
 #endif
