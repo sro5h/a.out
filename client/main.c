@@ -1,78 +1,70 @@
-#include "client.h"
+#include "game.h"
 
-#include <common/console.h>
-#include <common/dummy.h>
+#include <common/result.h>
 
 #include <enet/enet.h>
-#include <signal.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 #include <stdio.h>
 
-static sig_atomic_t sig_int_raised = 0;
+typedef enum aout_initialise_res {
+        AOUT_INITIALISE_OK,
+        AOUT_INITIALISE_ERR_ENET,
+        AOUT_INITIALISE_ERR_GLFW,
+} aout_initialise_res;
 
-static void cleanup(aout_client* client);
-static void on_sig_int(void* context);
+static aout_res aout_initialise(
+                void);
+
+static void aout_terminate(
+                void);
 
 int main(void) {
+        if (AOUT_IS_ERR(aout_initialise())) {
+                printf("error: initialisation failed\n");
+                return EXIT_FAILURE;
+        }
+
+        printf("client\n");
+
+        aout_game* game = aout_game_create();
+
+        if (!game) {
+                printf("error: could not create game\n");
+                goto error;
+        }
+
+        printf("client started\n");
+
+        aout_res res = aout_game_run(game);
+
+        printf("client stopped\n");
+
+        aout_game_destroy(game);
+        aout_terminate();
+        return AOUT_IS_OK(res) ? EXIT_SUCCESS : EXIT_FAILURE;
+
+error:
+        aout_terminate();
+        return EXIT_FAILURE;
+}
+
+static aout_res aout_initialise(
+                void) {
         if (enet_initialize() != 0) {
-                fprintf(stderr, "could not initialize enet\n");
-                return EXIT_FAILURE;
+                return AOUT_ERR(AOUT_INITIALISE_ERR_ENET);
         }
 
-        if (AOUT_IS_OK(aout_dummy(true))) {
-                printf("client\n");
+        if (!glfwInit()) {
+                enet_deinitialize();
+                return AOUT_ERR(AOUT_INITIALISE_ERR_GLFW);
         }
 
-        aout_client* client = aout_client_create();
-
-        if (!client) {
-                fprintf(stderr, "could not create client\n");
-                cleanup(NULL);
-                return EXIT_FAILURE;
-        }
-
-        printf("client created\n");
-
-        if (AOUT_IS_ERR(aout_client_connect(client, 0x7f000001, 42424))) {
-                fprintf(stderr, "could not connect to foreign host\n");
-                cleanup(client);
-                return EXIT_FAILURE;
-        }
-
-        aout_res res = aout_on_sig_int((aout_sig_handler) {
-                .callback = on_sig_int,
-                .context = NULL
-        });
-
-        if (AOUT_IS_ERR(res)) {
-                fprintf(stderr, "could not set SIGINT handler\n");
-                cleanup(client);
-                return EXIT_FAILURE;
-        }
-
-        while (aout_client_is_running(client)) {
-                if (sig_int_raised) {
-                        printf("\n"); // CTRL-C
-                        break;
-                }
-
-                aout_client_update(client);
-        }
-
-        cleanup(client);
-        printf("client destroyed\n");
-
-        return EXIT_SUCCESS;
+        return AOUT_OK;
 }
 
-static void cleanup(aout_client* client) {
-        if (client) {
-                aout_client_destroy(client);
-        }
-
+static void aout_terminate(
+                void) {
+        glfwTerminate();
         enet_deinitialize();
-}
-
-static void on_sig_int(void* context) {
-        (void) context;
-        sig_int_raised = 1;
 }

@@ -10,7 +10,7 @@ typedef struct _ENetHost ENetHost;
 typedef struct aout_client {
         ENetHost* host;
         aout_connection connection;
-        bool is_running;
+        bool is_running; // TODO: Remove?
 } aout_client;
 
 typedef enum aout_client_res {
