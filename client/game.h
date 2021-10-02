@@ -2,6 +2,7 @@
 #define CLIENT_GAME_H
 
 #include "client.h"
+//#include <signal.h>
 
 typedef struct GLFWwindow GLFWwindow;
 
@@ -10,6 +11,7 @@ typedef struct aout_game {
         GLFWwindow* window;
         bool is_running;
         double time_step; // Maybe use ticks_per_second instead
+        //sig_atomic_t sigint_raised;
 } aout_game; // aout_cl_game // TODO: Maybe rename to aout_cl_app
 
 typedef enum aout_game_res {
