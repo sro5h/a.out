@@ -1,5 +1,6 @@
 #include "application.h"
 
+#include <common/console.h>
 #include <common/log.h>
 
 #define GLFW_INCLUDE_NONE
@@ -14,6 +15,9 @@ static void aout_application_update_fixed(
 static void aout_application_update(
                 aout_application* app,
                 double delta_time);
+
+static void on_sigint(
+                void* context);
 
 // TODO: add aout_application_desc
 aout_application* aout_application_create(
@@ -50,10 +54,21 @@ aout_application* aout_application_create(
 
         app->is_running = true;
         app->time_step = 1.0 / 64;
+        app->sigint_raised = 0;
 
         // Move somewhere else
         if (AOUT_IS_ERR(aout_client_connect(app->client, 0x7f000001, 42424))) {
                 aout_loge("could not connect to foreign host\n");
+                goto error_connect;
+        }
+
+        aout_res res = aout_on_sigint((aout_sig_handler) {
+                .callback = on_sigint,
+                .context = app
+        });
+
+        if (AOUT_IS_ERR(res)) {
+                aout_loge("could not set SIGINT handler");
                 goto error_connect;
         }
 
@@ -91,7 +106,8 @@ aout_res aout_application_run(
         double accumulator = 0.0;
 
         while (aout_application_is_running(app)) {
-                if (glfwWindowShouldClose(app->window)) {
+                if (glfwWindowShouldClose(app->window) || app->sigint_raised) {
+                        if (app->sigint_raised) { printf("\n"); } // CTRL-C
                         aout_application_stop(app);
                 }
 
@@ -137,4 +153,10 @@ static void aout_application_update(
                 double delta_time) {
         assert(app);
         (void) delta_time;
+}
+
+static void on_sigint(
+                void* context) {
+        aout_application* app = (aout_application*) context;
+        app->sigint_raised = 1;
 }
