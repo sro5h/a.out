@@ -1,11 +1,14 @@
 client_sources = [
   'application.c',
   'client.c',
+  'implementation.c',
+  'initialise.c',
   'main.c'
 ]
 
 client_public_headers = include_directories(
-  '..'
+  '..',
+  '../external'
 )
 
 client_dependencies = [

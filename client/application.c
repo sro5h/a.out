@@ -2,6 +2,7 @@
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include <sokol/sokol_time.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -85,7 +86,7 @@ aout_res aout_application_run(
                 aout_application* app) {
         assert(app);
 
-        double last_time = glfwGetTime();
+        uint64_t last_time = stm_now();
         double accumulator = 0.0;
 
         while (aout_application_is_running(app)) {
@@ -93,8 +94,8 @@ aout_res aout_application_run(
                         aout_application_stop(app);
                 }
 
-                const double now = glfwGetTime();
-                const double delta_time = now - last_time;
+                const uint64_t now = stm_now();
+                const double delta_time = stm_sec(stm_diff(now, last_time));
                 last_time = now;
 
                 const double time_step = app->time_step;
