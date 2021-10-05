@@ -2,10 +2,15 @@ common_sources = [
   'byte_order.c',
   'console.c',
   'dummy.c',
+  'log.c',
   'messages.c',
   'stream.c',
   'util.c'
 ]
+
+common_public_headers = include_directories(
+  '../external'
+)
 
 build_args = [
 ]
@@ -21,5 +26,6 @@ endif
 common_target = library(
   'common',
   common_sources,
+  include_directories: common_public_headers,
   c_args: build_args
 )

@@ -1,6 +1,7 @@
 #include "application.h"
 
 #include <common/console.h>
+#include <common/log.h>
 
 #include <chipmunk/chipmunk.h>
 #include <sokol/sokol_time.h>
@@ -28,7 +29,7 @@ aout_application* aout_application_create(
         app->space = cpSpaceNew();
 
         if (!app->space) {
-                printf("error: could not create space\n");
+                aout_loge("could not create space");
                 goto error_space;
         }
 
@@ -39,7 +40,7 @@ aout_application* aout_application_create(
         app->server = aout_server_create();
 
         if (!app->server) {
-                printf("error: could not create server\n");
+                aout_loge("could not create server");
                 goto error_server;
         }
 
@@ -53,7 +54,7 @@ aout_application* aout_application_create(
         });
 
         if (AOUT_IS_ERR(res)) {
-                printf("error: could not set SIGINT handler\n");
+                aout_loge("could not set SIGINT handler");
                 goto error_signal;
         }
 
@@ -92,6 +93,7 @@ aout_res aout_application_run(
 
         while (aout_application_is_running(app)) {
                 if (app->sigint_raised) {
+                        printf("\n"); // CTRL-C
                         aout_application_stop(app);
                 }
 

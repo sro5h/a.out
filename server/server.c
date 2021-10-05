@@ -1,7 +1,8 @@
 #include "server.h"
 
+#include <common/log.h>
+
 #include <enet/enet.h>
-#include <stdio.h>
 #include <string.h>
 
 static void aout_server_on_connect(
@@ -82,7 +83,7 @@ void aout_server_update(
                         aout_server_on_disconnect(server, event.peer);
                         break;
                 case ENET_EVENT_TYPE_NONE:
-                        //fprintf(stderr, "Invalid event\n");
+                        aout_loge("invalid event type");
                         break;
                 }
         }
@@ -112,14 +113,14 @@ aout_res aout_server_send_msg_connection(
         );
 
         if (AOUT_IS_ERR(res)) {
-                printf("error: could not write sv_msg_connection header\n");
+                aout_loge("could not write sv_msg_connection header");
                 goto error;
         }
 
         res = aout_stream_write_sv_msg_connection(&stream, msg);
 
         if (AOUT_IS_ERR(res)) {
-                printf("error: could not write sv_msg_connection\n");
+                aout_loge("could not write sv_msg_connection");
                 goto error;
         }
 
@@ -131,7 +132,7 @@ aout_res aout_server_send_msg_connection(
         ENetPeer* peer = &server->host->peers[peer_id];
         // Ownership of packet is transferred, if enet_peer_send succeeds!
         if (enet_peer_send(peer, 0, packet) < 0) {
-                printf("error: could not send packet\n");
+                aout_loge("could not send packet");
                 goto error;
         }
 
@@ -163,7 +164,7 @@ static void aout_server_on_connect(
         connection->peer_id = peer_id;
         peer->data = connection;
 
-        printf("[0x%08x] connection\n", connection->id);
+        aout_logd("[0x%08x] connection", connection->id);
 
         // Should be sent to all the other connected peers!
         aout_res res = aout_server_send_msg_connection(
@@ -190,7 +191,7 @@ static void aout_server_on_disconnect(
         assert(peer->data);
 
         aout_connection* connection = (aout_connection*) peer->data;
-        printf("[0x%08x] disconnection\n", connection->id);
+        aout_logd("[0x%08x] disconnection", connection->id);
 
         peer->data = NULL;
 }

@@ -1,6 +1,7 @@
 #include "util.h"
 #include <stdio.h>
 
+// TODO: Print to buffer
 void aout_print_bytes(
                 uint8_t* bytes, size_t size) {
         assert(bytes);

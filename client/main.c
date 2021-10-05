@@ -1,29 +1,30 @@
 #include "application.h"
 #include "initialise.h"
 
-#include <stdio.h>
+#include <common/log.h>
+
 #include <stdlib.h>
 
 int main(void) {
         if (AOUT_IS_ERR(aout_initialise())) {
-                printf("error: initialisation failed\n");
+                aout_loge("initialisation failed");
                 return EXIT_FAILURE;
         }
 
-        printf("client\n");
+        aout_logd("client");
 
         aout_application* app = aout_application_create();
 
         if (!app) {
-                printf("error: could not create application\n");
+                aout_loge("could not create application");
                 goto error;
         }
 
-        printf("client started\n");
+        aout_logd("client started");
 
         aout_res res = aout_application_run(app);
 
-        printf("client stopped\n");
+        aout_logd("client stopped");
 
         aout_application_destroy(app);
         aout_terminate();

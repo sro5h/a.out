@@ -1,9 +1,10 @@
 #include "application.h"
 
+#include <common/log.h>
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <sokol/sokol_time.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 static void aout_application_update_fixed(
@@ -32,7 +33,7 @@ aout_application* aout_application_create(
         app->window = glfwCreateWindow(640, 480, "client", NULL, NULL);
 
         if (!app->window) {
-                printf("error: could not create window\n");
+                aout_loge("could not create window");
                 goto error_window;
         }
 
@@ -43,7 +44,7 @@ aout_application* aout_application_create(
         app->client = aout_client_create();
 
         if (!app->client) {
-                printf("error: could not create client\n");
+                aout_loge("could not create client\n");
                 goto error_client;
         }
 
@@ -52,7 +53,7 @@ aout_application* aout_application_create(
 
         // Move somewhere else
         if (AOUT_IS_ERR(aout_client_connect(app->client, 0x7f000001, 42424))) {
-                printf("error: could not connect to foreign host\n");
+                aout_loge("could not connect to foreign host\n");
                 goto error_connect;
         }
 
