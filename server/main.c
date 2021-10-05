@@ -1,72 +1,35 @@
-#include "server.h"
+#include "application.h"
+#include "initialise.h"
 
-#include <common/console.h>
-#include <common/dummy.h>
-
-#include <enet/enet.h>
-#include <signal.h>
 #include <stdio.h>
-
-static sig_atomic_t sigint_raised = 0;
-
-static void cleanup(aout_server* server);
-static void on_sigint(void* context);
+#include <stdlib.h>
 
 int main(void) {
-        if (enet_initialize() != 0) {
-                fprintf(stderr, "could not initialize enet\n");
+        if (AOUT_IS_ERR(aout_initialise())) {
+                printf("error: initialisation failed\n");
                 return EXIT_FAILURE;
         }
 
-        if (AOUT_IS_ERR(aout_dummy(false))) {
-                printf("server\n");
+        printf("server\n");
+
+        aout_application* app = aout_application_create();
+
+        if (!app) {
+                printf("error: could not create application\n");
+                goto error;
         }
 
-        aout_server* server = aout_server_create();
+        printf("server started\n");
 
-        if (!server) {
-                fprintf(stderr, "could not create server\n");
-                cleanup(NULL);
-                return EXIT_FAILURE;
-        }
+        aout_res res = aout_application_run(app);
 
-        printf("server created\n");
+        printf("server stopped\n");
 
-        aout_res res = aout_on_sigint((aout_sig_handler) {
-                .callback = on_sigint,
-                .context = NULL
-        });
+        aout_application_destroy(app);
+        aout_terminate();
+        return AOUT_IS_OK(res) ? EXIT_SUCCESS : EXIT_FAILURE;
 
-        if (AOUT_IS_ERR(res)) {
-                fprintf(stderr, "could not set SIGINT handler\n");
-                cleanup(server);
-                return EXIT_FAILURE;
-        }
-
-        while (aout_server_is_running(server)) {
-                if (sigint_raised) {
-                        printf("\n"); // CTRL-C
-                        break;
-                }
-
-                aout_server_update(server);
-        }
-
-        cleanup(server);
-        printf("server destroyed\n");
-
-        return EXIT_SUCCESS;
-}
-
-static void cleanup(aout_server* server) {
-        if (server) {
-                aout_server_destroy(server);
-        }
-
-        enet_deinitialize();
-}
-
-static void on_sigint(void* context) {
-        (void) context;
-        sigint_raised = 1;
+error:
+        aout_terminate();
+        return EXIT_FAILURE;
 }
