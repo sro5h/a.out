@@ -7,10 +7,10 @@
 #include <signal.h>
 #include <stdio.h>
 
-static sig_atomic_t sig_int_raised = 0;
+static sig_atomic_t sigint_raised = 0;
 
 static void cleanup(aout_server* server);
-static void on_sig_int(void* context);
+static void on_sigint(void* context);
 
 int main(void) {
         if (enet_initialize() != 0) {
@@ -32,8 +32,8 @@ int main(void) {
 
         printf("server created\n");
 
-        aout_res res = aout_on_sig_int((aout_sig_handler) {
-                .callback = on_sig_int,
+        aout_res res = aout_on_sigint((aout_sig_handler) {
+                .callback = on_sigint,
                 .context = NULL
         });
 
@@ -44,7 +44,7 @@ int main(void) {
         }
 
         while (aout_server_is_running(server)) {
-                if (sig_int_raised) {
+                if (sigint_raised) {
                         printf("\n"); // CTRL-C
                         break;
                 }
@@ -66,7 +66,7 @@ static void cleanup(aout_server* server) {
         enet_deinitialize();
 }
 
-static void on_sig_int(void* context) {
+static void on_sigint(void* context) {
         (void) context;
-        sig_int_raised = 1;
+        sigint_raised = 1;
 }

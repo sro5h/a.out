@@ -1,6 +1,6 @@
 #include "console.h"
 
-static aout_sig_handler priv_sig_int_handler;
+static aout_sig_handler priv_sigint_handler;
 
 // TODO: Make portable
 //#if 1
@@ -9,13 +9,13 @@ static aout_sig_handler priv_sig_int_handler;
 
 static void priv_sa_handler(int signal) {
         (void) signal;
-        priv_sig_int_handler.callback(priv_sig_int_handler.context);
+        priv_sigint_handler.callback(priv_sigint_handler.context);
 }
 
 // TODO: Remove sigaction if NULL is passed
-aout_res aout_on_sig_int(
+aout_res aout_on_sigint(
                 aout_sig_handler handler) {
-        priv_sig_int_handler = handler;
+        priv_sigint_handler = handler;
 
         struct sigaction sig_action;
         sig_action.sa_handler = priv_sa_handler;
