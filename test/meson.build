@@ -51,5 +51,6 @@ test('Stream test', executable(
   'test_stream',
   test_stream_sources,
   include_directories: test_public_headers,
+  c_args: build_args,
   link_with: common_target
 ))

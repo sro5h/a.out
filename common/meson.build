@@ -8,11 +8,14 @@ common_sources = [
 ]
 
 build_args = [
-  '-D_DEFAULT_SOURCE' # TODO: Only define on linux
 ]
 
 if get_option('default_library') == 'shared'
   build_args += '-DCOMMON_EXPORTS'
+endif
+
+if build_machine.system() == 'linux'
+  build_args += '-D_DEFAULT_SOURCE'
 endif
 
 common_target = library(

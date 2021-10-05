@@ -33,11 +33,15 @@ if get_option('default_library') == 'shared'
   build_args += '-DCOMMON_IMPORTS'
 endif
 
+if build_machine.system() == 'linux'
+  build_args += '-D_DEFAULT_SOURCE'
+endif
 
 client_target = executable(
   'client',
   client_sources,
   include_directories: client_public_headers,
+  c_args: build_args,
   link_with: common_target,
   dependencies: client_dependencies
 )
