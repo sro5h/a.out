@@ -1,6 +1,6 @@
 client_sources = [
+  'application.c',
   'client.c',
-  'game.c',
   'main.c'
 ]
 

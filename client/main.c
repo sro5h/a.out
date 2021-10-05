@@ -1,4 +1,4 @@
-#include "game.h"
+#include "application.h"
 
 #include <common/result.h>
 
@@ -27,20 +27,20 @@ int main(void) {
 
         printf("client\n");
 
-        aout_game* game = aout_game_create();
+        aout_application* app = aout_application_create();
 
-        if (!game) {
-                printf("error: could not create game\n");
+        if (!app) {
+                printf("error: could not create application\n");
                 goto error;
         }
 
         printf("client started\n");
 
-        aout_res res = aout_game_run(game);
+        aout_res res = aout_application_run(app);
 
         printf("client stopped\n");
 
-        aout_game_destroy(game);
+        aout_application_destroy(app);
         aout_terminate();
         return AOUT_IS_OK(res) ? EXIT_SUCCESS : EXIT_FAILURE;
 
