@@ -1,3 +1,6 @@
 [submodule "external/greatest"]
 	path = external/greatest
 	url = https://github.com/silentbicycle/greatest
+[submodule "external/sokol"]
+	path = external/sokol
+	url = https://github.com/floooh/sokol
