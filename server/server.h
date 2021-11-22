@@ -5,13 +5,13 @@
 #include <common/messages.h>
 #include <common/result.h>
 
-#define MAX_CONNECTIONS 10
+#define AOUT_SERVER_MAX_CONNECTIONS 10
 
 typedef struct _ENetHost ENetHost;
 
 typedef struct aout_server {
         ENetHost* host;
-        aout_connection connections[MAX_CONNECTIONS];
+        aout_connection connections[AOUT_SERVER_MAX_CONNECTIONS];
         bool is_running;
 } aout_server;
 

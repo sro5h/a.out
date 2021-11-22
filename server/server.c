@@ -40,7 +40,7 @@ aout_server* aout_server_create(
                         .host = ENET_HOST_ANY,
                         .port = 42424,
                 },
-                MAX_CONNECTIONS,
+                AOUT_SERVER_MAX_CONNECTIONS,
                 2,
                 0,
                 0
