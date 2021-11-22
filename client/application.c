@@ -69,11 +69,12 @@ aout_application* aout_application_create(
 
         if (AOUT_IS_ERR(res)) {
                 aout_loge("could not set SIGINT handler");
-                goto error_connect;
+                goto error_signal;
         }
 
         return app;
 
+error_signal:
 error_connect:
         aout_client_destroy(app->client);
 
