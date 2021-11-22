@@ -12,6 +12,15 @@ common_public_headers = include_directories(
   '../external'
 )
 
+common_dependencies = [
+]
+
+if build_machine.system() == 'linux'
+  common_dependencies += dependency('threads')
+endif
+
+common_dependencies += dependency('libchipmunk')
+
 build_args = [
 ]
 
@@ -27,5 +36,6 @@ common_target = library(
   'common',
   common_sources,
   include_directories: common_public_headers,
-  c_args: build_args
+  c_args: build_args,
+  dependencies: common_dependencies
 )

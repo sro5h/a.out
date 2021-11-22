@@ -2,6 +2,7 @@
 
 #include <common/console.h>
 #include <common/log.h>
+#include <common/util.h>
 
 #include <chipmunk/chipmunk.h>
 #include <sokol/sokol_time.h>
@@ -79,7 +80,7 @@ void aout_application_destroy(
         assert(app->space); assert(app->server);
 
         aout_server_destroy(app->server);
-        //aout_util_space_free_children(app->space); // TODO: Add
+        aout_space_free_children(app->space);
         cpSpaceFree(app->space);
         free(app);
 }
