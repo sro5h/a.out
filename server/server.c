@@ -28,7 +28,7 @@ static uint32_t aout_server_get_packet_flags(
                 aout_sv_msg_type type);
 
 aout_server* aout_server_create(
-                aout_server_adapter* adapter) {
+                aout_server_adapter adapter) {
         aout_server* server = malloc(sizeof(*server));
 
         if (!server) {
@@ -176,8 +176,8 @@ static void aout_server_on_connect(
         );
         assert(AOUT_IS_OK(res)); // TODO: Maybe print error message
 
-        aout_server_adapter* adapter = server->adapter;
-        if (adapter && adapter->on_connection) {
+        aout_server_adapter* adapter = &server->adapter;
+        if (adapter->on_connection) {
                 adapter->on_connection(server, connection, adapter->context);
         }
 }
@@ -199,8 +199,8 @@ static void aout_server_on_disconnect(
         aout_connection* connection = (aout_connection*) peer->data;
         aout_logd("[0x%08x] disconnection", connection->id);
 
-        aout_server_adapter* adapter = server->adapter;
-        if (adapter && adapter->on_disconnection) {
+        aout_server_adapter* adapter = &server->adapter;
+        if (adapter->on_disconnection) {
                 adapter->on_disconnection(server, connection, adapter->context);
         }
 

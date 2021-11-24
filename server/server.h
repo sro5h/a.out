@@ -15,7 +15,7 @@ typedef struct aout_server {
         ENetHost* host;
         aout_connection connections[AOUT_SERVER_MAX_CONNECTIONS];
         bool is_running;
-        aout_server_adapter* adapter;
+        aout_server_adapter adapter;
 } aout_server;
 
 typedef enum aout_server_res {
@@ -24,7 +24,7 @@ typedef enum aout_server_res {
 } aout_server_res;
 
 aout_server* aout_server_create(
-                aout_server_adapter* adapter);
+                aout_server_adapter adapter);
 
 void aout_server_destroy(
                 aout_server* server);
