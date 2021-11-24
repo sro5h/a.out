@@ -49,6 +49,25 @@ aout_res aout_stream_write_sv_msg_connection(
         return AOUT_OK;
 }
 
+aout_res aout_stream_write_sv_msg_state(
+                aout_stream* stream,
+                aout_sv_msg_state* msg) {
+        assert(stream); assert(msg);
+
+        // TODO: Either use this or the idea above.
+        if (!aout_stream_has_capacity(stream, sizeof(*msg))) {
+                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+        }
+
+        aout_res res = { 0 };
+        res = aout_stream_write_f32(stream, msg->position.x);
+        assert(AOUT_IS_OK(res));
+        res = aout_stream_write_f32(stream, msg->position.y);
+        assert(AOUT_IS_OK(res));
+
+        return AOUT_OK;
+}
+
 aout_res aout_stream_read_cl_msg_type(
                 aout_stream* stream,
                 aout_cl_msg_type* type) {
@@ -93,6 +112,25 @@ aout_res aout_stream_read_sv_msg_connection(
         }
 
         if (AOUT_IS_ERR(aout_stream_read_u16(stream, &tmp.peer_id))) {
+                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+        }
+
+        *msg = tmp;
+        return AOUT_OK;
+}
+
+aout_res aout_stream_read_sv_msg_state(
+                aout_stream* stream,
+                aout_sv_msg_state* msg) {
+        assert(stream); assert(msg);
+
+        aout_sv_msg_state tmp;
+
+        if (AOUT_IS_ERR(aout_stream_read_f32(stream, &tmp.position.x))) {
+                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+        }
+
+        if (AOUT_IS_ERR(aout_stream_read_f32(stream, &tmp.position.y))) {
                 return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
         }
 

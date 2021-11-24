@@ -181,6 +181,57 @@ TEST stream_write_sv_msg_connection(void) {
         PASS();
 }
 
+TEST stream_write_sv_msg_state(void) {
+        uint8_t* data = calloc(10, sizeof(*data));
+
+        ASSERT(data);
+
+        aout_stream stream = {
+                .data = data,
+                .data_size = 10
+        };
+
+        aout_res res = { 0 };
+        aout_sv_msg_state msg = {
+                .position = { .x = 3.14159f, .y = -32.3299f }
+        };
+        uint32_t n_position_x = aout_hton_f32(msg.position.x);
+        uint32_t n_position_y = aout_hton_f32(msg.position.y);
+
+        res = aout_stream_write_sv_msg_state(&stream, &msg);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(stream.data[0], ((uint8_t*) &n_position_x)[0]);
+        ASSERT_EQ(stream.data[1], ((uint8_t*) &n_position_x)[1]);
+        ASSERT_EQ(stream.data[2], ((uint8_t*) &n_position_x)[2]);
+        ASSERT_EQ(stream.data[3], ((uint8_t*) &n_position_x)[3]);
+        ASSERT_EQ(stream.data[4], ((uint8_t*) &n_position_y)[0]);
+        ASSERT_EQ(stream.data[5], ((uint8_t*) &n_position_y)[1]);
+        ASSERT_EQ(stream.data[6], ((uint8_t*) &n_position_y)[2]);
+        ASSERT_EQ(stream.data[7], ((uint8_t*) &n_position_y)[3]);
+        ASSERT_EQ(stream.data[8], 0);
+        ASSERT_EQ(stream.data[9], 0);
+
+        res = aout_stream_write_sv_msg_state(&stream, &msg);
+
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
+        ASSERT_EQ(stream.data[0], ((uint8_t*) &n_position_x)[0]);
+        ASSERT_EQ(stream.data[1], ((uint8_t*) &n_position_x)[1]);
+        ASSERT_EQ(stream.data[2], ((uint8_t*) &n_position_x)[2]);
+        ASSERT_EQ(stream.data[3], ((uint8_t*) &n_position_x)[3]);
+        ASSERT_EQ(stream.data[4], ((uint8_t*) &n_position_y)[0]);
+        ASSERT_EQ(stream.data[5], ((uint8_t*) &n_position_y)[1]);
+        ASSERT_EQ(stream.data[6], ((uint8_t*) &n_position_y)[2]);
+        ASSERT_EQ(stream.data[7], ((uint8_t*) &n_position_y)[3]);
+        ASSERT_EQ(stream.data[8], 0);
+        ASSERT_EQ(stream.data[9], 0);
+
+        free(data);
+        data = NULL;
+        PASS();
+}
+
 // Depends on enum order of aout_sv_msg_type!
 TEST stream_read_cl_msg_type(void) {
         uint8_t data[] = { 0, 0, 0, 0, 0, 0, 0, 0, 49, 3 };
@@ -269,6 +320,36 @@ TEST stream_read_sv_msg_connection(void) {
         PASS();
 }
 
+TEST stream_read_sv_msg_state(void) {
+        uint8_t data[] = { 32, 129, -32, 239, 12, 4, 9, 94, 49, 3 };
+        aout_stream stream = {
+                .data = data,
+                .data_size = sizeof(data)
+        };
+
+        aout_res res = { 0 };
+        aout_sv_msg_state msg = { 0 };
+        float32_t h_position_x = aout_ntoh_f32(*((uint32_t*) &data[0]));
+        float32_t h_position_y = aout_ntoh_f32(*((uint32_t*) &data[4]));
+
+        res = aout_stream_read_sv_msg_state(&stream, &msg);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(msg.position.x, h_position_x);
+        ASSERT_EQ(msg.position.y, h_position_y);
+
+        res = aout_stream_read_sv_msg_state(&stream, &msg);
+
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
+
+        // Values should not have changed
+        ASSERT_EQ(msg.position.x, h_position_x);
+        ASSERT_EQ(msg.position.y, h_position_y);
+
+        PASS();
+}
+
 TEST stream_write_sv_msg_type_then_read_sv_msg_type(void) {
         uint8_t* data = calloc(6, sizeof(*data));
 
@@ -310,10 +391,12 @@ SUITE(test_messages) {
         RUN_TEST(stream_write_cl_msg_type);
         RUN_TEST(stream_write_sv_msg_type);
         RUN_TEST(stream_write_sv_msg_connection);
+        RUN_TEST(stream_write_sv_msg_state);
 
         RUN_TEST(stream_read_cl_msg_type);
         RUN_TEST(stream_read_sv_msg_type);
         RUN_TEST(stream_read_sv_msg_connection);
+        RUN_TEST(stream_read_sv_msg_state);
 
         RUN_TEST(stream_write_sv_msg_type_then_read_sv_msg_type);
 }
