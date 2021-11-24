@@ -38,7 +38,7 @@ aout_application* aout_application_create(
         cpSpaceSetSleepTimeThreshold(app->space, 0.5f);
         // TODO: Create physics scene
 
-        app->server = aout_server_create();
+        app->server = aout_server_create(NULL);
 
         if (!app->server) {
                 aout_loge("could not create server");
