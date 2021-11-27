@@ -19,6 +19,11 @@ static void aout_client_on_receive_msg_connection(
                 aout_connection* connection,
                 aout_stream* stream);
 
+static void aout_client_on_receive_msg_state(
+                aout_client* client,
+                aout_connection* connection,
+                aout_stream* stream);
+
 static void aout_client_on_disconnect(
                 aout_client* client,
                 ENetPeer* peer);
@@ -139,6 +144,9 @@ static void aout_client_on_receive(
                 aout_client_on_receive_msg_connection(client, connection,
                                 &stream);
                 break;
+        case AOUT_SV_MSG_TYPE_STATE:
+                aout_client_on_receive_msg_state(client, connection, &stream);
+                break;
         default:
                 aout_loge("unknown sv_msg_type");
                 break;
@@ -159,6 +167,22 @@ static void aout_client_on_receive_msg_connection(
 
         aout_logd("[0x%08x] sv_msg_connection received: ", connection->id);
         aout_logd("{ .id = 0x%x, .peer_id = 0x%x }", msg.id, msg.peer_id);
+}
+
+static void aout_client_on_receive_msg_state(
+                aout_client* client,
+                aout_connection* connection,
+                aout_stream* stream) {
+        assert(client); assert(connection); assert(stream);
+
+        aout_sv_msg_state msg;
+        if (AOUT_IS_ERR(aout_stream_read_sv_msg_state(stream, &msg))) {
+                aout_loge("could not read sv_msg_state");
+                return;
+        }
+
+        aout_logd("[0x%08x] sv_msg_state received: ", connection->id);
+        aout_logd("{ .position = { %f, %f } }", msg.position.x, msg.position.y);
 }
 
 static void aout_client_on_disconnect(
