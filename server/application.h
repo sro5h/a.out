@@ -4,11 +4,13 @@
 #include "server.h"
 #include <signal.h>
 
+typedef struct cpBody cpBody;
 typedef struct cpSpace cpSpace;
 
 typedef struct aout_application {
         aout_server* server;
         cpSpace* space;
+        cpBody* bodies[AOUT_SERVER_MAX_CONNECTIONS];
         bool is_running;
         double time_step;
         sig_atomic_t sigint_raised;

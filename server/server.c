@@ -148,6 +148,56 @@ error:
         return AOUT_ERR(AOUT_SERVER_ERR);
 }
 
+aout_res aout_server_send_msg_state(
+                aout_server* server,
+                uint16_t peer_id,
+                aout_sv_msg_state* msg) {
+        assert(server); assert(msg);
+        assert(server->host);
+        assert(peer_id < server->host->peerCount);
+        assert(server->host->peers[peer_id].connectID); // TODO: Treat as error?
+
+        // The requested buffer is an upper limit of how much space will be
+        // needed and will be shrunken.
+        ENetPacket* packet;
+        aout_stream stream;
+        aout_res res = aout_server_create_packet(
+                AOUT_SV_MSG_TYPE_STATE,
+                sizeof(*msg),
+                &packet,
+                &stream
+        );
+
+        if (AOUT_IS_ERR(res)) {
+                aout_loge("could not write sv_msg_state header");
+                goto error;
+        }
+
+        res = aout_stream_write_sv_msg_state(&stream, msg);
+
+        if (AOUT_IS_ERR(res)) {
+                aout_loge("could not write sv_msg_state");
+                goto error;
+        }
+
+        // Resize the packet to the number of written bytes
+        enet_packet_resize(packet, aout_stream_get_count(&stream));
+
+        ENetPeer* peer = &server->host->peers[peer_id];
+        if (enet_peer_send(peer, 0, packet) < 0) {
+                aout_loge("could not send packet");
+                goto error;
+        }
+
+        return AOUT_OK;
+
+error:
+        assert(packet); assert(packet->referenceCount == 0);
+
+        enet_packet_destroy(packet);
+        return AOUT_ERR(AOUT_SERVER_ERR);
+}
+
 bool aout_server_is_running(
                 aout_server* server) {
         assert(server);

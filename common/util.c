@@ -15,61 +15,107 @@ void aout_print_bytes(
 }
 
 static
-void shape_free_wrap(
+void space_shape_free_wrap(
                 cpSpace* space,
-                cpShape* shape,
+                void* key,
                 void* unused) {
         (void) unused;
+        cpShape* shape = key;
         cpSpaceRemoveShape(space, shape);
         cpShapeFree(shape);
 }
 
 static
-void constraint_free_wrap(
+void space_constraint_free_wrap(
                 cpSpace* space,
-                cpConstraint* constraint,
+                void* key,
                 void* unused) {
         (void) unused;
+        cpConstraint* constraint = key;
         cpSpaceRemoveConstraint(space, constraint);
         cpConstraintFree(constraint);
 }
 
 static
-void body_free_wrap(
+void space_body_free_wrap(
                 cpSpace* space,
-                cpBody* body,
+                void* key,
                 void* unused) {
         (void) unused;
+        cpBody* body = key;
         cpSpaceRemoveBody(space, body);
         cpBodyFree(body);
 }
 
 static
-void post_shape_free(
+void space_post_shape_free(
                 cpShape* shape,
-                cpSpace* space) {
-        cpSpaceAddPostStepCallback(space, (cpPostStepFunc) shape_free_wrap, shape, NULL);
+                void* context) {
+        cpSpace* space = context;
+        cpSpaceAddPostStepCallback(space, space_shape_free_wrap, shape, NULL);
 }
 
 static
-void post_constraint_free(
+void space_post_constraint_free(
                 cpConstraint* constraint,
-                cpSpace* space) {
-        cpSpaceAddPostStepCallback(space, (cpPostStepFunc) constraint_free_wrap, constraint, NULL);
+                void* context) {
+        cpSpace* space = context;
+        cpSpaceAddPostStepCallback(space, space_constraint_free_wrap, constraint, NULL);
 }
 
 static
-void post_body_free(
+void space_post_body_free(
                 cpBody* body,
-                cpSpace* space) {
-        cpSpaceAddPostStepCallback(space, (cpPostStepFunc) body_free_wrap, body, NULL);
+                void* context) {
+        cpSpace* space = context;
+        cpSpaceAddPostStepCallback(space, space_body_free_wrap, body, NULL);
 }
 
-void aout_space_free_children(
+void aout_space_free_children_post_step(
                 cpSpace* space) {
-        // Must remove these BEFORE freeing the body or you will access dangling pointers.
-        cpSpaceEachShape(space, (cpSpaceShapeIteratorFunc) post_shape_free, space);
-        cpSpaceEachConstraint(space, (cpSpaceConstraintIteratorFunc) post_constraint_free, space);
+        cpSpaceEachShape(space, space_post_shape_free, space);
+        cpSpaceEachConstraint(space, space_post_constraint_free, space);
+        // TODO: Remove arbiters aswell
+        // Must remove the above BEFORE freeing the body
+        cpSpaceEachBody(space, space_post_body_free, space);
+}
 
-        cpSpaceEachBody(space, (cpSpaceBodyIteratorFunc) post_body_free, space);
+void aout_space_free(
+                cpSpace* space) {
+        aout_space_free_children_post_step(space);
+        cpSpaceFree(space);
+}
+
+static
+void body_shape_free_wrap(
+                cpBody* body,
+                cpShape* shape,
+                void* unused) {
+        (void) unused;
+        cpSpaceRemoveShape(cpBodyGetSpace(body), shape);
+        cpShapeFree(shape);
+}
+
+static
+void body_constraint_free_wrap(
+                cpBody* body,
+                cpConstraint* constraint,
+                void* unused) {
+        (void) unused;
+        cpSpaceRemoveConstraint(cpBodyGetSpace(body), constraint);
+        cpConstraintFree(constraint);
+}
+
+void aout_body_free_children(
+                cpBody* body) {
+        cpBodyEachShape(body, body_shape_free_wrap, NULL);
+        cpBodyEachConstraint(body, body_constraint_free_wrap, NULL);
+        // TODO: Free arbiters aswell
+}
+
+void aout_body_free(
+                cpBody* body) {
+        aout_body_free_children(body);
+        cpSpaceRemoveBody(cpBodyGetSpace(body), body);
+        cpBodyFree(body);
 }
