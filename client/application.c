@@ -45,7 +45,7 @@ aout_application* aout_application_create(
         glfwMakeContextCurrent(app->window);
         glfwSwapInterval(1);
 
-        app->client = aout_client_create();
+        app->client = aout_client_create((aout_client_adapter) { 0 });
 
         if (!app->client) {
                 aout_loge("could not create client\n");

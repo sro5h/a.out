@@ -1,6 +1,8 @@
 #ifndef CLIENT_CLIENT_H
 #define CLIENT_CLIENT_H
 
+#include "client_adapter.h"
+
 #include <common/connection.h>
 #include <common/result.h>
 #include <common/types.h>
@@ -11,6 +13,7 @@ typedef struct aout_client {
         ENetHost* host;
         aout_connection connection;
         bool is_running; // TODO: Remove?
+        aout_client_adapter adapter;
 } aout_client;
 
 typedef enum aout_client_res {
@@ -19,7 +22,7 @@ typedef enum aout_client_res {
 } aout_client_res;
 
 aout_client* aout_client_create(
-                void);
+                aout_client_adapter adapter);
 
 void aout_client_destroy(
                 aout_client* client);

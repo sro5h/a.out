@@ -3,6 +3,7 @@
 #include <common/byte_order.h>
 #include <common/log.h>
 #include <common/messages.h>
+
 #include <enet/enet.h>
 
 static void aout_client_on_connect(
@@ -29,7 +30,7 @@ static void aout_client_on_disconnect(
                 ENetPeer* peer);
 
 aout_client* aout_client_create(
-                void) {
+                aout_client_adapter adapter) {
         aout_client* client = malloc(sizeof(*client));
 
         if (!client) {
@@ -45,6 +46,7 @@ aout_client* aout_client_create(
 
         client->connection = (aout_connection) { 0 };
         client->is_running = true;
+        client->adapter = adapter;
 
         return client;
 }
@@ -116,6 +118,11 @@ static void aout_client_on_connect(
         peer->data = connection;
 
         aout_logd("[0x%08x] connection", connection->id);
+
+        aout_client_adapter* adapter = &client->adapter;
+        if (adapter->on_connection) {
+                adapter->on_connection(client, connection, adapter->context);
+        }
 }
 
 static void aout_client_on_receive(
@@ -167,6 +174,12 @@ static void aout_client_on_receive_msg_connection(
 
         aout_logd("[0x%08x] sv_msg_connection received: ", connection->id);
         aout_logd("{ .id = 0x%x, .peer_id = 0x%x }", msg.id, msg.peer_id);
+
+        aout_client_adapter* adapter = &client->adapter;
+        if (adapter->on_msg_connection) {
+                adapter->on_msg_connection(client, connection, &msg,
+                                adapter->context);
+        }
 }
 
 static void aout_client_on_receive_msg_state(
@@ -183,6 +196,12 @@ static void aout_client_on_receive_msg_state(
 
         aout_logd("[0x%08x] sv_msg_state received: ", connection->id);
         aout_logd("{ .position = { %f, %f } }", msg.position.x, msg.position.y);
+
+        aout_client_adapter* adapter = &client->adapter;
+        if (adapter->on_msg_state) {
+                adapter->on_msg_state(client, connection, &msg,
+                                adapter->context);
+        }
 }
 
 static void aout_client_on_disconnect(
@@ -193,6 +212,11 @@ static void aout_client_on_disconnect(
 
         aout_connection* connection = (aout_connection*) peer->data;
         aout_logd("[0x%08x] disconnection", connection->id);
+
+        aout_client_adapter* adapter = &client->adapter;
+        if (adapter->on_disconnection) {
+                adapter->on_disconnection(client, connection, adapter->context);
+        }
 
         peer->data = NULL;
 }

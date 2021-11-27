@@ -16,7 +16,7 @@ typedef void (*aout_on_disconnection)(
                 void* context);
 
 typedef struct aout_server_adapter {
-        aout_on_connection    on_connection;
+        aout_on_connection on_connection;
         aout_on_disconnection on_disconnection;
 
         void* context;
