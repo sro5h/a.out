@@ -52,7 +52,6 @@ aout_server* aout_server_create(
         }
 
         memset(server->connections, 0, sizeof(server->connections));
-        server->is_running = true;
         server->adapter = adapter;
 
         return server;
@@ -196,12 +195,6 @@ error:
 
         enet_packet_destroy(packet);
         return AOUT_ERR(AOUT_SERVER_ERR);
-}
-
-bool aout_server_is_running(
-                aout_server* server) {
-        assert(server);
-        return server->is_running;
 }
 
 static void aout_server_on_connect(

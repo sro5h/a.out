@@ -12,7 +12,6 @@ typedef struct _ENetHost ENetHost;
 typedef struct aout_client {
         ENetHost* host;
         aout_connection connection;
-        bool is_running; // TODO: Remove?
         aout_client_adapter adapter;
 } aout_client;
 
@@ -34,8 +33,5 @@ aout_res aout_client_connect(
                 aout_client* client,
                 uint32_t ip,
                 uint16_t port);
-
-bool aout_client_is_running(
-                aout_client* client);
 
 #endif

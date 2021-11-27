@@ -45,7 +45,6 @@ aout_client* aout_client_create(
         }
 
         client->connection = (aout_connection) { 0 };
-        client->is_running = true;
         client->adapter = adapter;
 
         return client;
@@ -99,12 +98,6 @@ aout_res aout_client_connect(
         }
 
         return AOUT_OK;
-}
-
-bool aout_client_is_running(
-                aout_client* client) {
-        assert(client);
-        return client->is_running;
 }
 
 static void aout_client_on_connect(
