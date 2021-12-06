@@ -2,6 +2,7 @@ common_sources = [
   'byte_order.c',
   'console.c',
   'dummy.c',
+  'id_pool.c',
   'log.c',
   'messages.c',
   'stream.c',

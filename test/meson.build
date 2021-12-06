@@ -6,6 +6,10 @@ test_dummy_sources = [
   'test_dummy.c'
 ]
 
+test_id_pool_sources = [
+  'test_id_pool.c'
+]
+
 test_messages_sources = [
   'test_messages.c'
 ]
@@ -36,6 +40,13 @@ test('Byte order test', executable(
 test('Dummy test', executable(
   'test_dummy',
   test_dummy_sources,
+  include_directories: test_public_headers,
+  link_with: common_target
+))
+
+test('Id pool test', executable(
+  'test_id_pool',
+  test_id_pool_sources,
   include_directories: test_public_headers,
   link_with: common_target
 ))
