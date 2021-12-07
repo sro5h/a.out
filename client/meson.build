@@ -3,7 +3,9 @@ client_sources = [
   'client.c',
   'implementation.c',
   'initialise.c',
-  'main.c'
+  'main.c',
+  'player_mesh.c',
+  'renderer.c'
 ]
 
 client_public_headers = include_directories(
@@ -35,6 +37,7 @@ endif
 
 if build_machine.system() == 'linux'
   build_args += '-D_DEFAULT_SOURCE'
+  build_args += '-Wno-missing-field-initializers'
 endif
 
 client_target = executable(
