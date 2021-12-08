@@ -171,7 +171,13 @@ static void aout_application_update(
         assert(width > 0); assert(height > 0);
 
         aout_renderer_begin(app->renderer, width, height);
-        aout_renderer_render_mesh(app->renderer, &app->player_mesh);
+
+        aout_renderer_render_mesh(
+                app->renderer,
+                &app->player_mesh,
+                &(aout_transform) { 0 }
+        );
+
         aout_renderer_end(app->renderer);
 
         glfwSwapBuffers(app->window);

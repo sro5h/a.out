@@ -3,6 +3,8 @@
 
 #include "mesh.h"
 
+#include <common/transform.h>
+
 typedef struct aout_renderer aout_renderer;
 
 aout_renderer* aout_renderer_create(
@@ -26,7 +28,7 @@ void aout_renderer_end(
 
 void aout_renderer_render_mesh(
                 aout_renderer* renderer,
-                aout_mesh* mesh/*,
-                transform*/);
+                aout_mesh const* mesh,
+                aout_transform const* transform);
 
 #endif
