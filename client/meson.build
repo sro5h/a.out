@@ -10,7 +10,8 @@ client_sources = [
 
 client_public_headers = include_directories(
   '..',
-  '../external'
+  '../external',
+  '../external/cglm/include'
 )
 
 client_dependencies = [
