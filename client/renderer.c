@@ -25,8 +25,10 @@ aout_renderer* aout_renderer_create(
 
 void aout_renderer_destroy(
                 aout_renderer* renderer) {
-        sg_shutdown();
-        free(renderer);
+        if (renderer) {
+                sg_shutdown();
+                free(renderer);
+        }
 }
 
 void aout_renderer_begin(

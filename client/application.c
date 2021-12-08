@@ -21,15 +21,18 @@ static void on_sigint(
                 void* context);
 
 // TODO: add aout_application_desc
-// TODO: Maybe don't protect against malloc failure?
 aout_application* aout_application_create(
                 //aout_application_desc* desc
                 void) {
-        aout_application* app = malloc(sizeof(*app));
+        aout_application* app = calloc(1, sizeof(*app));
 
         if (!app) {
                 return NULL;
         }
+
+        app->is_running = true;
+        app->time_step = 1.0 / 64;
+        app->sigint_raised = 0;
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -40,7 +43,7 @@ aout_application* aout_application_create(
 
         if (!app->window) {
                 aout_loge("could not create window");
-                goto error_window;
+                goto error;
         }
 
         glfwSetWindowPos(app->window, 0, 0);
@@ -51,25 +54,22 @@ aout_application* aout_application_create(
 
         if (!app->renderer) {
                 aout_loge("could not create renderer");
-                goto error_renderer;
+                goto error;
         }
+
+        app->player_mesh = aout_player_mesh_create();
 
         app->client = aout_client_create((aout_client_adapter) { 0 });
 
         if (!app->client) {
                 aout_loge("could not create client");
-                goto error_client;
+                goto error;
         }
-
-        app->is_running = true;
-        app->time_step = 1.0 / 64;
-        app->sigint_raised = 0;
-        app->player_mesh = aout_player_mesh_create();
 
         // Move somewhere else
         if (AOUT_IS_ERR(aout_client_connect(app->client, 0x7f000001, 42424))) {
                 aout_loge("could not connect to foreign host");
-                goto error_connect;
+                goto error;
         }
 
         aout_res res = aout_on_sigint((aout_sig_handler) {
@@ -79,25 +79,16 @@ aout_application* aout_application_create(
 
         if (AOUT_IS_ERR(res)) {
                 aout_loge("could not set SIGINT handler");
-                goto error_signal;
+                goto error;
         }
 
         return app;
 
-// TODO: Zero initialise app (especially pointers) and replace labels with
-// if (app->ptr) { destroy(app->ptr) }
-error_signal:
-error_connect:
-        aout_client_destroy(app->client);
-
-error_client:
-        aout_renderer_destroy(app->renderer);
-
-error_renderer:
-        glfwDestroyWindow(app->window);
-
-error_window:
-        free(app);
+        // As all pointers are zero initialised, simply call
+        // aout_application_destroy to release all allocated resources.
+        // NULL pointers will be ignored.
+error:
+        aout_application_destroy(app);
         return NULL;
 }
 
@@ -107,7 +98,8 @@ void aout_application_destroy(
                 return;
         }
 
-        assert(app->window); assert(app->client);
+        // NULL is safely handled by *_destroy
+        //assert(app->window); assert(app->client);
 
         aout_client_destroy(app->client);
         aout_renderer_destroy(app->renderer);
