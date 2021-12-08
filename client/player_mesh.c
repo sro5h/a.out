@@ -9,8 +9,7 @@ static char const* vs_source =
         "layout(location=0) in vec2 position;\n"
         "layout(location=1) in vec2 uv;\n"
         "layout(location=2) in float radius;\n"
-        "layout(location=3) in vec4 fill;\n"
-        "layout(location=4) in vec4 outline;\n"
+        "layout(location=3) in vec4 color0;\n"
         "uniform mat4 mvp;\n"
         "out vec4 color;\n"
         "void main() {\n"
@@ -51,12 +50,8 @@ aout_mesh aout_player_mesh_create(
                 },
                 .attrs[3] = {
                         .format = SG_VERTEXFORMAT_UBYTE4N,
-                        .offset = offsetof(aout_vertex, color_fill)
-                },
-                .attrs[4] = {
-                        .format = SG_VERTEXFORMAT_UBYTE4N,
-                        .offset = offsetof(aout_vertex, color_outline)
-                },
+                        .offset = offsetof(aout_vertex, color)
+                }
         };
 
         return (aout_mesh) {
