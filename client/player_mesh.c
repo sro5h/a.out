@@ -1,6 +1,7 @@
 #include "player_mesh.h"
 #include "vertex.h"
 
+#include <cglm/mat4.h>
 #include <sokol/sokol_gfx.h>
 
 static char const* vs_source =
@@ -10,9 +11,10 @@ static char const* vs_source =
         "layout(location=2) in float radius;\n"
         "layout(location=3) in vec4 fill;\n"
         "layout(location=4) in vec4 outline;\n"
+        "uniform mat4 mvp;\n"
         "out vec4 color;\n"
         "void main() {\n"
-        "       gl_Position = vec4(position, 0, 1);\n"
+        "       gl_Position = mvp * vec4(position, 0, 1);\n"
         "       color = vec4(1, 0, 0, 1);\n"
         "}\n";
 
@@ -27,9 +29,9 @@ static char const* fs_source =
 aout_mesh aout_player_mesh_create(
                 void) {
         aout_vertex const vertices[] = {
-                { .position = {   0.f, .5f } },
-                { .position = {  .5f, -.5f } },
-                { .position = { -.5f, -.5f } }
+                { .position = {   0.f,  50.f } },
+                { .position = {  50.f, -50.f } },
+                { .position = { -50.f, -50.f } }
         };
 
         aout_index const indices[] = { 0, 1, 2 };
@@ -71,6 +73,13 @@ aout_mesh aout_player_mesh_create(
                 .index_count = 3,
                 .pipeline = sg_make_pipeline(&(sg_pipeline_desc) {
                         .shader = sg_make_shader(&(sg_shader_desc) {
+                                .vs.uniform_blocks[0] = {
+                                        .size = sizeof(mat4),
+                                        .uniforms[0] = {
+                                                .name = "mvp",
+                                                .type = SG_UNIFORMTYPE_MAT4,
+                                        },
+                                },
                                 .vs.source = vs_source,
                                 .fs.source = fs_source
                         }),

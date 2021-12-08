@@ -57,6 +57,7 @@ aout_application* aout_application_create(
                 goto error;
         }
 
+        aout_renderer_set_view(app->renderer, 640, 480);
         app->player_mesh = aout_player_mesh_create();
 
         app->client = aout_client_create((aout_client_adapter) { 0 });

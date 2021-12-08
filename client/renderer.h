@@ -11,6 +11,11 @@ aout_renderer* aout_renderer_create(
 void aout_renderer_destroy(
                 aout_renderer* renderer);
 
+void aout_renderer_set_view(
+                aout_renderer* renderer,
+                size_t width,
+                size_t height);
+
 void aout_renderer_begin(
                 aout_renderer* renderer,
                 size_t width,
