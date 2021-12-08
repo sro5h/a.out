@@ -14,7 +14,7 @@ static char const* vs_source =
         "out vec4 color;\n"
         "void main() {\n"
         "       gl_Position = mvp * vec4(position, 0, 1);\n"
-        "       color = vec4(1, 0, 0, 1);\n"
+        "       color = color0;\n"
         "}\n";
 
 static char const* fs_source =
@@ -27,10 +27,11 @@ static char const* fs_source =
 
 aout_mesh aout_player_mesh_create(
                 void) {
+        aout_rgba8 color = { 0xf6, 0x08, 0x1e, 0xff };
         aout_vertex const vertices[] = {
-                { .position = {   0.f,  50.f } },
-                { .position = {  50.f, -50.f } },
-                { .position = { -50.f, -50.f } }
+                { .position = {   0.f,  50.f }, .color = color },
+                { .position = {  50.f, -50.f }, .color = color },
+                { .position = { -50.f, -50.f }, .color = color }
         };
 
         aout_index const indices[] = { 0, 1, 2 };
