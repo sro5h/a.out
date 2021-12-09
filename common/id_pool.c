@@ -46,18 +46,17 @@ aout_id_pool* aout_id_pool_create(
                 size_t size) {
         assert(size <= AOUT_ID_POOL_MAX_SIZE);
 
-        aout_id_pool* pool = malloc(sizeof(*pool));
+        aout_id_pool* pool = calloc(1, sizeof(*pool));
         assert(pool);
 
         pool->size = size;
         pool->unused_indices_top = 0;
 
-        size_t const slots_bytes = sizeof(*pool->slots) * pool->size;
-        pool->slots = malloc(slots_bytes);
+        // Slots must be zero
+        pool->slots = calloc(pool->size, sizeof(*pool->slots));
         assert(pool->slots);
 
-        memset(pool->slots, 0, slots_bytes);
-
+        // TODO: Maybe also change to calloc?
         pool->unused_indices = malloc(sizeof(size_t) * size);
         assert(pool->unused_indices);
 
@@ -72,11 +71,11 @@ aout_id_pool* aout_id_pool_create(
 
 void aout_id_pool_destroy(
                 aout_id_pool* pool) {
-        assert(pool);
-
-        free(pool->unused_indices);
-        free(pool->slots);
-        free(pool);
+        if (pool) {
+                free(pool->unused_indices);
+                free(pool->slots);
+                free(pool);
+        }
 }
 
 aout_id aout_id_pool_id_create(
