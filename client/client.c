@@ -31,21 +31,22 @@ static void aout_client_on_disconnect(
 
 aout_client* aout_client_create(
                 aout_client_adapter adapter) {
-        aout_client* client = malloc(sizeof(*client));
+        aout_client* client = calloc(1, sizeof(*client));
 
         if (!client) {
                 return NULL;
         }
 
+        client->connection = (aout_connection) { 0 };
+        client->adapter = adapter;
+
         client->host = enet_host_create(NULL, 1, 2, 0, 0);
 
         if (!client->host) {
+                // TODO: Could be changed to mirror application error handling
                 free(client);
                 return NULL;
         }
-
-        client->connection = (aout_connection) { 0 };
-        client->adapter = adapter;
 
         return client;
 }

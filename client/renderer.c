@@ -12,7 +12,7 @@ struct aout_renderer {
 
 aout_renderer* aout_renderer_create(
                 void) {
-        aout_renderer* renderer = malloc(sizeof(*renderer));
+        aout_renderer* renderer = calloc(1, sizeof(*renderer));
 
         if (!renderer) {
                 return NULL;
