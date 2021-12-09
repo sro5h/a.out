@@ -9,32 +9,64 @@ static char const* vs_source =
         "layout(location=0) in vec2 position;\n"
         "layout(location=1) in vec2 uv;\n"
         "layout(location=2) in float radius;\n"
-        "layout(location=3) in vec4 color0;\n"
+        "layout(location=3) in vec4 color;\n"
         "uniform mat4 mvp;\n"
-        "out vec4 color;\n"
+        "out struct {\n"
+        "       vec2 uv;\n"
+        "       vec4 color;\n"
+        "} frag;\n"
         "void main() {\n"
-        "       gl_Position = mvp * vec4(position, 0, 1);\n"
-        "       color = color0;\n"
+        "       gl_Position = mvp * vec4(position + radius * uv, 0, 1);\n"
+        "       frag.uv = uv;\n"
+        "       frag.color = color;\n"
         "}\n";
 
 static char const* fs_source =
         "#version 330\n"
-        "in vec4 color;\n"
-        "out vec4 frag_color;\n"
+        "in struct {"
+        "       vec2 uv;\n"
+        "       vec4 color;\n"
+        "} frag;\n"
+        "out vec4 color;\n"
         "void main() {\n"
-        "       frag_color = color;\n"
+        "       float len = length(frag.uv);\n"
+        "       float fw = length(fwidth(frag.uv));\n"
+        "       float mask = smoothstep(-1, fw - 1, -len);\n"
+        "       color = frag.color * mask;\n"
         "}\n";
 
 aout_mesh aout_player_mesh_create(
                 void) {
         aout_rgba8 color = { 0xf6, 0x08, 0x1e, 0xff };
         aout_vertex const vertices[] = {
-                { .position = {   0.f,  50.f }, .color = color },
-                { .position = {  50.f, -50.f }, .color = color },
-                { .position = { -50.f, -50.f }, .color = color }
+                {
+                        .position = { 0.f, 0.f },
+                        .uv = { -1, -1 },
+                        .radius = 50.f,
+                        .color = color
+                },
+                {
+                        .position = { 0.f, 0.f },
+                        .uv = { -1,  1 },
+                        .radius = 50.f,
+                        .color = color
+                },
+                {
+                        .position = { 0.f, 0.f },
+                        .uv = {  1,  1 },
+                        .radius = 50.f,
+                        .color = color
+                },
+                {
+                        .position = { 0.f, 0.f },
+                        .uv = {  1, -1 },
+                        .radius = 50.f,
+                        .color = color
+                }
         };
 
-        aout_index const indices[] = { 0, 1, 2 };
+        aout_index const indices[] = { 0, 1, 2, 0, 2, 3 };
+        size_t const index_count = 6;
 
         sg_layout_desc layout = {
                 .attrs[0] = {
@@ -66,7 +98,7 @@ aout_mesh aout_player_mesh_create(
                         .usage = SG_USAGE_IMMUTABLE,
                         .data = SG_RANGE(indices),
                 }),
-                .index_count = 3,
+                .index_count = index_count,
                 .pipeline = sg_make_pipeline(&(sg_pipeline_desc) {
                         .shader = sg_make_shader(&(sg_shader_desc) {
                                 .vs.uniform_blocks[0] = {
