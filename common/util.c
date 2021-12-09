@@ -82,8 +82,10 @@ void aout_space_free_children_post_step(
 
 void aout_space_free(
                 cpSpace* space) {
-        aout_space_free_children_post_step(space);
-        cpSpaceFree(space);
+        if (space) {
+                aout_space_free_children_post_step(space);
+                cpSpaceFree(space);
+        }
 }
 
 static
@@ -115,7 +117,9 @@ void aout_body_free_children(
 
 void aout_body_free(
                 cpBody* body) {
-        aout_body_free_children(body);
-        cpSpaceRemoveBody(cpBodyGetSpace(body), body);
-        cpBodyFree(body);
+        if (body) {
+                aout_body_free_children(body);
+                cpSpaceRemoveBody(cpBodyGetSpace(body), body);
+                cpBodyFree(body);
+        }
 }

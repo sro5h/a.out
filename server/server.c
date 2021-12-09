@@ -29,11 +29,14 @@ static uint32_t aout_server_get_packet_flags(
 
 aout_server* aout_server_create(
                 aout_server_adapter adapter) {
-        aout_server* server = malloc(sizeof(*server));
+        // Connections must be zero
+        aout_server* server = calloc(1, sizeof(*server));
 
         if (!server) {
                 return NULL;
         }
+
+        server->adapter = adapter;
 
         server->host = enet_host_create(
                 &(ENetAddress) {
@@ -47,12 +50,10 @@ aout_server* aout_server_create(
         );
 
         if (!server->host) {
+                // TODO: Could be changed to mirror application error handling
                 free(server);
                 return NULL;
         }
-
-        memset(server->connections, 0, sizeof(server->connections));
-        server->adapter = adapter;
 
         return server;
 }

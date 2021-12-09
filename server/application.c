@@ -35,17 +35,22 @@ static void on_sigint(
 
 aout_application* aout_application_create(
                 void) {
-        aout_application* app = malloc(sizeof(*app));
+        // Bodies must be zero
+        aout_application* app = calloc(1, sizeof(*app));
 
         if (!app) {
                 return NULL;
         }
 
+        app->is_running = true;
+        app->time_step = 1.0 / 64;
+        app->sigint_raised = 0;
+
         app->space = cpSpaceNew();
 
         if (!app->space) {
                 aout_loge("could not create space");
-                goto error_space;
+                goto error;
         }
 
         cpSpaceSetIterations(app->space, 10);
@@ -60,13 +65,8 @@ aout_application* aout_application_create(
 
         if (!app->server) {
                 aout_loge("could not create server");
-                goto error_server;
+                goto error;
         }
-
-        memset(app->bodies, 0, sizeof(app->bodies));
-        app->is_running = true;
-        app->time_step = 1.0 / 64;
-        app->sigint_raised = 0;
 
         aout_res res = aout_on_sigint((aout_sig_handler) {
                 .callback = on_sigint,
@@ -75,18 +75,13 @@ aout_application* aout_application_create(
 
         if (AOUT_IS_ERR(res)) {
                 aout_loge("could not set SIGINT handler");
-                goto error_signal;
+                goto error;
         }
 
         return app;
 
-error_signal:
-        aout_server_destroy(app->server);
-
-error_server:
-
-error_space:
-        free(app);
+error:
+        aout_application_destroy(app);
         return NULL;
 }
 
@@ -95,8 +90,6 @@ void aout_application_destroy(
         if (!app) {
                 return;
         }
-
-        assert(app->space); assert(app->server);
 
         aout_server_destroy(app->server);
         aout_space_free(app->space);
