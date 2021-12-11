@@ -4,8 +4,8 @@
 #include "client_adapter.h"
 
 #include <common/connection.h>
+#include <common/messages.h>
 #include <common/result.h>
-#include <common/types.h>
 
 typedef struct _ENetHost ENetHost;
 
