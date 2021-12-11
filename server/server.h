@@ -7,13 +7,11 @@
 #include <common/messages.h>
 #include <common/result.h>
 
-#define AOUT_SERVER_MAX_CONNECTIONS 10
-
 typedef struct _ENetHost ENetHost;
 
 typedef struct aout_server {
         ENetHost* host;
-        aout_connection connections[AOUT_SERVER_MAX_CONNECTIONS];
+        aout_connection* connections;
         aout_server_adapter adapter;
 } aout_server;
 
@@ -23,7 +21,8 @@ typedef enum aout_server_res {
 } aout_server_res;
 
 aout_server* aout_server_create(
-                aout_server_adapter adapter);
+                aout_server_adapter adapter,
+                size_t connection_count);
 
 void aout_server_destroy(
                 aout_server* server);

@@ -28,7 +28,8 @@ static uint32_t aout_server_get_packet_flags(
                 aout_sv_msg_type type);
 
 aout_server* aout_server_create(
-                aout_server_adapter adapter) {
+                aout_server_adapter adapter,
+                size_t connection_count) {
         // Connections must be zero
         aout_server* server = calloc(1, sizeof(*server));
 
@@ -38,30 +39,40 @@ aout_server* aout_server_create(
 
         server->adapter = adapter;
 
+        size_t const connection_size = sizeof(*server->connections);
+        server->connections = calloc(connection_count, connection_size);
+
+        if (!server->connections) {
+                goto error;
+        }
+
         server->host = enet_host_create(
                 &(ENetAddress) {
                         .host = ENET_HOST_ANY,
                         .port = 42424,
                 },
-                AOUT_SERVER_MAX_CONNECTIONS,
+                connection_count,
                 2,
                 0,
                 0
         );
 
         if (!server->host) {
-                // TODO: Could be changed to mirror application error handling
-                free(server);
-                return NULL;
+                goto error;
         }
 
         return server;
+
+error:
+        aout_server_destroy(server);
+        return NULL;
 }
 
 void aout_server_destroy(
                 aout_server* server) {
         if (server) {
                 enet_host_destroy(server->host);
+                free(server->connections);
                 free(server);
         }
 }
@@ -141,9 +152,7 @@ aout_res aout_server_send_msg_connection(
 
 error:
         assert(packet); assert(packet->referenceCount == 0);
-        if (packet->referenceCount == 0) { // TODO: Shouldn't be necessary
-                enet_packet_destroy(packet);
-        }
+        enet_packet_destroy(packet);
 
         return AOUT_ERR(AOUT_SERVER_ERR);
 }
@@ -193,8 +202,8 @@ aout_res aout_server_send_msg_state(
 
 error:
         assert(packet); assert(packet->referenceCount == 0);
-
         enet_packet_destroy(packet);
+
         return AOUT_ERR(AOUT_SERVER_ERR);
 }
 

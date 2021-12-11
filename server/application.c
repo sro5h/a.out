@@ -61,7 +61,7 @@ aout_application* aout_application_create(
                 .on_connection = aout_application_on_connection,
                 .on_disconnection = aout_application_on_disconnection,
                 .context = app
-        });
+        }, AOUT_SERVER_MAX_CONNECTIONS);
 
         if (!app->server) {
                 aout_loge("could not create server");
