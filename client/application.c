@@ -19,17 +19,14 @@ static void aout_application_update(
 
 static void aout_application_on_connection(
                 aout_client* client,
-                aout_connection* connection,
                 void* context);
 
 static void aout_application_on_disconnection(
                 aout_client* client,
-                aout_connection* connection,
                 void* context);
 
 static void aout_application_on_msg_state(
                 aout_client* client,
-                aout_connection* connection,
                 aout_sv_msg_state* msg,
                 void* context);
 
@@ -47,6 +44,7 @@ aout_application* aout_application_create(
         }
 
         app->is_running = true;
+        app->is_connected = false;
         app->time_step = 1.0 / 64;
         app->sigint_raised = 0;
 
@@ -206,37 +204,34 @@ static void aout_application_update(
 
 static void aout_application_on_connection(
                 aout_client* client,
-                aout_connection* connection,
                 void* context) {
-        assert(client); assert(connection); assert(context);
+        assert(client); assert(context);
         aout_application* app = context;
 
-        assert(app->player_connection.id == 0);
+        assert(!app->is_connected);
 
-        app->player_connection = *connection;
+        app->is_connected = true;
 }
 
 static void aout_application_on_disconnection(
                 aout_client* client,
-                aout_connection* connection,
                 void* context) {
-        assert(client); assert(connection); assert(context);
+        assert(client); assert(context);
         aout_application* app = context;
 
-        assert(app->player_connection.id != 0);
+        assert(app->is_connected);
 
-        app->player_connection = (aout_connection) { 0 };
+        app->is_connected = false;
 }
 
 static void aout_application_on_msg_state(
                 aout_client* client,
-                aout_connection* connection,
                 aout_sv_msg_state* msg,
                 void* context) {
-        assert(client); assert(connection); assert(msg); assert(context);
+        assert(client); assert(msg); assert(context);
         aout_application* app = context;
 
-        assert(app->player_connection.id == connection->id);
+        assert(app->is_connected);
 
         app->player_transform.position = msg->position;
 }

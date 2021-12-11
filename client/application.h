@@ -13,10 +13,10 @@ typedef struct aout_application {
         GLFWwindow* window;
         aout_renderer* renderer;
         bool is_running;
+        bool is_connected;
         double time_step; // Maybe use ticks_per_second instead
         sig_atomic_t sigint_raised;
         aout_mesh player_mesh;
-        aout_connection player_connection; // TODO: Should be able to retrieve this from aout_client
         aout_transform player_transform;
 } aout_application;
 

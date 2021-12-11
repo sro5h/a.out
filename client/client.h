@@ -34,4 +34,7 @@ aout_res aout_client_connect(
                 uint32_t ip,
                 uint16_t port);
 
+aout_connection aout_client_get_connection(
+                aout_client const* client);
+
 #endif
