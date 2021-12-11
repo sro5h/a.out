@@ -7,12 +7,12 @@ typedef struct aout_server aout_server;
 
 typedef void (*aout_on_connection)(
                 aout_server* server,
-                aout_connection* connection,
+                aout_connection connection,
                 void* context);
 
 typedef void (*aout_on_disconnection)(
                 aout_server* server,
-                aout_connection* connection,
+                aout_connection connection,
                 void* context);
 
 typedef struct aout_server_adapter {

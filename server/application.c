@@ -22,12 +22,12 @@ static void aout_application_update(
 
 static void aout_application_on_connection(
                 aout_server* server,
-                aout_connection* connection,
+                aout_connection connection,
                 void* context);
 
 static void aout_application_on_disconnection(
                 aout_server* server,
-                aout_connection* connection,
+                aout_connection connection,
                 void* context);
 
 static void on_sigint(
@@ -170,12 +170,12 @@ static void aout_application_update(
 
 static void aout_application_on_connection(
                 aout_server* server,
-                aout_connection* connection,
+                aout_connection connection,
                 void* context) {
-        assert(server); assert(connection); assert(context);
+        assert(server); assert(context);
         aout_application* app = context;
 
-        assert(!app->bodies[connection->peer_id]);
+        assert(!app->bodies[connection.peer_id]);
 
         cpBody* body = cpSpaceAddBody(app->space, cpBodyNew(
                 CLIENT_BODY_MASS,
@@ -197,23 +197,23 @@ static void aout_application_on_connection(
         cpShapeSetElasticity(shape, 0.0f);
         cpShapeSetFriction(shape, 0.7f);
 
-        app->bodies[connection->peer_id] = body;
+        app->bodies[connection.peer_id] = body;
 }
 
 static void aout_application_on_disconnection(
                 aout_server* server,
-                aout_connection* connection,
+                aout_connection connection,
                 void* context) {
-        assert(server); assert(connection); assert(context);
+        assert(server); assert(context);
         aout_application* app = context;
 
-        cpBody* body = app->bodies[connection->peer_id];
+        cpBody* body = app->bodies[connection.peer_id];
         assert(body);
 
         // Don't use post step callbacks as this will never be called inside
         // cpSpaceStep.
         aout_body_free(body);
-        app->bodies[connection->peer_id] = NULL;
+        app->bodies[connection.peer_id] = NULL;
 }
 
 static void on_sigint(
