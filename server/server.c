@@ -203,8 +203,13 @@ static void aout_server_on_connect(
                 ENetPeer* peer) {
         assert(server); assert(peer);
 
+        // TODO: Maybe don't store the connection, but create it each
+        // time on the fly from the peer data. Would remove the need to make
+        // sure data is in sync.
         uint16_t peer_id = peer->incomingPeerID;
         aout_connection* connection = &server->connections[peer_id];
+        assert(connection->id == 0);
+
         connection->id = peer->connectID;
         connection->peer_id = peer_id;
         peer->data = connection;
@@ -232,6 +237,9 @@ static void aout_server_on_receive(
                 ENetPacket* packet) {
         assert(server); assert(peer); assert(packet);
         assert(packet->data);
+
+        aout_connection* connection = (aout_connection*) peer->data;
+        assert(connection->id == peer->connectID);
 }
 
 static void aout_server_on_disconnect(
@@ -241,6 +249,8 @@ static void aout_server_on_disconnect(
         assert(peer->data);
 
         aout_connection* connection = (aout_connection*) peer->data;
+        assert(connection->id == peer->connectID);
+
         aout_logd("[0x%08x] disconnection", connection->id);
 
         aout_server_adapter* adapter = &server->adapter;

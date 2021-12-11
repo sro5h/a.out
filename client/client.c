@@ -105,9 +105,10 @@ static void aout_client_on_connect(
                 aout_client* client,
                 ENetPeer* peer) {
         assert(client); assert(peer);
-        assert(client->connection.id == 0);
 
         aout_connection* connection = &client->connection;
+        assert(connection.id == 0);
+
         connection->id = peer->connectID;
         connection->peer_id = peer->outgoingPeerID;
         peer->data = connection;
@@ -128,10 +129,10 @@ static void aout_client_on_receive(
         assert(packet->data);
 
         aout_connection* connection = (aout_connection*) peer->data;
+        assert(connection->id == peer->connectID);
+
         // TODO: Remove below
         aout_logd("[0x%08x] packet received", connection->id);
-
-        assert(connection->id == peer->connectID);
 
         aout_stream stream = {
                 .data = packet->data,
@@ -209,6 +210,8 @@ static void aout_client_on_disconnect(
         assert(peer->data);
 
         aout_connection* connection = (aout_connection*) peer->data;
+        assert(connection->id == peer->connectID);
+
         aout_logd("[0x%08x] disconnection", connection->id);
 
         aout_client_adapter* adapter = &client->adapter;
