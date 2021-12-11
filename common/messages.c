@@ -1,11 +1,6 @@
 #include "messages.h"
 #include "stream.h"
 
-#define AOUT_SV_MSG_CONNECTION_SIZE ((size_t) sizeof(uint32_t)\
-                + sizeof(uint16_t))
-
-static_assert(AOUT_SV_MSG_CONNECTION_SIZE <= sizeof(aout_sv_msg_connection));
-
 aout_res aout_stream_write_cl_msg_type(
                 aout_stream* stream,
                 aout_cl_msg_type type) {
@@ -52,13 +47,9 @@ aout_res aout_stream_write_sv_msg_connection(
                 aout_sv_msg_connection* msg) {
         assert(stream); assert(msg);
 
-        // TODO: Try to remove this check in analogy to the read function
-        // The problem is that one needs to know if there is enough space to
-        // guarantee that the buffer won't be modified if the function fails
-        // TODO: Maybe add transaction functionality to stream that guarantees
-        // that the index gets reset if an error occurs. The buffer will be
-        // modified but that shouldn't matter anyways?
-        if (!aout_stream_has_capacity(stream, AOUT_SV_MSG_CONNECTION_SIZE)) {
+        // Make sure there is enough space to write each type on its own. This
+        // leaves the option to optimize how many bytes are written.
+        if (!aout_stream_has_capacity(stream, sizeof(*msg))) {
                 return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
         }
 
@@ -77,7 +68,6 @@ aout_res aout_stream_write_sv_msg_state(
                 aout_sv_msg_state* msg) {
         assert(stream); assert(msg);
 
-        // TODO: Either use this or the idea above.
         if (!aout_stream_has_capacity(stream, sizeof(*msg))) {
                 return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
         }
