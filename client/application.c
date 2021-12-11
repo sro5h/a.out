@@ -17,6 +17,22 @@ static void aout_application_update(
                 aout_application* app,
                 double delta_time);
 
+static void aout_application_on_connection(
+                aout_client* client,
+                aout_connection* connection,
+                void* context);
+
+static void aout_application_on_disconnection(
+                aout_client* client,
+                aout_connection* connection,
+                void* context);
+
+static void aout_application_on_msg_state(
+                aout_client* client,
+                aout_connection* connection,
+                aout_sv_msg_state* msg,
+                void* context);
+
 static void on_sigint(
                 void* context);
 
@@ -60,7 +76,12 @@ aout_application* aout_application_create(
         aout_renderer_set_view(app->renderer, 640, 480);
         app->player_mesh = aout_player_mesh_create();
 
-        app->client = aout_client_create((aout_client_adapter) { 0 });
+        app->client = aout_client_create((aout_client_adapter) {
+                .on_connection = aout_application_on_connection,
+                .on_disconnection = aout_application_on_disconnection,
+                .on_msg_state = aout_application_on_msg_state,
+                .context = app
+        });
 
         if (!app->client) {
                 aout_loge("could not create client");
@@ -175,12 +196,49 @@ static void aout_application_update(
         aout_renderer_render_mesh(
                 app->renderer,
                 &app->player_mesh,
-                &(aout_transform) { 0 }
+                &app->player_transform
         );
 
         aout_renderer_end(app->renderer);
 
         glfwSwapBuffers(app->window);
+}
+
+static void aout_application_on_connection(
+                aout_client* client,
+                aout_connection* connection,
+                void* context) {
+        assert(client); assert(connection); assert(context);
+        aout_application* app = context;
+
+        assert(app->player_connection.id == 0);
+
+        app->player_connection = *connection;
+}
+
+static void aout_application_on_disconnection(
+                aout_client* client,
+                aout_connection* connection,
+                void* context) {
+        assert(client); assert(connection); assert(context);
+        aout_application* app = context;
+
+        assert(app->player_connection.id != 0);
+
+        app->player_connection = (aout_connection) { 0 };
+}
+
+static void aout_application_on_msg_state(
+                aout_client* client,
+                aout_connection* connection,
+                aout_sv_msg_state* msg,
+                void* context) {
+        assert(client); assert(connection); assert(msg); assert(context);
+        aout_application* app = context;
+
+        assert(app->player_connection.id == connection->id);
+
+        app->player_transform.position = msg->position;
 }
 
 static void on_sigint(
