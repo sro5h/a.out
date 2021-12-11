@@ -129,6 +129,54 @@ TEST stream_write_sv_msg_type(void) {
         PASS();
 }
 
+TEST stream_write_cl_msg_input(void) {
+        uint8_t* data = calloc(6, sizeof(*data));
+
+        ASSERT(data);
+
+        aout_stream stream = {
+                .data = data,
+                .data_size = 6
+        };
+
+        aout_res res = { 0 };
+        aout_cl_msg_input msg = {
+                .up = false,
+                .down = true,
+                .left = true,
+                .right = false
+        };
+        uint8_t n_up = msg.up;
+        uint8_t n_down = msg.down;
+        uint8_t n_left = msg.left;
+        uint8_t n_right = msg.right;
+
+        res = aout_stream_write_cl_msg_input(&stream, &msg);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(stream.data[0], n_up);
+        ASSERT_EQ(stream.data[1], n_down);
+        ASSERT_EQ(stream.data[2], n_left);
+        ASSERT_EQ(stream.data[3], n_right);
+        ASSERT_EQ(stream.data[4], 0);
+        ASSERT_EQ(stream.data[5], 0);
+
+        res = aout_stream_write_cl_msg_input(&stream, &msg);
+
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
+        ASSERT_EQ(stream.data[0], n_up);
+        ASSERT_EQ(stream.data[1], n_down);
+        ASSERT_EQ(stream.data[2], n_left);
+        ASSERT_EQ(stream.data[3], n_right);
+        ASSERT_EQ(stream.data[4], 0);
+        ASSERT_EQ(stream.data[5], 0);
+
+        free(data);
+        data = NULL;
+        PASS();
+}
+
 TEST stream_write_sv_msg_connection(void) {
         uint8_t* data = calloc(10, sizeof(*data));
 
@@ -290,6 +338,41 @@ TEST stream_read_sv_msg_type(void) {
         PASS();
 }
 
+TEST stream_read_cl_msg_input(void) {
+        uint8_t data[] = { 32, 129, -32, 239, 12, 4 };
+        aout_stream stream = {
+                .data = data,
+                .data_size = sizeof(data)
+        };
+
+        aout_res res = { 0 };
+        aout_cl_msg_input msg = { 0 };
+        uint8_t h_up = data[0];
+        uint8_t h_down = data[1];
+        uint8_t h_left = data[2];
+        uint8_t h_right = data[3];
+
+        res = aout_stream_read_cl_msg_input(&stream, &msg);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(msg.up, h_up);
+        ASSERT_EQ(msg.down, h_down);
+        ASSERT_EQ(msg.left, h_left);
+        ASSERT_EQ(msg.right, h_right);
+
+        res = aout_stream_read_cl_msg_input(&stream, &msg);
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
+
+        // Values should not have changed
+        ASSERT_EQ(msg.up, h_up);
+        ASSERT_EQ(msg.down, h_down);
+        ASSERT_EQ(msg.left, h_left);
+        ASSERT_EQ(msg.right, h_right);
+
+        PASS();
+}
+
 TEST stream_read_sv_msg_connection(void) {
         uint8_t data[] = { 32, 129, -32, 239, 12, 4, 9, 94, 49, 3 };
         aout_stream stream = {
@@ -390,11 +473,13 @@ TEST stream_write_sv_msg_type_then_read_sv_msg_type(void) {
 SUITE(test_messages) {
         RUN_TEST(stream_write_cl_msg_type);
         RUN_TEST(stream_write_sv_msg_type);
+        RUN_TEST(stream_write_cl_msg_input);
         RUN_TEST(stream_write_sv_msg_connection);
         RUN_TEST(stream_write_sv_msg_state);
 
         RUN_TEST(stream_read_cl_msg_type);
         RUN_TEST(stream_read_sv_msg_type);
+        RUN_TEST(stream_read_cl_msg_input);
         RUN_TEST(stream_read_sv_msg_connection);
         RUN_TEST(stream_read_sv_msg_state);
 
