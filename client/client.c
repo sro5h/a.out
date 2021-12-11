@@ -10,6 +10,10 @@ static void aout_client_on_connect(
                 aout_client* client,
                 ENetPeer* peer);
 
+static void aout_client_on_disconnect(
+                aout_client* client,
+                ENetPeer* peer);
+
 static void aout_client_on_receive(
                 aout_client* client,
                 ENetPeer* peer, // TODO: Maybe use peer_id or aout_connection
@@ -22,10 +26,6 @@ static void aout_client_on_receive_msg_connection(
 static void aout_client_on_receive_msg_state(
                 aout_client* client,
                 aout_stream* stream);
-
-static void aout_client_on_disconnect(
-                aout_client* client,
-                ENetPeer* peer);
 
 aout_client* aout_client_create(
                 aout_client_adapter adapter) {
@@ -124,6 +124,24 @@ static void aout_client_on_connect(
         }
 }
 
+static void aout_client_on_disconnect(
+                aout_client* client,
+                ENetPeer* peer) {
+        assert(client); assert(peer);
+
+        aout_connection* connection = &client->connection;
+        assert(connection->id != 0);
+
+        aout_logd("[0x%08x] disconnection", connection->id);
+
+        aout_client_adapter* adapter = &client->adapter;
+        if (adapter->on_disconnection) {
+                adapter->on_disconnection(client, adapter->context);
+        }
+
+        client->connection = (aout_connection) { 0 };
+}
+
 static void aout_client_on_receive(
                 aout_client* client,
                 ENetPeer* peer,
@@ -200,22 +218,4 @@ static void aout_client_on_receive_msg_state(
         if (adapter->on_msg_state) {
                 adapter->on_msg_state(client, &msg, adapter->context);
         }
-}
-
-static void aout_client_on_disconnect(
-                aout_client* client,
-                ENetPeer* peer) {
-        assert(client); assert(peer);
-
-        aout_connection* connection = &client->connection;
-        assert(connection->id != 0);
-
-        aout_logd("[0x%08x] disconnection", connection->id);
-
-        aout_client_adapter* adapter = &client->adapter;
-        if (adapter->on_disconnection) {
-                adapter->on_disconnection(client, adapter->context);
-        }
-
-        client->connection = (aout_connection) { 0 };
 }

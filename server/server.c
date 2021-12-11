@@ -9,14 +9,14 @@ static void aout_server_on_connect(
                 aout_server* server,
                 ENetPeer* peer);
 
+static void aout_server_on_disconnect(
+                aout_server* server,
+                ENetPeer* peer);
+
 static void aout_server_on_receive(
                 aout_server* server,
                 ENetPeer* peer,
                 ENetPacket* packet);
-
-static void aout_server_on_disconnect(
-                aout_server* server,
-                ENetPeer* peer);
 
 static aout_res aout_server_create_packet(
                 aout_sv_msg_type type,
@@ -237,17 +237,6 @@ static void aout_server_on_connect(
         }
 }
 
-static void aout_server_on_receive(
-                aout_server* server,
-                ENetPeer* peer,
-                ENetPacket* packet) {
-        assert(server); assert(peer); assert(packet);
-        assert(packet->data);
-
-        aout_connection const* connection = peer->data;
-        assert(connection->id == peer->connectID);
-}
-
 static void aout_server_on_disconnect(
                 aout_server* server,
                 ENetPeer* peer) {
@@ -266,6 +255,17 @@ static void aout_server_on_disconnect(
 
         *connection = (aout_connection) { 0 };
         peer->data = NULL;
+}
+
+static void aout_server_on_receive(
+                aout_server* server,
+                ENetPeer* peer,
+                ENetPacket* packet) {
+        assert(server); assert(peer); assert(packet);
+        assert(packet->data);
+
+        aout_connection const* connection = peer->data;
+        assert(connection->id == peer->connectID);
 }
 
 static aout_res aout_server_create_packet(
