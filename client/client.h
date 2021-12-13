@@ -8,9 +8,11 @@
 #include <common/result.h>
 
 typedef struct _ENetHost ENetHost;
+typedef struct _ENetPeer ENetPeer;
 
 typedef struct aout_client {
         ENetHost* host;
+        ENetPeer* peer;
         aout_connection connection;
         aout_client_adapter adapter;
 } aout_client;
@@ -33,6 +35,10 @@ aout_res aout_client_connect(
                 aout_client* client,
                 uint32_t ip,
                 uint16_t port);
+
+aout_res aout_client_send_msg_input(
+                aout_client* client,
+                aout_cl_msg_input* msg);
 
 aout_connection aout_client_get_connection(
                 aout_client const* client);

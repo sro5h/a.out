@@ -176,6 +176,18 @@ static void aout_application_update_fixed(
                 double delta_time) {
         assert(app);
         (void) delta_time;
+
+        // Send input
+        if (app->is_connected) {
+                aout_cl_msg_input msg = { 0 };
+                msg.up = glfwGetKey(app->window, GLFW_KEY_W) == GLFW_PRESS;
+                msg.down = glfwGetKey(app->window, GLFW_KEY_S) == GLFW_PRESS;
+                msg.left = glfwGetKey(app->window, GLFW_KEY_A) == GLFW_PRESS;
+                msg.right = glfwGetKey(app->window, GLFW_KEY_D) == GLFW_PRESS;
+
+                aout_client_send_msg_input(app->client, &msg);
+        }
+
         aout_client_update(app->client);
 }
 

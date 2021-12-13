@@ -27,6 +27,15 @@ static void aout_client_on_receive_msg_state(
                 aout_client* client,
                 aout_stream* stream);
 
+static aout_res aout_client_create_packet(
+                aout_cl_msg_type type,
+                size_t size,
+                ENetPacket** packet,
+                aout_stream* stream);
+
+static uint32_t aout_client_get_packet_flags(
+                aout_cl_msg_type type);
+
 aout_client* aout_client_create(
                 aout_client_adapter adapter) {
         aout_client* client = calloc(1, sizeof(*client));
@@ -99,6 +108,52 @@ aout_res aout_client_connect(
         return AOUT_OK;
 }
 
+aout_res aout_client_send_msg_input(
+                aout_client* client,
+                aout_cl_msg_input* msg) {
+        assert(client); assert(msg);
+        assert(client->host);
+        assert(client->peer);
+
+        ENetPacket* packet;
+        aout_stream stream;
+        aout_res res = aout_client_create_packet(
+                AOUT_CL_MSG_TYPE_INPUT,
+                sizeof(*msg),
+                &packet,
+                &stream
+        );
+
+        if (AOUT_IS_ERR(res)) {
+                aout_loge("could not write cl_msg_input header");
+                goto error;
+        }
+
+        res = aout_stream_write_cl_msg_input(&stream, msg);
+
+        if (AOUT_IS_ERR(res)) {
+                aout_loge("could not write cl_msg_input");
+                goto error;
+        }
+
+        // Resize the packet to the number of written bytes
+        enet_packet_resize(packet, aout_stream_get_count(&stream));
+
+        // Ownership of packet is transferred, if enet_peer_send succeeds!
+        if (enet_peer_send(client->peer, 0, packet) < 0) {
+                aout_loge("could not send cl_msg_input");
+                goto error;
+        }
+
+        return AOUT_OK;
+
+error:
+        assert(packet); assert(packet->referenceCount == 0);
+        enet_packet_destroy(packet);
+
+        return AOUT_ERR(AOUT_CLIENT_ERR);
+}
+
 aout_connection aout_client_get_connection(
                 aout_client const* client) {
         assert(client);
@@ -109,12 +164,14 @@ static void aout_client_on_connect(
                 aout_client* client,
                 ENetPeer* peer) {
         assert(client); assert(peer);
+        assert(client->peer == NULL);
 
         aout_connection* connection = &client->connection;
         assert(connection->id == 0);
 
         connection->id = peer->connectID;
         connection->peer_id = peer->outgoingPeerID;
+        client->peer = peer;
 
         aout_logd("[0x%08x] connection", connection->id);
 
@@ -128,6 +185,7 @@ static void aout_client_on_disconnect(
                 aout_client* client,
                 ENetPeer* peer) {
         assert(client); assert(peer);
+        assert(client->peer);
 
         aout_connection* connection = &client->connection;
         assert(connection->id != 0);
@@ -140,6 +198,7 @@ static void aout_client_on_disconnect(
         }
 
         client->connection = (aout_connection) { 0 };
+        client->peer = NULL;
 }
 
 static void aout_client_on_receive(
@@ -147,6 +206,7 @@ static void aout_client_on_receive(
                 ENetPeer* peer,
                 ENetPacket* packet) {
         assert(client); assert(peer); assert(packet);
+        assert(client->peer);
         assert(packet->data);
 
         aout_connection const* connection = &client->connection;
@@ -217,5 +277,39 @@ static void aout_client_on_receive_msg_state(
         aout_client_adapter* adapter = &client->adapter;
         if (adapter->on_msg_state) {
                 adapter->on_msg_state(client, &msg, adapter->context);
+        }
+}
+
+static aout_res aout_client_create_packet(
+                aout_cl_msg_type type,
+                size_t size,
+                ENetPacket** packet,
+                aout_stream* stream) {
+        assert(packet); assert(stream);
+
+        *packet = enet_packet_create(
+                NULL,
+                sizeof(AOUT_TYPE_CL_MSG_TYPE) + size,
+                aout_client_get_packet_flags(type)
+        );
+
+        assert(*packet);
+
+        *stream = (aout_stream) {
+                .data = (*packet)->data,
+                .data_size = (*packet)->dataLength
+        };
+
+        return aout_stream_write_cl_msg_type(stream, type);
+}
+
+static uint32_t aout_client_get_packet_flags(
+                aout_cl_msg_type type) {
+        switch (type) {
+        case AOUT_CL_MSG_TYPE_INPUT:
+                return ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT
+                        | ENET_PACKET_FLAG_UNSEQUENCED;
+        default:
+                return ENET_PACKET_FLAG_RELIABLE;
         }
 }

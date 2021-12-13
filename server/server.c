@@ -18,6 +18,11 @@ static void aout_server_on_receive(
                 ENetPeer* peer,
                 ENetPacket* packet);
 
+static void aout_server_on_receive_msg_input(
+                aout_server* server,
+                aout_connection const* connection,
+                aout_stream* stream);
+
 static aout_res aout_server_create_packet(
                 aout_sv_msg_type type,
                 size_t size,
@@ -144,7 +149,7 @@ aout_res aout_server_send_msg_connection(
         ENetPeer* peer = &server->host->peers[peer_id];
         // Ownership of packet is transferred, if enet_peer_send succeeds!
         if (enet_peer_send(peer, 0, packet) < 0) {
-                aout_loge("could not send packet");
+                aout_loge("could not send sv_msg_connection");
                 goto error;
         }
 
@@ -194,7 +199,7 @@ aout_res aout_server_send_msg_state(
 
         ENetPeer* peer = &server->host->peers[peer_id];
         if (enet_peer_send(peer, 0, packet) < 0) {
-                aout_loge("could not send packet");
+                aout_loge("could not send sv_msg_state");
                 goto error;
         }
 
@@ -266,6 +271,49 @@ static void aout_server_on_receive(
 
         aout_connection const* connection = peer->data;
         assert(connection->id == peer->connectID);
+
+        aout_logd("[0x%08x] packet received", connection->id);
+
+        aout_stream stream = {
+                .data = packet->data,
+                .data_size = packet->dataLength
+        };
+
+        aout_cl_msg_type type;
+        if (AOUT_IS_ERR(aout_stream_read_cl_msg_type(&stream, &type))) {
+                aout_loge("could not read cl_msg_type");
+                return;
+        }
+
+        switch (type) {
+        case AOUT_CL_MSG_TYPE_INPUT:
+                aout_server_on_receive_msg_input(server, connection, &stream);
+                break;
+        default:
+                aout_loge("unknown cl_msg_type");
+                break;
+        }
+}
+
+static void aout_server_on_receive_msg_input(
+                aout_server* server,
+                aout_connection const* connection,
+                aout_stream* stream) {
+        assert(server); assert(connection); assert(stream);
+
+        aout_cl_msg_input msg;
+        if (AOUT_IS_ERR(aout_stream_read_cl_msg_input(stream, &msg))) {
+                aout_loge("could not read cl_msg_input");
+                return;
+        }
+
+        aout_logd("[0x%08x] cl_msg_input received: ", connection->id);
+
+        aout_server_adapter* adapter = &server->adapter;
+        if (adapter->on_msg_input) {
+                adapter->on_msg_input(server, *connection, &msg,
+                                adapter->context);
+        }
 }
 
 static aout_res aout_server_create_packet(
@@ -296,6 +344,9 @@ static uint32_t aout_server_get_packet_flags(
         switch (type) {
         case AOUT_SV_MSG_TYPE_CONNECTION:
                 return ENET_PACKET_FLAG_RELIABLE;
+        case AOUT_SV_MSG_TYPE_STATE:
+                return ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT
+                        | ENET_PACKET_FLAG_UNSEQUENCED;
         default:
                 return ENET_PACKET_FLAG_RELIABLE; // TODO: Change?
         }
