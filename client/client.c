@@ -38,50 +38,50 @@ static uint32_t aout_client_get_packet_flags(
 
 aout_client* aout_client_create(
                 aout_client_adapter adapter) {
-        aout_client* client = calloc(1, sizeof(*client));
+        aout_client* self = calloc(1, sizeof(*self));
 
-        if (!client) {
+        if (!self) {
                 return NULL;
         }
 
-        client->connection = (aout_connection) { 0 };
-        client->adapter = adapter;
+        self->connection = (aout_connection) { 0 };
+        self->adapter = adapter;
 
-        client->host = enet_host_create(NULL, 1, 2, 0, 0);
+        self->host = enet_host_create(NULL, 1, 2, 0, 0);
 
-        if (!client->host) {
+        if (!self->host) {
                 // TODO: Could be changed to mirror application error handling
-                free(client);
+                free(self);
                 return NULL;
         }
 
-        return client;
+        return self;
 }
 
 void aout_client_destroy(
-                aout_client* client) {
-        if (client) {
-                enet_host_destroy(client->host);
-                free(client);
+                aout_client* self) {
+        if (self) {
+                enet_host_destroy(self->host);
+                free(self);
         }
 }
 
 void aout_client_update(
-                aout_client* client) {
-        assert(client);
+                aout_client* self) {
+        assert(self);
 
         ENetEvent event;
-        while (enet_host_service(client->host, &event, 0) > 0) {
+        while (enet_host_service(self->host, &event, 0) > 0) {
                 switch (event.type) {
                 case ENET_EVENT_TYPE_CONNECT:
-                        aout_client_on_connect(client, event.peer);
+                        aout_client_on_connect(self, event.peer);
                         break;
                 case ENET_EVENT_TYPE_RECEIVE:
-                        aout_client_on_receive(client, event.peer, event.packet);
+                        aout_client_on_receive(self, event.peer, event.packet);
                         enet_packet_destroy(event.packet);
                         break;
                 case ENET_EVENT_TYPE_DISCONNECT:
-                        aout_client_on_disconnect(client, event.peer);
+                        aout_client_on_disconnect(self, event.peer);
                         break;
                 case ENET_EVENT_TYPE_NONE:
                         break;
@@ -90,16 +90,16 @@ void aout_client_update(
 }
 
 aout_res aout_client_connect(
-                aout_client* client,
+                aout_client* self,
                 uint32_t ip,
                 uint16_t port) {
-        assert(client);
+        assert(self);
 
         ENetAddress address;
         address.host = aout_hton_u32(ip);
         address.port = port;
 
-        ENetPeer* peer = enet_host_connect(client->host, &address, 2, 0);
+        ENetPeer* peer = enet_host_connect(self->host, &address, 2, 0);
 
         if (!peer) {
                 return AOUT_ERR(AOUT_CLIENT_ERR);
@@ -109,11 +109,11 @@ aout_res aout_client_connect(
 }
 
 aout_res aout_client_send_msg_input(
-                aout_client* client,
+                aout_client* self,
                 aout_cl_msg_input* msg) {
-        assert(client); assert(msg);
-        assert(client->host);
-        assert(client->peer);
+        assert(self); assert(msg);
+        assert(self->host);
+        assert(self->peer);
 
         ENetPacket* packet;
         aout_stream stream;
@@ -140,7 +140,7 @@ aout_res aout_client_send_msg_input(
         enet_packet_resize(packet, aout_stream_get_count(&stream));
 
         // Ownership of packet is transferred, if enet_peer_send succeeds!
-        if (enet_peer_send(client->peer, 0, packet) < 0) {
+        if (enet_peer_send(self->peer, 0, packet) < 0) {
                 aout_loge("could not send cl_msg_input");
                 goto error;
         }
@@ -155,61 +155,61 @@ error:
 }
 
 aout_connection aout_client_get_connection(
-                aout_client const* client) {
-        assert(client);
-        return client->connection;
+                aout_client const* self) {
+        assert(self);
+        return self->connection;
 }
 
 static void aout_client_on_connect(
-                aout_client* client,
+                aout_client* self,
                 ENetPeer* peer) {
-        assert(client); assert(peer);
-        assert(client->peer == NULL);
+        assert(self); assert(peer);
+        assert(self->peer == NULL);
 
-        aout_connection* connection = &client->connection;
+        aout_connection* connection = &self->connection;
         assert(connection->id == 0);
 
         connection->id = peer->connectID;
         connection->peer_id = peer->outgoingPeerID;
-        client->peer = peer;
+        self->peer = peer;
 
         aout_logd("[0x%08x] connection", connection->id);
 
-        aout_client_adapter* adapter = &client->adapter;
+        aout_client_adapter* adapter = &self->adapter;
         if (adapter->on_connection) {
-                adapter->on_connection(client, adapter->context);
+                adapter->on_connection(self, adapter->context);
         }
 }
 
 static void aout_client_on_disconnect(
-                aout_client* client,
+                aout_client* self,
                 ENetPeer* peer) {
-        assert(client); assert(peer);
-        assert(client->peer);
+        assert(self); assert(peer);
+        assert(self->peer);
 
-        aout_connection* connection = &client->connection;
+        aout_connection* connection = &self->connection;
         assert(connection->id != 0);
 
         aout_logd("[0x%08x] disconnection", connection->id);
 
-        aout_client_adapter* adapter = &client->adapter;
+        aout_client_adapter* adapter = &self->adapter;
         if (adapter->on_disconnection) {
-                adapter->on_disconnection(client, adapter->context);
+                adapter->on_disconnection(self, adapter->context);
         }
 
-        client->connection = (aout_connection) { 0 };
-        client->peer = NULL;
+        self->connection = (aout_connection) { 0 };
+        self->peer = NULL;
 }
 
 static void aout_client_on_receive(
-                aout_client* client,
+                aout_client* self,
                 ENetPeer* peer,
                 ENetPacket* packet) {
-        assert(client); assert(peer); assert(packet);
-        assert(client->peer);
+        assert(self); assert(peer); assert(packet);
+        assert(self->peer);
         assert(packet->data);
 
-        aout_connection const* connection = &client->connection;
+        aout_connection const* connection = &self->connection;
         assert(connection->id == peer->connectID);
 
         // TODO: Remove below
@@ -228,10 +228,10 @@ static void aout_client_on_receive(
 
         switch (type) {
         case AOUT_SV_MSG_TYPE_CONNECTION:
-                aout_client_on_receive_msg_connection(client, &stream);
+                aout_client_on_receive_msg_connection(self, &stream);
                 break;
         case AOUT_SV_MSG_TYPE_STATE:
-                aout_client_on_receive_msg_state(client, &stream);
+                aout_client_on_receive_msg_state(self, &stream);
                 break;
         default:
                 aout_loge("unknown sv_msg_type");
@@ -240,9 +240,9 @@ static void aout_client_on_receive(
 }
 
 static void aout_client_on_receive_msg_connection(
-                aout_client* client,
+                aout_client* self,
                 aout_stream* stream) {
-        assert(client); assert(stream);
+        assert(self); assert(stream);
 
         aout_sv_msg_connection msg;
         if (AOUT_IS_ERR(aout_stream_read_sv_msg_connection(stream, &msg))) {
@@ -251,19 +251,19 @@ static void aout_client_on_receive_msg_connection(
         }
 
         aout_logd("[0x%08x] sv_msg_connection received: ",
-                        client->connection.id);
+                        self->connection.id);
         aout_logd("{ .id = 0x%x, .peer_id = 0x%x }", msg.id, msg.peer_id);
 
-        aout_client_adapter* adapter = &client->adapter;
+        aout_client_adapter* adapter = &self->adapter;
         if (adapter->on_msg_connection) {
-                adapter->on_msg_connection(client, &msg, adapter->context);
+                adapter->on_msg_connection(self, &msg, adapter->context);
         }
 }
 
 static void aout_client_on_receive_msg_state(
-                aout_client* client,
+                aout_client* self,
                 aout_stream* stream) {
-        assert(client); assert(stream);
+        assert(self); assert(stream);
 
         aout_sv_msg_state msg;
         if (AOUT_IS_ERR(aout_stream_read_sv_msg_state(stream, &msg))) {
@@ -271,12 +271,12 @@ static void aout_client_on_receive_msg_state(
                 return;
         }
 
-        aout_logd("[0x%08x] sv_msg_state received: ", client->connection.id);
+        aout_logd("[0x%08x] sv_msg_state received: ", self->connection.id);
         aout_logd("{ .position = { %f, %f } }", msg.position.x, msg.position.y);
 
-        aout_client_adapter* adapter = &client->adapter;
+        aout_client_adapter* adapter = &self->adapter;
         if (adapter->on_msg_state) {
-                adapter->on_msg_state(client, &msg, adapter->context);
+                adapter->on_msg_state(self, &msg, adapter->context);
         }
 }
 

@@ -12,45 +12,45 @@ struct aout_renderer {
 
 aout_renderer* aout_renderer_create(
                 void) {
-        aout_renderer* renderer = calloc(1, sizeof(*renderer));
+        aout_renderer* self = calloc(1, sizeof(*self));
 
-        if (!renderer) {
+        if (!self) {
                 return NULL;
         }
 
         sg_setup(&(sg_desc) { 0 });
 
-        renderer->pass_action = (sg_pass_action) {
+        self->pass_action = (sg_pass_action) {
                 .colors[0] = {
                         .action = SG_ACTION_CLEAR,
                         .value = { 0 }
                 }
         };
 
-        aout_renderer_set_view(renderer, 640, 360);
+        aout_renderer_set_view(self, 640, 360);
 
-        return renderer;
+        return self;
 }
 
 void aout_renderer_destroy(
-                aout_renderer* renderer) {
-        if (renderer) {
+                aout_renderer* self) {
+        if (self) {
                 sg_shutdown();
-                free(renderer);
+                free(self);
         }
 }
 
 void aout_renderer_set_view(
-                aout_renderer* renderer,
+                aout_renderer* self,
                 size_t width,
                 size_t height) {
-        assert(renderer);
+        assert(self);
 
-        renderer->view_width = width;
-        renderer->view_height = height;
+        self->view_width = width;
+        self->view_height = height;
 
-        glm_mat4_identity(renderer->view_matrix);
-        glm_scale(renderer->view_matrix, (vec3) {
+        glm_mat4_identity(self->view_matrix);
+        glm_scale(self->view_matrix, (vec3) {
                 1.0f / width,
                 1.0f / height,
                 1
@@ -58,27 +58,27 @@ void aout_renderer_set_view(
 }
 
 void aout_renderer_begin(
-                aout_renderer* renderer,
+                aout_renderer* self,
                 size_t width,
                 size_t height) {
-        assert(renderer);
-        sg_begin_default_pass(&renderer->pass_action, width, height);
+        assert(self);
+        sg_begin_default_pass(&self->pass_action, width, height);
 }
 
 void aout_renderer_end(
-                aout_renderer* renderer) {
-        assert(renderer);
-        (void) renderer;
+                aout_renderer* self) {
+        assert(self);
+        (void) self;
 
         sg_end_pass();
         sg_commit();
 }
 
 void aout_renderer_render_mesh(
-                aout_renderer* renderer,
+                aout_renderer* self,
                 aout_mesh const* mesh,
                 aout_transform const* transform) {
-        assert(renderer); assert(mesh); assert(transform);
+        assert(self); assert(mesh); assert(transform);
 
         sg_bindings bindings = {
                 .vertex_buffers[0] = mesh->vertex_buffer,
@@ -94,7 +94,7 @@ void aout_renderer_render_mesh(
         // TODO: Rotation and scale
 
         mat4 mvp = GLM_MAT4_IDENTITY_INIT;
-        glm_mat4_mul(renderer->view_matrix, model_matrix, mvp);
+        glm_mat4_mul(self->view_matrix, model_matrix, mvp);
 
         sg_apply_pipeline(mesh->pipeline);
         sg_apply_bindings(&bindings);

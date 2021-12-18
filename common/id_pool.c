@@ -46,93 +46,93 @@ aout_id_pool* aout_id_pool_create(
                 size_t size) {
         assert(size <= AOUT_ID_POOL_MAX_SIZE);
 
-        aout_id_pool* pool = calloc(1, sizeof(*pool));
-        assert(pool);
+        aout_id_pool* self = calloc(1, sizeof(*self));
+        assert(self);
 
-        pool->size = size;
-        pool->unused_indices_top = 0;
+        self->size = size;
+        self->unused_indices_top = 0;
 
         // Slots must be zero
-        pool->slots = calloc(pool->size, sizeof(*pool->slots));
-        assert(pool->slots);
+        self->slots = calloc(self->size, sizeof(*self->slots));
+        assert(self->slots);
 
         // TODO: Maybe also change to calloc?
-        pool->unused_indices = malloc(sizeof(size_t) * size);
-        assert(pool->unused_indices);
+        self->unused_indices = malloc(sizeof(size_t) * size);
+        assert(self->unused_indices);
 
         // Populate unused indices with [size - 1 .. 0]
-        for (size_t i = 1; i <= pool->size; ++i) {
-                pool->unused_indices[pool->unused_indices_top] = pool->size - i;
-                ++pool->unused_indices_top;
+        for (size_t i = 1; i <= self->size; ++i) {
+                self->unused_indices[self->unused_indices_top] = self->size - i;
+                ++self->unused_indices_top;
         }
 
-        return pool;
+        return self;
 }
 
 void aout_id_pool_destroy(
-                aout_id_pool* pool) {
-        if (pool) {
-                free(pool->unused_indices);
-                free(pool->slots);
-                free(pool);
+                aout_id_pool* self) {
+        if (self) {
+                free(self->unused_indices);
+                free(self->slots);
+                free(self);
         }
 }
 
 aout_id aout_id_pool_id_create(
-                aout_id_pool* pool) {
-        assert(pool); assert(pool->unused_indices); assert(pool->slots);
-        assert(pool->unused_indices_top <= pool->size);
+                aout_id_pool* self) {
+        assert(self); assert(self->unused_indices); assert(self->slots);
+        assert(self->unused_indices_top <= self->size);
 
-        if (pool->unused_indices_top == 0) {
+        if (self->unused_indices_top == 0) {
                 return AOUT_ID_POOL_INVALID_ID;
         }
 
-        --pool->unused_indices_top;
-        size_t index = pool->unused_indices[pool->unused_indices_top];
-        assert(index < pool->size);
+        --self->unused_indices_top;
+        size_t index = self->unused_indices[self->unused_indices_top];
+        assert(index < self->size);
 
-        aout_slot* slot = &pool->slots[index];
+        aout_slot* slot = &self->slots[index];
         slot->in_use = true;
         return aout_id_make(index, slot->generation);
 }
 
 void aout_id_pool_id_destroy(
-                aout_id_pool* pool,
+                aout_id_pool* self,
                 aout_id id) {
-        assert(pool); assert(pool->unused_indices); assert(pool->slots);
+        assert(self); assert(self->unused_indices); assert(self->slots);
         assert(id != AOUT_ID_POOL_INVALID_ID);
-        assert(pool->unused_indices_top < pool->size);
+        assert(self->unused_indices_top < self->size);
 
         size_t index = aout_id_index(id);
-        assert(index < pool->size);
+        assert(index < self->size);
 
         // Protect against double free
         // TODO: Only do this in debug mode
-        assert(aout_id_pool_id_is_valid(pool, id));
-        for (size_t i = 0; i < pool->unused_indices_top; ++i) {
-                assert(pool->unused_indices[i] != index);
+        assert(aout_id_pool_id_is_valid(self, id));
+        for (size_t i = 0; i < self->unused_indices_top; ++i) {
+                assert(self->unused_indices[i] != index);
         }
 
-        pool->unused_indices[pool->unused_indices_top] = index;
-        ++pool->unused_indices_top;
+        self->unused_indices[self->unused_indices_top] = index;
+        ++self->unused_indices_top;
 
-        aout_slot* slot = &pool->slots[index];
+        aout_slot* slot = &self->slots[index];
         ++slot->generation;
         slot->in_use = false;
 }
 
 bool aout_id_pool_id_is_valid(
-                aout_id_pool const* pool,
+                aout_id_pool const* self,
                 aout_id id) {
-        assert(pool); assert(pool->slots);
+        assert(self); assert(self->slots);
 
         if (id == AOUT_ID_POOL_INVALID_ID) {
                 return false;
         }
 
         size_t index = aout_id_index(id);
-        assert(index < pool->size);
+        assert(index < self->size);
 
-        aout_slot* slot = &pool->slots[index];
+        aout_slot* slot = &self->slots[index];
         return slot->in_use && slot->generation == aout_id_generation(id);
 }

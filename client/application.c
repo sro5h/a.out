@@ -37,64 +37,64 @@ static void on_sigint(
 aout_application* aout_application_create(
                 //aout_application_desc* desc
                 void) {
-        aout_application* app = calloc(1, sizeof(*app));
+        aout_application* self = calloc(1, sizeof(*self));
 
-        if (!app) {
+        if (!self) {
                 return NULL;
         }
 
-        app->is_running = true;
-        app->is_connected = false;
-        app->time_step = 1.0 / 64;
-        app->sigint_raised = 0;
+        self->is_running = true;
+        self->is_connected = false;
+        self->time_step = 1.0 / 64;
+        self->sigint_raised = 0;
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-        app->window = glfwCreateWindow(640, 480, "client", NULL, NULL);
+        self->window = glfwCreateWindow(640, 480, "client", NULL, NULL);
 
-        if (!app->window) {
+        if (!self->window) {
                 aout_loge("could not create window");
                 goto error;
         }
 
-        glfwSetWindowPos(app->window, 0, 0);
-        glfwMakeContextCurrent(app->window);
+        glfwSetWindowPos(self->window, 0, 0);
+        glfwMakeContextCurrent(self->window);
         glfwSwapInterval(1);
 
-        app->renderer = aout_renderer_create();
+        self->renderer = aout_renderer_create();
 
-        if (!app->renderer) {
+        if (!self->renderer) {
                 aout_loge("could not create renderer");
                 goto error;
         }
 
-        aout_renderer_set_view(app->renderer, 640, 480);
-        app->player_mesh = aout_player_mesh_create();
+        aout_renderer_set_view(self->renderer, 640, 480);
+        self->player_mesh = aout_player_mesh_create();
 
-        app->client = aout_client_create((aout_client_adapter) {
+        self->client = aout_client_create((aout_client_adapter) {
                 .on_connection = aout_application_on_connection,
                 .on_disconnection = aout_application_on_disconnection,
                 .on_msg_state = aout_application_on_msg_state,
-                .context = app
+                .context = self
         });
 
-        if (!app->client) {
+        if (!self->client) {
                 aout_loge("could not create client");
                 goto error;
         }
 
         // Move somewhere else
-        if (AOUT_IS_ERR(aout_client_connect(app->client, 0x7f000001, 42424))) {
+        if (AOUT_IS_ERR(aout_client_connect(self->client, 0x7f000001, 42424))) {
                 aout_loge("could not connect to foreign host");
                 goto error;
         }
 
         aout_res res = aout_on_sigint((aout_sig_handler) {
                 .callback = on_sigint,
-                .context = app
+                .context = self
         });
 
         if (AOUT_IS_ERR(res)) {
@@ -102,42 +102,42 @@ aout_application* aout_application_create(
                 goto error;
         }
 
-        return app;
+        return self;
 
         // As all pointers are zero initialised, simply call
         // aout_application_destroy to release all allocated resources.
         // NULL pointers will be ignored.
 error:
-        aout_application_destroy(app);
+        aout_application_destroy(self);
         return NULL;
 }
 
 void aout_application_destroy(
-                aout_application* app) {
-        if (!app) {
+                aout_application* self) {
+        if (!self) {
                 return;
         }
 
         // NULL is safely handled by *_destroy
-        //assert(app->window); assert(app->client);
+        //assert(self->window); assert(self->client);
 
-        aout_client_destroy(app->client);
-        aout_renderer_destroy(app->renderer);
-        glfwDestroyWindow(app->window);
-        free(app);
+        aout_client_destroy(self->client);
+        aout_renderer_destroy(self->renderer);
+        glfwDestroyWindow(self->window);
+        free(self);
 }
 
 aout_res aout_application_run(
-                aout_application* app) {
-        assert(app);
+                aout_application* self) {
+        assert(self);
 
         uint64_t last_time = stm_now();
         double accumulator = 0.0;
 
-        while (aout_application_is_running(app)) {
-                if (glfwWindowShouldClose(app->window) || app->sigint_raised) {
-                        if (app->sigint_raised) { printf("\n"); } // CTRL-C
-                        aout_application_stop(app);
+        while (aout_application_is_running(self)) {
+                if (glfwWindowShouldClose(self->window) || self->sigint_raised) {
+                        if (self->sigint_raised) { printf("\n"); } // CTRL-C
+                        aout_application_stop(self);
                         // TODO: Maybe move check to end of loop
                         break;
                 }
@@ -146,94 +146,94 @@ aout_res aout_application_run(
                 const double delta_time = stm_sec(stm_diff(now, last_time));
                 last_time = now;
 
-                const double time_step = app->time_step;
+                const double time_step = self->time_step;
                 for (accumulator += delta_time; accumulator > time_step;
                                 accumulator -= time_step) {
                         glfwPollEvents();
-                        aout_application_update_fixed(app, time_step);
+                        aout_application_update_fixed(self, time_step);
                 }
 
-                aout_application_update(app, delta_time);
+                aout_application_update(self, delta_time);
         }
 
         return AOUT_OK;
 }
 
 void aout_application_stop(
-                aout_application* app) {
-        assert(app);
-        app->is_running = false;
+                aout_application* self) {
+        assert(self);
+        self->is_running = false;
 }
 
 bool aout_application_is_running(
-                aout_application* app) {
-        assert(app);
-        return app->is_running;
+                aout_application* self) {
+        assert(self);
+        return self->is_running;
 }
 
 static void aout_application_update_fixed(
-                aout_application* app,
+                aout_application* self,
                 double delta_time) {
-        assert(app);
+        assert(self);
         (void) delta_time;
 
         // Send input
-        if (app->is_connected) {
+        if (self->is_connected) {
                 aout_cl_msg_input msg = { 0 };
-                msg.up = glfwGetKey(app->window, GLFW_KEY_W) == GLFW_PRESS;
-                msg.down = glfwGetKey(app->window, GLFW_KEY_S) == GLFW_PRESS;
-                msg.left = glfwGetKey(app->window, GLFW_KEY_A) == GLFW_PRESS;
-                msg.right = glfwGetKey(app->window, GLFW_KEY_D) == GLFW_PRESS;
+                msg.up = glfwGetKey(self->window, GLFW_KEY_W) == GLFW_PRESS;
+                msg.down = glfwGetKey(self->window, GLFW_KEY_S) == GLFW_PRESS;
+                msg.left = glfwGetKey(self->window, GLFW_KEY_A) == GLFW_PRESS;
+                msg.right = glfwGetKey(self->window, GLFW_KEY_D) == GLFW_PRESS;
 
-                aout_client_send_msg_input(app->client, &msg);
+                aout_client_send_msg_input(self->client, &msg);
         }
 
-        aout_client_update(app->client);
+        aout_client_update(self->client);
 }
 
 static void aout_application_update(
-                aout_application* app,
+                aout_application* self,
                 double delta_time) {
-        assert(app);
+        assert(self);
         (void) delta_time;
 
         int width, height;
-        glfwGetFramebufferSize(app->window, &width, &height);
+        glfwGetFramebufferSize(self->window, &width, &height);
         assert(width > 0); assert(height > 0);
 
-        aout_renderer_begin(app->renderer, width, height);
+        aout_renderer_begin(self->renderer, width, height);
 
         aout_renderer_render_mesh(
-                app->renderer,
-                &app->player_mesh,
-                &app->player_transform
+                self->renderer,
+                &self->player_mesh,
+                &self->player_transform
         );
 
-        aout_renderer_end(app->renderer);
+        aout_renderer_end(self->renderer);
 
-        glfwSwapBuffers(app->window);
+        glfwSwapBuffers(self->window);
 }
 
 static void aout_application_on_connection(
                 aout_client* client,
                 void* context) {
         assert(client); assert(context);
-        aout_application* app = context;
+        aout_application* self = context;
 
-        assert(!app->is_connected);
+        assert(!self->is_connected);
 
-        app->is_connected = true;
+        self->is_connected = true;
 }
 
 static void aout_application_on_disconnection(
                 aout_client* client,
                 void* context) {
         assert(client); assert(context);
-        aout_application* app = context;
+        aout_application* self = context;
 
-        assert(app->is_connected);
+        assert(self->is_connected);
 
-        app->is_connected = false;
+        self->is_connected = false;
 }
 
 static void aout_application_on_msg_state(
@@ -241,15 +241,15 @@ static void aout_application_on_msg_state(
                 aout_sv_msg_state* msg,
                 void* context) {
         assert(client); assert(msg); assert(context);
-        aout_application* app = context;
+        aout_application* self = context;
 
-        assert(app->is_connected);
+        assert(self->is_connected);
 
-        app->player_transform.position = msg->position;
+        self->player_transform.position = msg->position;
 }
 
 static void on_sigint(
                 void* context) {
-        aout_application* app = (aout_application*) context;
-        app->sigint_raised = 1;
+        aout_application* self = context;
+        self->sigint_raised = 1;
 }
