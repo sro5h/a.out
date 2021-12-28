@@ -18,6 +18,7 @@ client_dependencies = [
 ]
 
 if build_machine.system() == 'linux'
+  client_dependencies += meson.get_compiler('c').find_library('m')
   client_dependencies += dependency('threads')
   client_dependencies += dependency('gl')
   client_dependencies += dependency('glu')

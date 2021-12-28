@@ -30,6 +30,12 @@ static void aout_application_on_disconnection(
                 aout_connection connection,
                 void* context);
 
+static void aout_application_on_msg_input(
+                aout_server* server,
+                aout_connection connection,
+                aout_cl_msg_input* msg,
+                void* context);
+
 static void on_sigint(
                 void* context);
 
@@ -60,6 +66,7 @@ aout_application* aout_application_create(
         self->server = aout_server_create((aout_server_adapter) {
                 .on_connection = aout_application_on_connection,
                 .on_disconnection = aout_application_on_disconnection,
+                .on_msg_input = aout_application_on_msg_input,
                 .context = self
         }, AOUT_SERVER_MAX_CONNECTIONS);
 
@@ -214,6 +221,39 @@ static void aout_application_on_disconnection(
         // cpSpaceStep.
         aout_body_free(body);
         self->bodies[connection.peer_id] = NULL;
+}
+
+static void aout_application_on_msg_input(
+                aout_server* server,
+                aout_connection connection,
+                aout_cl_msg_input* msg,
+                void* context) {
+        assert(server); assert(msg); assert(context);
+        (void) connection;
+        aout_application* self = context;
+
+        assert(self->bodies[0]);
+
+        cpVect direction = cpvzero;
+
+        if (msg->right) {
+                direction.x += 1;
+        }
+        if (msg->left) {
+                direction.x -= 1;
+        }
+        if (msg->up) {
+                direction.y += 1;
+        }
+        if (msg->down) {
+                direction.y -= 1;
+        }
+
+        cpVect desired = cpvmult(cpvnormalize(direction), 250);
+        cpVect change = cpvsub(desired, cpBodyGetVelocity(self->bodies[0]));
+        float32_t mass = cpBodyGetMass(self->bodies[0]);
+        cpVect force = cpvmult(cpvmult(change, mass), 64.f);
+        cpBodySetForce(self->bodies[0], force);
 }
 
 static void on_sigint(

@@ -18,6 +18,7 @@ typedef enum aout_sv_msg_type {
         AOUT_SV_MSG_TYPE_STATE,
 } aout_sv_msg_type;
 
+// TODO: Rename to *_command
 typedef struct aout_cl_msg_input {
         uint8_t up, down, left, right;
 } aout_cl_msg_input;

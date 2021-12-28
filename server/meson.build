@@ -15,6 +15,7 @@ server_dependencies = [
 ]
 
 if build_machine.system() == 'linux'
+  server_dependencies += meson.get_compiler('c').find_library('m')
   server_dependencies += dependency('threads')
 endif
 
