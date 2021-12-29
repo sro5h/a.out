@@ -13,11 +13,11 @@
 #define CLIENT_BODY_RADIUS 10
 
 static void aout_application_update_fixed(
-                aout_application* app,
+                aout_application* self,
                 double delta_time);
 
 static void aout_application_update(
-                aout_application* app,
+                aout_application* self,
                 double delta_time);
 
 static void aout_application_on_connection(

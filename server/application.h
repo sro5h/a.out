@@ -28,15 +28,15 @@ typedef enum aout_application_res {
 aout_application* aout_application_create(
                 void);
 void aout_application_destroy(
-                aout_application* app);
+                aout_application* self);
 
 aout_res aout_application_run(
-                aout_application* app);
+                aout_application* self);
 
 void aout_application_stop(
-                aout_application* app);
+                aout_application* self);
 
 bool aout_application_is_running(
-                aout_application* app);
+                aout_application* self);
 
 #endif

@@ -27,17 +27,17 @@ aout_id_pool* aout_id_pool_create(
                 size_t size);
 
 void aout_id_pool_destroy(
-                aout_id_pool* pool);
+                aout_id_pool* self);
 
 aout_id aout_id_pool_id_create(
-                aout_id_pool* pool);
+                aout_id_pool* self);
 
 void aout_id_pool_id_destroy(
-                aout_id_pool* pool,
+                aout_id_pool* self,
                 aout_id id);
 
 bool aout_id_pool_id_is_valid(
-                aout_id_pool const* pool,
+                aout_id_pool const* self,
                 aout_id id);
 
 #endif

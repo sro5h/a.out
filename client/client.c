@@ -7,24 +7,24 @@
 #include <enet/enet.h>
 
 static void aout_client_on_connect(
-                aout_client* client,
+                aout_client* self,
                 ENetPeer* peer);
 
 static void aout_client_on_disconnect(
-                aout_client* client,
+                aout_client* self,
                 ENetPeer* peer);
 
 static void aout_client_on_receive(
-                aout_client* client,
+                aout_client* self,
                 ENetPeer* peer, // TODO: Maybe use peer_id or aout_connection
                 ENetPacket* packet);
 
 static void aout_client_on_receive_msg_connection(
-                aout_client* client,
+                aout_client* self,
                 aout_stream* stream);
 
 static void aout_client_on_receive_msg_state(
-                aout_client* client,
+                aout_client* self,
                 aout_stream* stream);
 
 static aout_res aout_client_create_packet(

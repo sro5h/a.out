@@ -6,20 +6,20 @@
 #include <string.h>
 
 static void aout_server_on_connect(
-                aout_server* server,
+                aout_server* self,
                 ENetPeer* peer);
 
 static void aout_server_on_disconnect(
-                aout_server* server,
+                aout_server* self,
                 ENetPeer* peer);
 
 static void aout_server_on_receive(
-                aout_server* server,
+                aout_server* self,
                 ENetPeer* peer,
                 ENetPacket* packet);
 
 static void aout_server_on_receive_msg_input(
-                aout_server* server,
+                aout_server* self,
                 aout_connection const* connection,
                 aout_stream* stream);
 

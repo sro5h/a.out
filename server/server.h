@@ -25,18 +25,18 @@ aout_server* aout_server_create(
                 size_t connection_count);
 
 void aout_server_destroy(
-                aout_server* server);
+                aout_server* self);
 
 void aout_server_update(
-                aout_server* server);
+                aout_server* self);
 
 aout_res aout_server_send_msg_connection(
-                aout_server* server,
+                aout_server* self,
                 uint16_t peer_id,
                 aout_sv_msg_connection* msg);
 
 aout_res aout_server_send_msg_state(
-                aout_server* server,
+                aout_server* self,
                 uint16_t peer_id,
                 aout_sv_msg_state* msg);
 
