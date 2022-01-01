@@ -4,19 +4,26 @@
 #include "client.h"
 #include "renderer.h"
 
+#include <common/tick.h>
+
 #include <signal.h>
 
 typedef struct GLFWwindow GLFWwindow;
 
 typedef struct aout_application {
-        aout_client* client;
+        // Window and graphics
         GLFWwindow* window;
         aout_renderer* renderer;
-        bool is_running;
-        bool is_connected;
-        double time_step; // Maybe use ticks_per_second instead
-        sig_atomic_t sigint_raised;
         aout_mesh player_mesh;
+        bool is_running;
+        // Networking
+        aout_client* client;
+        bool is_connected;
+        // Timing
+        double time_step; // Maybe use ticks_per_second instead
+        aout_tick tick;
+        // Other
+        sig_atomic_t sigint_raised;
         aout_transform player_transform;
 } aout_application;
 

@@ -142,14 +142,14 @@ aout_res aout_application_run(
                         break;
                 }
 
-                const uint64_t now = stm_now();
-                const double delta_time = stm_sec(stm_diff(now, last_time));
+                uint64_t  const now = stm_now();
+                float64_t const delta_time = stm_sec(stm_diff(now, last_time));
                 last_time = now;
 
-                const double time_step = self->time_step;
+                float64_t const time_step = self->time_step;
                 for (accumulator += delta_time; accumulator > time_step;
                                 accumulator -= time_step) {
-                        glfwPollEvents();
+                        aout_tick_increment(&self->tick);
                         aout_application_update_fixed(self, time_step);
                 }
 
@@ -176,6 +176,10 @@ static void aout_application_update_fixed(
                 double delta_time) {
         assert(self);
         (void) delta_time;
+
+        glfwPollEvents();
+
+        if (!aout_tick_filter_rate(&self->tick, 2)) { return; }
 
         // Send input
         if (self->is_connected) {

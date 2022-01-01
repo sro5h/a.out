@@ -2,6 +2,7 @@
 #define SERVER_APPLICATION_H
 
 #include "server.h"
+#include <common/tick.h>
 #include <signal.h>
 
 // TODO: Move to application.c and convert to static const
@@ -11,12 +12,17 @@ typedef struct cpBody cpBody;
 typedef struct cpSpace cpSpace;
 
 typedef struct aout_application {
-        aout_server* server;
+        // Physics
         cpSpace* space;
         // TODO: Allocate on creation
         cpBody* bodies[AOUT_SERVER_MAX_CONNECTIONS];
-        bool is_running;
+        // Networking
+        aout_server* server;
+        // Timing
         double time_step;
+        aout_tick tick;
+        // Other
+        bool is_running;
         sig_atomic_t sigint_raised;
 } aout_application;
 

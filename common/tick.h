@@ -1,0 +1,20 @@
+#ifndef COMMON_TICK_H
+#define COMMON_TICK_H
+
+#include "types.h"
+
+typedef struct aout_tick {
+        // TODO: Maybe reduce to uint16_t and handle wrapping correctly.
+        // On the other hand 64 bit should be so much that even an increase
+        // to 256 ticks per second shouldn't be a problem.
+        uint64_t value;
+} aout_tick;
+
+void aout_tick_increment(
+                aout_tick* self);
+
+bool aout_tick_filter_rate(
+                aout_tick const* self,
+                uint32_t rate);
+
+#endif

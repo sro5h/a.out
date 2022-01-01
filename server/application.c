@@ -125,6 +125,7 @@ aout_res aout_application_run(
                 const double time_step = self->time_step;
                 for (accumulator += delta_time; accumulator > time_step;
                                 accumulator -= time_step) {
+                        aout_tick_increment(&self->tick);
                         aout_application_update_fixed(self, time_step);
                 }
 

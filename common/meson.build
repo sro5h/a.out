@@ -6,6 +6,7 @@ common_sources = [
   'log.c',
   'messages.c',
   'stream.c',
+  'tick.c',
   'util.c'
 ]
 
