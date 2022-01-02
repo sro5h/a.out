@@ -111,6 +111,11 @@ aout_mesh aout_player_mesh_create(
                                 .vs.source = vs_source,
                                 .fs.source = fs_source
                         }),
+                        .colors[0].blend = {
+                                .enabled = true,
+                                .src_factor_rgb = SG_BLENDFACTOR_ONE,
+                                .dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
+                        },
                         .index_type = SG_INDEXTYPE_UINT16,
                         .layout = layout
                 })
