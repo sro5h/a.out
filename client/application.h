@@ -25,6 +25,7 @@ typedef struct aout_application {
         // Other
         sig_atomic_t sigint_raised;
         aout_transform player_transform;
+        aout_transform player_transform_prev;
 } aout_application;
 
 typedef enum aout_application_res {

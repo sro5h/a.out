@@ -11,11 +11,12 @@
 
 static void aout_application_update_fixed(
                 aout_application* self,
-                double delta_time);
+                float64_t delta_time);
 
 static void aout_application_update(
                 aout_application* self,
-                double delta_time);
+                float64_t delta_time,
+                float64_t alpha);
 
 static void aout_application_on_connection(
                 aout_client* client,
@@ -45,7 +46,7 @@ aout_application* aout_application_create(
 
         self->is_running = true;
         self->is_connected = false;
-        self->time_step = 1.0 / 64;
+        self->time_step = 1.0 / 32;
         self->sigint_raised = 0;
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -153,7 +154,8 @@ aout_res aout_application_run(
                         aout_application_update_fixed(self, time_step);
                 }
 
-                aout_application_update(self, delta_time);
+                float64_t const alpha = accumulator / time_step;
+                aout_application_update(self, delta_time, alpha);
         }
 
         return AOUT_OK;
@@ -173,13 +175,13 @@ bool aout_application_is_running(
 
 static void aout_application_update_fixed(
                 aout_application* self,
-                double delta_time) {
+                float64_t delta_time) {
         assert(self);
         (void) delta_time;
 
         glfwPollEvents();
 
-        if (!aout_tick_filter_rate(&self->tick, 2)) { return; }
+        //if (!aout_tick_filter_rate(&self->tick, 2)) { return; }
 
         // Send input
         if (self->is_connected) {
@@ -197,9 +199,16 @@ static void aout_application_update_fixed(
 
 static void aout_application_update(
                 aout_application* self,
-                double delta_time) {
+                float64_t delta_time,
+                float64_t alpha) {
         assert(self);
         (void) delta_time;
+
+        aout_transform interpolated = { 0 };
+        interpolated = aout_transform_add(
+                aout_transform_mul(self->player_transform, alpha),
+                aout_transform_mul(self->player_transform_prev, 1.0 - alpha)
+        );
 
         int width, height;
         glfwGetFramebufferSize(self->window, &width, &height);
@@ -210,7 +219,7 @@ static void aout_application_update(
         aout_renderer_render_mesh(
                 self->renderer,
                 &self->player_mesh,
-                &self->player_transform
+                &interpolated
         );
 
         aout_renderer_end(self->renderer);
@@ -249,6 +258,7 @@ static void aout_application_on_msg_state(
 
         assert(self->is_connected);
 
+        self->player_transform_prev = self->player_transform;
         self->player_transform.position = msg->position;
 }
 

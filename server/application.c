@@ -49,7 +49,7 @@ aout_application* aout_application_create(
         }
 
         self->is_running = true;
-        self->time_step = 1.0 / 64;
+        self->time_step = 1.0 / 32;
         self->sigint_raised = 0;
 
         self->space = cpSpaceNew();
@@ -250,11 +250,12 @@ static void aout_application_on_msg_input(
                 direction.y -= 1;
         }
 
-        cpVect desired = cpvmult(cpvnormalize(direction), 250);
-        cpVect change = cpvsub(desired, cpBodyGetVelocity(self->bodies[0]));
+        cpVect velocity = cpvmult(cpvnormalize(direction), 250);
+        cpBodySetVelocity(self->bodies[0], velocity);
+        /*cpVect change = cpvsub(desired, cpBodyGetVelocity(self->bodies[0]));
         float32_t mass = cpBodyGetMass(self->bodies[0]);
         cpVect force = cpvmult(cpvmult(change, mass), 64.f);
-        cpBodySetForce(self->bodies[0], force);
+        cpBodySetForce(self->bodies[0], force);*/
 }
 
 static void on_sigint(
