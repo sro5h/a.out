@@ -7,7 +7,8 @@ common_sources = [
   'messages.c',
   'stream.c',
   'tick.c',
-  'util.c'
+  'util.c',
+  'vector2.c'
 ]
 
 common_public_headers = include_directories(
