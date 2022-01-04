@@ -7,6 +7,7 @@ common_sources = [
   'messages.c',
   'stream.c',
   'tick.c',
+  'transform.c',
   'util.c',
   'vector2.c'
 ]
