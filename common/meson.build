@@ -5,6 +5,7 @@ common_sources = [
   'id_pool.c',
   'log.c',
   'messages.c',
+  'ring.c',
   'stream.c',
   'tick.c',
   'transform.c',
