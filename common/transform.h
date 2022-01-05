@@ -9,19 +9,19 @@ typedef struct aout_transform {
         aout_vec2 scale;
 } aout_transform;
 
-aout_transform aout_transform_add(
+COMMON_API aout_transform aout_transform_add(
                 aout_transform a,
                 aout_transform b);
 
-aout_transform aout_transform_sub(
+COMMON_API aout_transform aout_transform_sub(
                 aout_transform a,
                 aout_transform b);
 
-aout_transform aout_transform_mul(
+COMMON_API aout_transform aout_transform_mul(
                 aout_transform t,
                 float32_t f);
 
-aout_transform aout_transform_div(
+COMMON_API aout_transform aout_transform_div(
                 aout_transform t,
                 float32_t f);
 

@@ -10,10 +10,10 @@ typedef struct aout_tick {
         uint64_t value;
 } aout_tick;
 
-void aout_tick_increment(
+COMMON_API void aout_tick_increment(
                 aout_tick* self);
 
-bool aout_tick_filter_rate(
+COMMON_API bool aout_tick_filter_rate(
                 aout_tick const* self,
                 uint32_t rate);
 

@@ -11,32 +11,32 @@
 
 typedef uint32_t aout_id;
 
-aout_id aout_id_make(
+COMMON_API aout_id aout_id_make(
                 size_t index,
                 uint8_t generation);
 
-size_t aout_id_index(
+COMMON_API size_t aout_id_index(
                 aout_id id);
 
-uint8_t aout_id_generation(
+COMMON_API uint8_t aout_id_generation(
                 aout_id id);
 
 typedef struct aout_id_pool aout_id_pool;
 
-aout_id_pool* aout_id_pool_create(
+COMMON_API aout_id_pool* aout_id_pool_create(
                 size_t size);
 
-void aout_id_pool_destroy(
+COMMON_API void aout_id_pool_destroy(
                 aout_id_pool* self);
 
-aout_id aout_id_pool_id_create(
+COMMON_API aout_id aout_id_pool_id_create(
                 aout_id_pool* self);
 
-void aout_id_pool_id_destroy(
+COMMON_API void aout_id_pool_id_destroy(
                 aout_id_pool* self,
                 aout_id id);
 
-bool aout_id_pool_id_is_valid(
+COMMON_API bool aout_id_pool_id_is_valid(
                 aout_id_pool const* self,
                 aout_id id);
 
