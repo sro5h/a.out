@@ -3,6 +3,7 @@
 
 #include "result.h"
 #include "stream.h"
+#include "tick.h"
 #include "vector2.h"
 
 #define AOUT_TYPE_CL_MSG_TYPE uint32_t
@@ -20,6 +21,7 @@ typedef enum aout_sv_msg_type {
 
 // TODO: Rename to *_command
 typedef struct aout_cl_msg_input {
+        aout_tick tick;
         uint8_t up, down, left, right;
 } aout_cl_msg_input;
 
@@ -29,6 +31,7 @@ typedef struct aout_sv_msg_connection {
 } aout_sv_msg_connection;
 
 typedef struct aout_sv_msg_state {
+        aout_tick tick;
         aout_vec2 position;
 } aout_sv_msg_state;
 

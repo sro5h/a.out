@@ -30,6 +30,8 @@ aout_res aout_stream_write_cl_msg_input(
 
         // Ignore return values, as aout_stream_has_capacity returned true
         aout_res res = { 0 };
+        res = aout_stream_write_u64(self, msg->tick.value);
+        assert(AOUT_IS_OK(res));
         res = aout_stream_write_u8(self, msg->up);
         assert(AOUT_IS_OK(res));
         res = aout_stream_write_u8(self, msg->down);
@@ -73,6 +75,8 @@ aout_res aout_stream_write_sv_msg_state(
         }
 
         aout_res res = { 0 };
+        res = aout_stream_write_u64(self, msg->tick.value);
+        assert(AOUT_IS_OK(res));
         res = aout_stream_write_f32(self, msg->position.x);
         assert(AOUT_IS_OK(res));
         res = aout_stream_write_f32(self, msg->position.y);
@@ -120,6 +124,10 @@ aout_res aout_stream_read_cl_msg_input(
 
         aout_cl_msg_input tmp;
 
+        if (AOUT_IS_ERR(aout_stream_read_u64(self, &tmp.tick.value))) {
+                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+        }
+
         if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.up))) {
                 return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
         }
@@ -165,6 +173,10 @@ aout_res aout_stream_read_sv_msg_state(
         assert(self); assert(msg);
 
         aout_sv_msg_state tmp;
+
+        if (AOUT_IS_ERR(aout_stream_read_u64(self, &tmp.tick.value))) {
+                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+        }
 
         if (AOUT_IS_ERR(aout_stream_read_f32(self, &tmp.position.x))) {
                 return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);

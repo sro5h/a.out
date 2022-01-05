@@ -2,62 +2,55 @@
 #include <common/messages.h>
 #include <greatest/greatest.h>
 
+static bool memval(
+                void const* src,
+                uint8_t value,
+                size_t size);
+
 TEST stream_write_cl_msg_type(void) {
-        uint8_t* data = calloc(10, sizeof(*data));
+        size_t const size = 2 * sizeof(aout_cl_msg_type) + 2;
+        uint8_t* data = calloc(size, sizeof(*data));
 
         ASSERT(data);
 
         aout_stream stream = {
                 .data = data,
-                .data_size = 10
+                .data_size = size
         };
 
         aout_res res = { 0 };
+        size_t cursor = 0;
         aout_cl_msg_type type = AOUT_CL_MSG_TYPE_INPUT;
         uint32_t n_type = aout_hton_u32((uint32_t) type);
 
         res = aout_stream_write_cl_msg_type(&stream, type);
+        cursor = 0;
 
         ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(stream.data[0], ((uint8_t*) &n_type)[0]);
-        ASSERT_EQ(stream.data[1], ((uint8_t*) &n_type)[1]);
-        ASSERT_EQ(stream.data[2], ((uint8_t*) &n_type)[2]);
-        ASSERT_EQ(stream.data[3], ((uint8_t*) &n_type)[3]);
-        ASSERT_EQ(stream.data[4], 0);
-        ASSERT_EQ(stream.data[5], 0);
-        ASSERT_EQ(stream.data[6], 0);
-        ASSERT_EQ(stream.data[7], 0);
-        ASSERT_EQ(stream.data[8], 0);
-        ASSERT_EQ(stream.data[9], 0);
+        ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
+        cursor += sizeof(n_type);
+        ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         res = aout_stream_write_cl_msg_type(&stream, type);
+        cursor = 0;
 
         ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(stream.data[0], ((uint8_t*) &n_type)[0]);
-        ASSERT_EQ(stream.data[1], ((uint8_t*) &n_type)[1]);
-        ASSERT_EQ(stream.data[2], ((uint8_t*) &n_type)[2]);
-        ASSERT_EQ(stream.data[3], ((uint8_t*) &n_type)[3]);
-        ASSERT_EQ(stream.data[4], ((uint8_t*) &n_type)[0]);
-        ASSERT_EQ(stream.data[5], ((uint8_t*) &n_type)[1]);
-        ASSERT_EQ(stream.data[6], ((uint8_t*) &n_type)[2]);
-        ASSERT_EQ(stream.data[7], ((uint8_t*) &n_type)[3]);
-        ASSERT_EQ(stream.data[8], 0);
-        ASSERT_EQ(stream.data[9], 0);
+        ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
+        cursor += sizeof(n_type);
+        ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
+        cursor += sizeof(n_type);
+        ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         res = aout_stream_write_cl_msg_type(&stream, type);
+        cursor = 0;
 
         ASSERT(AOUT_IS_ERR(res));
         ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
-        ASSERT_EQ(stream.data[0], ((uint8_t*) &n_type)[0]);
-        ASSERT_EQ(stream.data[1], ((uint8_t*) &n_type)[1]);
-        ASSERT_EQ(stream.data[2], ((uint8_t*) &n_type)[2]);
-        ASSERT_EQ(stream.data[3], ((uint8_t*) &n_type)[3]);
-        ASSERT_EQ(stream.data[4], ((uint8_t*) &n_type)[0]);
-        ASSERT_EQ(stream.data[5], ((uint8_t*) &n_type)[1]);
-        ASSERT_EQ(stream.data[6], ((uint8_t*) &n_type)[2]);
-        ASSERT_EQ(stream.data[7], ((uint8_t*) &n_type)[3]);
-        ASSERT_EQ(stream.data[8], 0);
-        ASSERT_EQ(stream.data[9], 0);
+        ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
+        cursor += sizeof(n_type);
+        ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
+        cursor += sizeof(n_type);
+        ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         free(data);
         data = NULL;
@@ -65,64 +58,52 @@ TEST stream_write_cl_msg_type(void) {
 }
 
 TEST stream_write_sv_msg_type(void) {
-        uint8_t* data = calloc(10, sizeof(*data));
+        size_t const size = 2 * sizeof(aout_sv_msg_type) + 2;
+        uint8_t* data = calloc(size, sizeof(*data));
 
         ASSERT(data);
 
         aout_stream stream = {
                 .data = data,
-                .data_size = 10
+                .data_size = size
         };
 
         aout_res res = { 0 };
+        size_t cursor = 0;
         aout_sv_msg_type type0 = AOUT_SV_MSG_TYPE_CONNECTION;
         uint32_t n_type0 = aout_hton_u32((uint32_t) type0);
 
         res = aout_stream_write_sv_msg_type(&stream, type0);
+        cursor = 0;
 
         ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(stream.data[0], ((uint8_t*) &n_type0)[0]);
-        ASSERT_EQ(stream.data[1], ((uint8_t*) &n_type0)[1]);
-        ASSERT_EQ(stream.data[2], ((uint8_t*) &n_type0)[2]);
-        ASSERT_EQ(stream.data[3], ((uint8_t*) &n_type0)[3]);
-        ASSERT_EQ(stream.data[4], 0);
-        ASSERT_EQ(stream.data[5], 0);
-        ASSERT_EQ(stream.data[6], 0);
-        ASSERT_EQ(stream.data[7], 0);
-        ASSERT_EQ(stream.data[8], 0);
-        ASSERT_EQ(stream.data[9], 0);
+        ASSERT(memcmp(stream.data + cursor, &n_type0, sizeof(n_type0)) == 0);
+        cursor += sizeof(n_type0);
+        ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         aout_sv_msg_type type1 = AOUT_SV_MSG_TYPE_STATE;
         uint32_t n_type1 = aout_hton_u32((uint32_t) type1);
 
         res = aout_stream_write_sv_msg_type(&stream, type1);
+        cursor = 0;
 
         ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(stream.data[0], ((uint8_t*) &n_type0)[0]);
-        ASSERT_EQ(stream.data[1], ((uint8_t*) &n_type0)[1]);
-        ASSERT_EQ(stream.data[2], ((uint8_t*) &n_type0)[2]);
-        ASSERT_EQ(stream.data[3], ((uint8_t*) &n_type0)[3]);
-        ASSERT_EQ(stream.data[4], ((uint8_t*) &n_type1)[0]);
-        ASSERT_EQ(stream.data[5], ((uint8_t*) &n_type1)[1]);
-        ASSERT_EQ(stream.data[6], ((uint8_t*) &n_type1)[2]);
-        ASSERT_EQ(stream.data[7], ((uint8_t*) &n_type1)[3]);
-        ASSERT_EQ(stream.data[8], 0);
-        ASSERT_EQ(stream.data[9], 0);
+        ASSERT(memcmp(stream.data + cursor, &n_type0, sizeof(n_type0)) == 0);
+        cursor += sizeof(n_type0);
+        ASSERT(memcmp(stream.data + cursor, &n_type1, sizeof(n_type1)) == 0);
+        cursor += sizeof(n_type1);
+        ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         res = aout_stream_write_sv_msg_type(&stream, type1);
+        cursor = 0;
 
         ASSERT(AOUT_IS_ERR(res));
         ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
-        ASSERT_EQ(stream.data[0], ((uint8_t*) &n_type0)[0]);
-        ASSERT_EQ(stream.data[1], ((uint8_t*) &n_type0)[1]);
-        ASSERT_EQ(stream.data[2], ((uint8_t*) &n_type0)[2]);
-        ASSERT_EQ(stream.data[3], ((uint8_t*) &n_type0)[3]);
-        ASSERT_EQ(stream.data[4], ((uint8_t*) &n_type1)[0]);
-        ASSERT_EQ(stream.data[5], ((uint8_t*) &n_type1)[1]);
-        ASSERT_EQ(stream.data[6], ((uint8_t*) &n_type1)[2]);
-        ASSERT_EQ(stream.data[7], ((uint8_t*) &n_type1)[3]);
-        ASSERT_EQ(stream.data[8], 0);
-        ASSERT_EQ(stream.data[9], 0);
+        ASSERT(memcmp(stream.data + cursor, &n_type0, sizeof(n_type0)) == 0);
+        cursor += sizeof(n_type0);
+        ASSERT(memcmp(stream.data + cursor, &n_type1, sizeof(n_type1)) == 0);
+        cursor += sizeof(n_type1);
+        ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         free(data);
         data = NULL;
@@ -130,47 +111,63 @@ TEST stream_write_sv_msg_type(void) {
 }
 
 TEST stream_write_cl_msg_input(void) {
-        uint8_t* data = calloc(6, sizeof(*data));
+        size_t const size = sizeof(aout_cl_msg_input) + 2;
+        uint8_t* data = calloc(size, sizeof(*data));
 
         ASSERT(data);
 
         aout_stream stream = {
                 .data = data,
-                .data_size = 6
+                .data_size = size
         };
 
         aout_res res = { 0 };
+        size_t cursor = 0;
         aout_cl_msg_input msg = {
+                .tick.value = 1337,
                 .up = false,
                 .down = true,
                 .left = true,
                 .right = false
         };
+        uint64_t n_tick = aout_hton_u64(msg.tick.value);
         uint8_t n_up = msg.up;
         uint8_t n_down = msg.down;
         uint8_t n_left = msg.left;
         uint8_t n_right = msg.right;
 
         res = aout_stream_write_cl_msg_input(&stream, &msg);
+        cursor = 0;
 
         ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(stream.data[0], n_up);
-        ASSERT_EQ(stream.data[1], n_down);
-        ASSERT_EQ(stream.data[2], n_left);
-        ASSERT_EQ(stream.data[3], n_right);
-        ASSERT_EQ(stream.data[4], 0);
-        ASSERT_EQ(stream.data[5], 0);
+        ASSERT(memcmp(stream.data + cursor, &n_tick, sizeof(n_tick)) == 0);
+        cursor += sizeof(n_tick);
+        ASSERT(memcmp(stream.data + cursor, &n_up, sizeof(n_up)) == 0);
+        cursor += sizeof(n_up);
+        ASSERT(memcmp(stream.data + cursor, &n_down, sizeof(n_down)) == 0);
+        cursor += sizeof(n_down);
+        ASSERT(memcmp(stream.data + cursor, &n_left, sizeof(n_left)) == 0);
+        cursor += sizeof(n_left);
+        ASSERT(memcmp(stream.data + cursor, &n_right, sizeof(n_right)) == 0);
+        cursor += sizeof(n_right);
+        ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         res = aout_stream_write_cl_msg_input(&stream, &msg);
+        cursor = 0;
 
         ASSERT(AOUT_IS_ERR(res));
         ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
-        ASSERT_EQ(stream.data[0], n_up);
-        ASSERT_EQ(stream.data[1], n_down);
-        ASSERT_EQ(stream.data[2], n_left);
-        ASSERT_EQ(stream.data[3], n_right);
-        ASSERT_EQ(stream.data[4], 0);
-        ASSERT_EQ(stream.data[5], 0);
+        ASSERT(memcmp(stream.data + cursor, &n_tick, sizeof(n_tick)) == 0);
+        cursor += sizeof(n_tick);
+        ASSERT(memcmp(stream.data + cursor, &n_up, sizeof(n_up)) == 0);
+        cursor += sizeof(n_up);
+        ASSERT(memcmp(stream.data + cursor, &n_down, sizeof(n_down)) == 0);
+        cursor += sizeof(n_down);
+        ASSERT(memcmp(stream.data + cursor, &n_left, sizeof(n_left)) == 0);
+        cursor += sizeof(n_left);
+        ASSERT(memcmp(stream.data + cursor, &n_right, sizeof(n_right)) == 0);
+        cursor += sizeof(n_right);
+        ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         free(data);
         data = NULL;
@@ -178,16 +175,18 @@ TEST stream_write_cl_msg_input(void) {
 }
 
 TEST stream_write_sv_msg_connection(void) {
-        uint8_t* data = calloc(10, sizeof(*data));
+        size_t const size = sizeof(aout_sv_msg_connection) + 4;
+        uint8_t* data = calloc(size, sizeof(*data));
 
         ASSERT(data);
 
         aout_stream stream = {
                 .data = data,
-                .data_size = 10
+                .data_size = size
         };
 
         aout_res res = { 0 };
+        size_t cursor = 0;
         aout_sv_msg_connection msg = {
                 .id = 3290323,
                 .peer_id = 23
@@ -196,33 +195,25 @@ TEST stream_write_sv_msg_connection(void) {
         uint16_t n_peer_id = aout_hton_u16(msg.peer_id);
 
         res = aout_stream_write_sv_msg_connection(&stream, &msg);
+        cursor = 0;
 
         ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(stream.data[0], ((uint8_t*) &n_id)[0]);
-        ASSERT_EQ(stream.data[1], ((uint8_t*) &n_id)[1]);
-        ASSERT_EQ(stream.data[2], ((uint8_t*) &n_id)[2]);
-        ASSERT_EQ(stream.data[3], ((uint8_t*) &n_id)[3]);
-        ASSERT_EQ(stream.data[4], ((uint8_t*) &n_peer_id)[0]);
-        ASSERT_EQ(stream.data[5], ((uint8_t*) &n_peer_id)[1]);
-        ASSERT_EQ(stream.data[6], 0);
-        ASSERT_EQ(stream.data[7], 0);
-        ASSERT_EQ(stream.data[8], 0);
-        ASSERT_EQ(stream.data[9], 0);
+        ASSERT(memcmp(stream.data + cursor, &n_id, sizeof(n_id)) == 0);
+        cursor += sizeof(n_id);
+        ASSERT(memcmp(stream.data + cursor, &n_peer_id, sizeof(n_peer_id)) == 0);
+        cursor += sizeof(n_peer_id);
+        ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         res = aout_stream_write_sv_msg_connection(&stream, &msg);
+        cursor = 0;
 
         ASSERT(AOUT_IS_ERR(res));
         ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
-        ASSERT_EQ(stream.data[0], ((uint8_t*) &n_id)[0]);
-        ASSERT_EQ(stream.data[1], ((uint8_t*) &n_id)[1]);
-        ASSERT_EQ(stream.data[2], ((uint8_t*) &n_id)[2]);
-        ASSERT_EQ(stream.data[3], ((uint8_t*) &n_id)[3]);
-        ASSERT_EQ(stream.data[4], ((uint8_t*) &n_peer_id)[0]);
-        ASSERT_EQ(stream.data[5], ((uint8_t*) &n_peer_id)[1]);
-        ASSERT_EQ(stream.data[6], 0);
-        ASSERT_EQ(stream.data[7], 0);
-        ASSERT_EQ(stream.data[8], 0);
-        ASSERT_EQ(stream.data[9], 0);
+        ASSERT(memcmp(stream.data + cursor, &n_id, sizeof(n_id)) == 0);
+        cursor += sizeof(n_id);
+        ASSERT(memcmp(stream.data + cursor, &n_peer_id, sizeof(n_peer_id)) == 0);
+        cursor += sizeof(n_peer_id);
+        ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         free(data);
         data = NULL;
@@ -230,50 +221,50 @@ TEST stream_write_sv_msg_connection(void) {
 }
 
 TEST stream_write_sv_msg_state(void) {
-        uint8_t* data = calloc(10, sizeof(*data));
+        size_t const size = sizeof(aout_sv_msg_state) + 2;
+        uint8_t* data = calloc(size, sizeof(*data));
 
         ASSERT(data);
 
         aout_stream stream = {
                 .data = data,
-                .data_size = 10
+                .data_size = size
         };
 
         aout_res res = { 0 };
+        size_t cursor = 0;
         aout_sv_msg_state msg = {
+                .tick.value = 3993,
                 .position = { .x = 3.14159f, .y = -32.3299f }
         };
-        uint32_t n_position_x = aout_hton_f32(msg.position.x);
-        uint32_t n_position_y = aout_hton_f32(msg.position.y);
+        uint64_t n_tick = aout_hton_u64(msg.tick.value);
+        uint32_t n_px = aout_hton_f32(msg.position.x);
+        uint32_t n_py = aout_hton_f32(msg.position.y);
 
         res = aout_stream_write_sv_msg_state(&stream, &msg);
+        cursor = 0;
 
         ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(stream.data[0], ((uint8_t*) &n_position_x)[0]);
-        ASSERT_EQ(stream.data[1], ((uint8_t*) &n_position_x)[1]);
-        ASSERT_EQ(stream.data[2], ((uint8_t*) &n_position_x)[2]);
-        ASSERT_EQ(stream.data[3], ((uint8_t*) &n_position_x)[3]);
-        ASSERT_EQ(stream.data[4], ((uint8_t*) &n_position_y)[0]);
-        ASSERT_EQ(stream.data[5], ((uint8_t*) &n_position_y)[1]);
-        ASSERT_EQ(stream.data[6], ((uint8_t*) &n_position_y)[2]);
-        ASSERT_EQ(stream.data[7], ((uint8_t*) &n_position_y)[3]);
-        ASSERT_EQ(stream.data[8], 0);
-        ASSERT_EQ(stream.data[9], 0);
+        ASSERT(memcmp(stream.data + cursor, &n_tick, sizeof(n_tick)) == 0);
+        cursor += sizeof(n_tick);
+        ASSERT(memcmp(stream.data + cursor, &n_px, sizeof(n_px)) == 0);
+        cursor += sizeof(n_px);
+        ASSERT(memcmp(stream.data + cursor, &n_py, sizeof(n_py)) == 0);
+        cursor += sizeof(n_py);
+        ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         res = aout_stream_write_sv_msg_state(&stream, &msg);
+        cursor = 0;
 
         ASSERT(AOUT_IS_ERR(res));
         ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
-        ASSERT_EQ(stream.data[0], ((uint8_t*) &n_position_x)[0]);
-        ASSERT_EQ(stream.data[1], ((uint8_t*) &n_position_x)[1]);
-        ASSERT_EQ(stream.data[2], ((uint8_t*) &n_position_x)[2]);
-        ASSERT_EQ(stream.data[3], ((uint8_t*) &n_position_x)[3]);
-        ASSERT_EQ(stream.data[4], ((uint8_t*) &n_position_y)[0]);
-        ASSERT_EQ(stream.data[5], ((uint8_t*) &n_position_y)[1]);
-        ASSERT_EQ(stream.data[6], ((uint8_t*) &n_position_y)[2]);
-        ASSERT_EQ(stream.data[7], ((uint8_t*) &n_position_y)[3]);
-        ASSERT_EQ(stream.data[8], 0);
-        ASSERT_EQ(stream.data[9], 0);
+        ASSERT(memcmp(stream.data + cursor, &n_tick, sizeof(n_tick)) == 0);
+        cursor += sizeof(n_tick);
+        ASSERT(memcmp(stream.data + cursor, &n_px, sizeof(n_px)) == 0);
+        cursor += sizeof(n_px);
+        ASSERT(memcmp(stream.data + cursor, &n_py, sizeof(n_py)) == 0);
+        cursor += sizeof(n_py);
+        ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         free(data);
         data = NULL;
@@ -339,7 +330,7 @@ TEST stream_read_sv_msg_type(void) {
 }
 
 TEST stream_read_cl_msg_input(void) {
-        uint8_t data[] = { 32, 129, -32, 239, 12, 4 };
+        uint8_t data[] = { 7, 32, -1, 39, 80, 21, 48, 79, 32, 129, -32, 239, 12, 4 };
         aout_stream stream = {
                 .data = data,
                 .data_size = sizeof(data)
@@ -347,14 +338,16 @@ TEST stream_read_cl_msg_input(void) {
 
         aout_res res = { 0 };
         aout_cl_msg_input msg = { 0 };
-        uint8_t h_up = data[0];
-        uint8_t h_down = data[1];
-        uint8_t h_left = data[2];
-        uint8_t h_right = data[3];
+        uint64_t h_tick = aout_ntoh_u64(*((uint64_t*) &data[0]));
+        uint8_t h_up = data[8];
+        uint8_t h_down = data[9];
+        uint8_t h_left = data[10];
+        uint8_t h_right = data[11];
 
         res = aout_stream_read_cl_msg_input(&stream, &msg);
 
         ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(msg.tick.value, h_tick);
         ASSERT_EQ(msg.up, h_up);
         ASSERT_EQ(msg.down, h_down);
         ASSERT_EQ(msg.left, h_left);
@@ -365,6 +358,7 @@ TEST stream_read_cl_msg_input(void) {
         ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
 
         // Values should not have changed
+        ASSERT_EQ(msg.tick.value, h_tick);
         ASSERT_EQ(msg.up, h_up);
         ASSERT_EQ(msg.down, h_down);
         ASSERT_EQ(msg.left, h_left);
@@ -404,7 +398,8 @@ TEST stream_read_sv_msg_connection(void) {
 }
 
 TEST stream_read_sv_msg_state(void) {
-        uint8_t data[] = { 32, 129, -32, 239, 12, 4, 9, 94, 49, 3 };
+        uint8_t data[] = { 54, 223, -20, 84, 59, 81, 10, 98, 32, 129, -32,
+                           239, 12, 4, 9, 94, 49, 3 };
         aout_stream stream = {
                 .data = data,
                 .data_size = sizeof(data)
@@ -412,12 +407,14 @@ TEST stream_read_sv_msg_state(void) {
 
         aout_res res = { 0 };
         aout_sv_msg_state msg = { 0 };
-        float32_t h_position_x = aout_ntoh_f32(*((uint32_t*) &data[0]));
-        float32_t h_position_y = aout_ntoh_f32(*((uint32_t*) &data[4]));
+        uint64_t h_tick = aout_ntoh_u64(*((uint64_t*) &data[0]));
+        float32_t h_position_x = aout_ntoh_f32(*((uint32_t*) &data[8]));
+        float32_t h_position_y = aout_ntoh_f32(*((uint32_t*) &data[12]));
 
         res = aout_stream_read_sv_msg_state(&stream, &msg);
 
         ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(msg.tick.value, h_tick);
         ASSERT_EQ(msg.position.x, h_position_x);
         ASSERT_EQ(msg.position.y, h_position_y);
 
@@ -427,6 +424,7 @@ TEST stream_read_sv_msg_state(void) {
         ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
 
         // Values should not have changed
+        ASSERT_EQ(msg.tick.value, h_tick);
         ASSERT_EQ(msg.position.x, h_position_x);
         ASSERT_EQ(msg.position.y, h_position_y);
 
@@ -494,4 +492,19 @@ int main(int argc, char* argv[]) {
         RUN_SUITE(test_messages);
 
         GREATEST_MAIN_END();
+}
+
+static bool memval(
+                void const* src,
+                uint8_t value,
+                size_t size) {
+        unsigned char const* bytes = src;
+
+        for (size_t i = 0; i < size; ++i) {
+                if (bytes[i] != (unsigned char) value) {
+                        return false;
+                }
+        }
+
+        return true;
 }
