@@ -22,10 +22,13 @@ typedef struct aout_application {
         // Timing
         double time_step; // Maybe use ticks_per_second instead
         aout_tick tick;
+        // Client-side prediction
+        aout_ring* predictions;
+        aout_transform server_state;
+        aout_transform player_state;
+        aout_transform player_state_prev;
         // Other
         sig_atomic_t sigint_raised;
-        aout_transform player_transform;
-        aout_transform player_transform_prev;
 } aout_application;
 
 typedef enum aout_application_res {

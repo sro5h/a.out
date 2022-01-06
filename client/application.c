@@ -44,9 +44,10 @@ aout_application* aout_application_create(
                 return NULL;
         }
 
+        size_t const tick_rate = 32;
         self->is_running = true;
         self->is_connected = false;
-        self->time_step = 1.0 / 32;
+        self->time_step = 1.0 / tick_rate;
         self->sigint_raised = 0;
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -93,6 +94,13 @@ aout_application* aout_application_create(
                 goto error;
         }
 
+        self->predictions = aout_ring_create(tick_rate, sizeof(aout_prediction));
+
+        if (!self->predictions) {
+                aout_loge("could not create prediction buffer");
+                goto error;
+        }
+
         aout_res res = aout_on_sigint((aout_sig_handler) {
                 .callback = on_sigint,
                 .context = self
@@ -122,6 +130,7 @@ void aout_application_destroy(
         // NULL is safely handled by *_destroy
         //assert(self->window); assert(self->client);
 
+        aout_ring_destroy(self->predictions);
         aout_client_destroy(self->client);
         aout_renderer_destroy(self->renderer);
         glfwDestroyWindow(self->window);
@@ -258,8 +267,63 @@ static void aout_application_on_msg_state(
 
         assert(self->is_connected);
 
-        self->player_transform_prev = self->player_transform;
-        self->player_transform.position = msg->position;
+        self->server_state.position = msg->position;
+
+        if (aout_ring_empty(self->predictions)) {
+                self->player_state_prev = self->player_state;
+                self->player_state = self->server_state;
+        } else {
+                aout_application_reconcile(self, msg->tick, self->server_state);
+        }
+
+        //self->player_transform_prev = self->player_transform;
+        //self->player_transform.position = msg->position;
+}
+
+static void aout_application_reconcile(
+                aout_application* self,
+                aout_tick tick,
+                aout_transform const* server_state) {
+        assert(self); assert(server_state);
+
+        while (!aout_ring_empty(self->predictions)) {
+                aout_prediction const* p = aout_ring_front(self->predictions);
+
+                if (aout_tick_cmp(p->tick, tick) < 0) {
+                        aout_ring_pop_front(self->predictions);
+                } else {
+                        break;
+                }
+        }
+
+        assert(!aout_ring_empty(self->predictions));
+
+        aout_prediction const* front = aout_ring_front(self->predictions);
+        assert(aout_tick_cmp(front->tick, tick) == 0);
+
+        if (!aout_transform_eq(&front->state, &server_state)) {
+                aout_transform reconciled = server_state;
+                // TODO: should pop front, front shouldn't be calculated, as it
+                // is already in the server_state
+                // TODO: Maybe sent fat state (i.e. also velocity, force etc.)
+                // to each connected client for its own body
+                // Bodies of other players don't need as detailed state as they
+                // aren't predicted.
+
+                // TODO: Maybe use aout_ring_foreach();
+                for (size_t i = 0; i < aout_ring_size(self->predictions); ++i) {
+                        aout_prediction const* p = aout_ring_at(self->predictions, i);
+                        // Reset physics scene
+                        // TODO: Maybe remembering position isn't enough (velocity, force etc.)
+                        // See also above^
+                        cpBodySetPosition(self->player_body, p->state.position);
+
+                        aout_apply_movement(self->player_body, p->input);
+                        cpSpaceStep(self->space, self->time_step);
+                }
+        }
+
+        aout_ring_pop_front(self->predictions);
 }
 
 static void on_sigint(

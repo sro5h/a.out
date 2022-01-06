@@ -235,27 +235,7 @@ static void aout_application_on_msg_input(
 
         assert(self->bodies[0]);
 
-        cpVect direction = cpvzero;
-
-        if (msg->right) {
-                direction.x += 1;
-        }
-        if (msg->left) {
-                direction.x -= 1;
-        }
-        if (msg->up) {
-                direction.y += 1;
-        }
-        if (msg->down) {
-                direction.y -= 1;
-        }
-
-        cpVect velocity = cpvmult(cpvnormalize(direction), 250);
-        cpBodySetVelocity(self->bodies[0], velocity);
-        /*cpVect change = cpvsub(desired, cpBodyGetVelocity(self->bodies[0]));
-        float32_t mass = cpBodyGetMass(self->bodies[0]);
-        cpVect force = cpvmult(cpvmult(change, mass), 64.f);
-        cpBodySetForce(self->bodies[0], force);*/
+        aout_apply_input(&self->bodies[0], &msg->input);
 }
 
 static void on_sigint(
