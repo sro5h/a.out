@@ -51,10 +51,10 @@ void aout_ring_push_back(
                 void const* value) {
         assert(self); assert(value);
 
-        self->head = aout_ring_end(self);
+        self->head = aout_ring_index(self, self->head + 1);
 
         // Check whether ring was already full
-        if (aout_ring_end(self) == self->tail) {
+        if (self->tail == aout_ring_index(self, self->head + 1)) {
                 self->tail = aout_ring_index(self, self->tail + 1);
         } else {
                 ++self->size;
@@ -108,13 +108,13 @@ void* aout_ring_back(
 size_t aout_ring_begin(
                 aout_ring const* self) {
         assert(self);
-        return self->tail;
+        return 0;
 }
 
 size_t aout_ring_end(
                 aout_ring const* self) {
         assert(self);
-        return aout_ring_index(self, self->head + 1);
+        return aout_ring_size(self);
 }
 
 size_t aout_ring_size(
