@@ -38,3 +38,13 @@ aout_vec2 aout_vec2_div(
                 .y = v.y / f
         };
 }
+
+#define AOUT_VEC2_EPSILON (1.0e-6)
+
+COMMON_API bool aout_vec2_eql(
+                aout_vec2 const* a,
+                aout_vec2 const* b) {
+        assert(a); assert(b);
+
+        return aout_f32_eql(a->x, b->x) && aout_f32_eql(a->y, b->y);
+}

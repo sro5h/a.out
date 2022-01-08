@@ -27,6 +27,7 @@ if build_machine.system() == 'linux'
   client_dependencies += dependency('xi')
 endif
 
+client_dependencies += dependency('libchipmunk')
 client_dependencies += dependency('glfw3')
 client_dependencies += dependency('libenet')
 

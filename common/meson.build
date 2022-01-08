@@ -5,9 +5,12 @@ common_sources = [
   'id_pool.c',
   'log.c',
   'messages.c',
+  'movement.c',
   'ring.c',
+  'state.c',
   'stream.c',
   'tick.c',
+  'types.c',
   'transform.c',
   'util.c',
   'vector2.c'
@@ -21,6 +24,7 @@ common_dependencies = [
 ]
 
 if build_machine.system() == 'linux'
+  common_dependencies += meson.get_compiler('c').find_library('m')
   common_dependencies += dependency('threads')
 endif
 

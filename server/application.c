@@ -2,6 +2,7 @@
 
 #include <common/console.h>
 #include <common/log.h>
+#include <common/movement.h>
 #include <common/util.h>
 
 #include <chipmunk/chipmunk.h>
@@ -159,8 +160,9 @@ static void aout_application_update_fixed(
         // TODO: Send state of all connected clients
         if (self->bodies[0]) {
                 aout_sv_msg_state msg = { 0 };
-                msg.position.x = cpBodyGetPosition(self->bodies[0]).x;
-                msg.position.y = cpBodyGetPosition(self->bodies[0]).y;
+                // TODO: Send tick from input message whose input was applied
+                // msg.tick = ...;
+                msg.state = aout_state_full_from_body(self->bodies[0]);
 
                 aout_server_send_msg_state(self->server, 0, &msg);
         }
@@ -235,7 +237,8 @@ static void aout_application_on_msg_input(
 
         assert(self->bodies[0]);
 
-        aout_apply_input(&self->bodies[0], &msg->input);
+        // TODO: Should only be called once per tick (i.e. in update_fixed)
+        aout_movement_apply(self->bodies[0], &msg->input);
 }
 
 static void on_sigint(

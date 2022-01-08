@@ -1,9 +1,13 @@
 #include "application.h"
 #include "player_mesh.h"
+#include "prediction.h"
 
 #include <common/console.h>
 #include <common/log.h>
+#include <common/movement.h>
+#include <common/util.h>
 
+#include <chipmunk/chipmunk.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <sokol/sokol_time.h>
@@ -49,6 +53,42 @@ aout_application* aout_application_create(
         self->is_connected = false;
         self->time_step = 1.0 / tick_rate;
         self->sigint_raised = 0;
+
+        self->space = cpSpaceNew();
+
+        if (!self->space) {
+                aout_loge("could not create space");
+                goto error;
+        }
+
+        cpSpaceSetIterations(self->space, 10);
+        cpSpaceSetSleepTimeThreshold(self->space, 0.5f);
+
+        self->player_body = cpSpaceAddBody(self->space, cpBodyNew(
+                10,
+                cpMomentForCircle(10, 0, 10, cpvzero)
+        ));
+
+        if (!self->player_body) {
+                aout_loge("could not create player body");
+                goto error;
+        }
+
+        cpBodySetPosition(self->player_body, cpvzero);
+
+        cpShape* shape = cpSpaceAddShape(self->space, cpCircleShapeNew(
+                self->player_body,
+                10,
+                cpvzero
+        ));
+
+        if (!shape) {
+                aout_loge("could not create shape");
+                goto error;
+        }
+
+        cpShapeSetElasticity(shape, 0.0f);
+        cpShapeSetFriction(shape, 0.7f);
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -134,6 +174,7 @@ void aout_application_destroy(
         aout_client_destroy(self->client);
         aout_renderer_destroy(self->renderer);
         glfwDestroyWindow(self->window);
+        aout_space_free(self->space);
         free(self);
 }
 
@@ -193,12 +234,33 @@ static void aout_application_update_fixed(
         //if (!aout_tick_filter_rate(&self->tick, 2)) { return; }
 
         // Send input
-        if (self->is_connected) {
+        /*if (self->is_connected) {
                 aout_cl_msg_input msg = { 0 };
                 msg.up = glfwGetKey(self->window, GLFW_KEY_W) == GLFW_PRESS;
                 msg.down = glfwGetKey(self->window, GLFW_KEY_S) == GLFW_PRESS;
                 msg.left = glfwGetKey(self->window, GLFW_KEY_A) == GLFW_PRESS;
                 msg.right = glfwGetKey(self->window, GLFW_KEY_D) == GLFW_PRESS;
+
+                aout_client_send_msg_input(self->client, &msg);
+        }*/
+
+        aout_input input = { 0 };
+        input.right = glfwGetKey(self->window, GLFW_KEY_D) == GLFW_PRESS;
+        input.left  = glfwGetKey(self->window, GLFW_KEY_A) == GLFW_PRESS;
+        input.up    = glfwGetKey(self->window, GLFW_KEY_W) == GLFW_PRESS;
+        input.down  = glfwGetKey(self->window, GLFW_KEY_S) == GLFW_PRESS;
+
+        aout_movement_apply(self->player_body, &input);
+        cpSpaceStep(self->space, self->time_step);
+
+        self->player_state_prev = self->player_state;
+        self->player_state = aout_state_full_from_body(self->player_body);
+
+        if (self->is_connected) {
+                aout_cl_msg_input msg = {
+                        .tick  = self->tick,
+                        .input = input
+                };
 
                 aout_client_send_msg_input(self->client, &msg);
         }
@@ -214,10 +276,13 @@ static void aout_application_update(
         (void) delta_time;
 
         aout_transform interpolated = { 0 };
-        interpolated = aout_transform_add(
+        /*interpolated = aout_transform_add(
                 aout_transform_mul(self->player_transform, alpha),
                 aout_transform_mul(self->player_transform_prev, 1.0 - alpha)
-        );
+        );*/
+        interpolated.position = self->player_state.p;
+        interpolated.rotation = self->player_state.r;
+        interpolated.scale = (aout_vec2) { .x = 1.0f, .y = 1.0f };
 
         int width, height;
         glfwGetFramebufferSize(self->window, &width, &height);
@@ -267,20 +332,17 @@ static void aout_application_on_msg_state(
 
         assert(self->is_connected);
 
-        self->server_state.position = msg->position;
+        /*self->server_state.position = msg->position;
 
         if (aout_ring_empty(self->predictions)) {
                 self->player_state_prev = self->player_state;
                 self->player_state = self->server_state;
         } else {
                 aout_application_reconcile(self, msg->tick, self->server_state);
-        }
-
-        //self->player_transform_prev = self->player_transform;
-        //self->player_transform.position = msg->position;
+        }*/
 }
 
-static void aout_application_reconcile(
+/*static void aout_application_reconcile(
                 aout_application* self,
                 aout_tick tick,
                 aout_transform const* server_state) {
@@ -324,7 +386,7 @@ static void aout_application_reconcile(
         }
 
         aout_ring_pop_front(self->predictions);
-}
+}*/
 
 static void on_sigint(
                 void* context) {

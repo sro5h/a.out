@@ -14,4 +14,8 @@ typedef double float64_t;
 static_assert(sizeof(float32_t) == 4, "float32_t must be 4 bytes");
 static_assert(sizeof(float64_t) == 8, "float64_t must be 8 bytes");
 
+COMMON_API bool aout_f32_eql(
+                float32_t a,
+                float32_t b);
+
 #endif

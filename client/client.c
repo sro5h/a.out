@@ -272,7 +272,7 @@ static void aout_client_on_receive_msg_state(
         }
 
         aout_logd("[0x%08x] sv_msg_state received: ", self->connection.id);
-        aout_logd("{ .position = { %f, %f } }", msg.position.x, msg.position.y);
+        aout_logd("{ .state.p = { %f, %f } }", msg.state.p.x, msg.state.p.y);
 
         aout_client_adapter* adapter = &self->adapter;
         if (adapter->on_msg_state) {

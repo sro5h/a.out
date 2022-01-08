@@ -4,11 +4,15 @@
 #include "client.h"
 #include "renderer.h"
 
+#include <common/ring.h>
+#include <common/state.h>
 #include <common/tick.h>
 
 #include <signal.h>
 
 typedef struct GLFWwindow GLFWwindow;
+typedef struct cpSpace cpSpace;
+typedef struct cpBody cpBody;
 
 typedef struct aout_application {
         // Window and graphics
@@ -19,14 +23,17 @@ typedef struct aout_application {
         // Networking
         aout_client* client;
         bool is_connected;
+        // Physics
+        cpSpace* space;
+        cpBody* player_body;
         // Timing
         double time_step; // Maybe use ticks_per_second instead
         aout_tick tick;
         // Client-side prediction
         aout_ring* predictions;
-        aout_transform server_state;
-        aout_transform player_state;
-        aout_transform player_state_prev;
+        aout_state_full server_state;
+        aout_state_full player_state;
+        aout_state_full player_state_prev;
         // Other
         sig_atomic_t sigint_raised;
 } aout_application;

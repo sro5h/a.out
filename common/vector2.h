@@ -23,4 +23,8 @@ COMMON_API aout_vec2 aout_vec2_div(
                 aout_vec2 v,
                 float32_t f);
 
+COMMON_API bool aout_vec2_eql(
+                aout_vec2 const* a,
+                aout_vec2 const* b);
+
 #endif

@@ -5,7 +5,7 @@
 
 typedef struct cpBody cpBody;
 
-COMMON_API void aout_apply_movement(
+COMMON_API void aout_movement_apply(
                 cpBody* body,
                 aout_input const* input);
 

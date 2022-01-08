@@ -125,16 +125,16 @@ TEST stream_write_cl_msg_input(void) {
         size_t cursor = 0;
         aout_cl_msg_input msg = {
                 .tick.value = 1337,
-                .up = false,
-                .down = true,
-                .left = true,
-                .right = false
+                .input.up = false,
+                .input.down = true,
+                .input.left = true,
+                .input.right = false
         };
         uint64_t n_tick = aout_hton_u64(msg.tick.value);
-        uint8_t n_up = msg.up;
-        uint8_t n_down = msg.down;
-        uint8_t n_left = msg.left;
-        uint8_t n_right = msg.right;
+        uint8_t n_up = msg.input.up;
+        uint8_t n_down = msg.input.down;
+        uint8_t n_left = msg.input.left;
+        uint8_t n_right = msg.input.right;
 
         res = aout_stream_write_cl_msg_input(&stream, &msg);
         cursor = 0;
@@ -235,11 +235,21 @@ TEST stream_write_sv_msg_state(void) {
         size_t cursor = 0;
         aout_sv_msg_state msg = {
                 .tick.value = 3993,
-                .position = { .x = 3.14159f, .y = -32.3299f }
+                .state = {
+                        .p = { .x = 3.14159f, .y = -32.3299f },
+                        .v = { .x = 0.5f, .y = 3209.0f },
+                        .r = 3923.32f,
+                        .f = { .x = 39.3293f, .y = -329.939f }
+                }
         };
         uint64_t n_tick = aout_hton_u64(msg.tick.value);
-        uint32_t n_px = aout_hton_f32(msg.position.x);
-        uint32_t n_py = aout_hton_f32(msg.position.y);
+        uint32_t n_px = aout_hton_f32(msg.state.p.x);
+        uint32_t n_py = aout_hton_f32(msg.state.p.y);
+        uint32_t n_vx = aout_hton_f32(msg.state.v.x);
+        uint32_t n_vy = aout_hton_f32(msg.state.v.y);
+        uint32_t n_r  = aout_hton_f32(msg.state.r);
+        uint32_t n_fx = aout_hton_f32(msg.state.f.x);
+        uint32_t n_fy = aout_hton_f32(msg.state.f.y);
 
         res = aout_stream_write_sv_msg_state(&stream, &msg);
         cursor = 0;
@@ -251,6 +261,16 @@ TEST stream_write_sv_msg_state(void) {
         cursor += sizeof(n_px);
         ASSERT(memcmp(stream.data + cursor, &n_py, sizeof(n_py)) == 0);
         cursor += sizeof(n_py);
+        ASSERT(memcmp(stream.data + cursor, &n_vx, sizeof(n_vx)) == 0);
+        cursor += sizeof(n_vx);
+        ASSERT(memcmp(stream.data + cursor, &n_vy, sizeof(n_vy)) == 0);
+        cursor += sizeof(n_vy);
+        ASSERT(memcmp(stream.data + cursor, &n_r, sizeof(n_r)) == 0);
+        cursor += sizeof(n_r);
+        ASSERT(memcmp(stream.data + cursor, &n_fx, sizeof(n_fx)) == 0);
+        cursor += sizeof(n_fx);
+        ASSERT(memcmp(stream.data + cursor, &n_fy, sizeof(n_fy)) == 0);
+        cursor += sizeof(n_fy);
         ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         res = aout_stream_write_sv_msg_state(&stream, &msg);
@@ -264,6 +284,16 @@ TEST stream_write_sv_msg_state(void) {
         cursor += sizeof(n_px);
         ASSERT(memcmp(stream.data + cursor, &n_py, sizeof(n_py)) == 0);
         cursor += sizeof(n_py);
+        ASSERT(memcmp(stream.data + cursor, &n_vx, sizeof(n_vx)) == 0);
+        cursor += sizeof(n_vx);
+        ASSERT(memcmp(stream.data + cursor, &n_vy, sizeof(n_vy)) == 0);
+        cursor += sizeof(n_vy);
+        ASSERT(memcmp(stream.data + cursor, &n_r, sizeof(n_r)) == 0);
+        cursor += sizeof(n_r);
+        ASSERT(memcmp(stream.data + cursor, &n_fx, sizeof(n_fx)) == 0);
+        cursor += sizeof(n_fx);
+        ASSERT(memcmp(stream.data + cursor, &n_fy, sizeof(n_fy)) == 0);
+        cursor += sizeof(n_fy);
         ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         free(data);
@@ -348,10 +378,10 @@ TEST stream_read_cl_msg_input(void) {
 
         ASSERT(AOUT_IS_OK(res));
         ASSERT_EQ(msg.tick.value, h_tick);
-        ASSERT_EQ(msg.up, h_up);
-        ASSERT_EQ(msg.down, h_down);
-        ASSERT_EQ(msg.left, h_left);
-        ASSERT_EQ(msg.right, h_right);
+        ASSERT_EQ(msg.input.up, h_up);
+        ASSERT_EQ(msg.input.down, h_down);
+        ASSERT_EQ(msg.input.left, h_left);
+        ASSERT_EQ(msg.input.right, h_right);
 
         res = aout_stream_read_cl_msg_input(&stream, &msg);
         ASSERT(AOUT_IS_ERR(res));
@@ -359,10 +389,10 @@ TEST stream_read_cl_msg_input(void) {
 
         // Values should not have changed
         ASSERT_EQ(msg.tick.value, h_tick);
-        ASSERT_EQ(msg.up, h_up);
-        ASSERT_EQ(msg.down, h_down);
-        ASSERT_EQ(msg.left, h_left);
-        ASSERT_EQ(msg.right, h_right);
+        ASSERT_EQ(msg.input.up, h_up);
+        ASSERT_EQ(msg.input.down, h_down);
+        ASSERT_EQ(msg.input.left, h_left);
+        ASSERT_EQ(msg.input.right, h_right);
 
         PASS();
 }
@@ -398,8 +428,10 @@ TEST stream_read_sv_msg_connection(void) {
 }
 
 TEST stream_read_sv_msg_state(void) {
-        uint8_t data[] = { 54, 223, -20, 84, 59, 81, 10, 98, 32, 129, -32,
-                           239, 12, 4, 9, 94, 49, 3 };
+        uint8_t data[] = { 54, 223, -20, 84, 59, 81, 10, 98, 32, 129,
+                           -32, 39, -13, 33, 72, 18, 45, 222, 156, 78,
+                           67, 43, 28, 234, 176, 2, 8, -5, 15, 38,
+                           239, 12, 4, 9, 94, 49, 3, 39 };
         aout_stream stream = {
                 .data = data,
                 .data_size = sizeof(data)
@@ -408,15 +440,25 @@ TEST stream_read_sv_msg_state(void) {
         aout_res res = { 0 };
         aout_sv_msg_state msg = { 0 };
         uint64_t h_tick = aout_ntoh_u64(*((uint64_t*) &data[0]));
-        float32_t h_position_x = aout_ntoh_f32(*((uint32_t*) &data[8]));
-        float32_t h_position_y = aout_ntoh_f32(*((uint32_t*) &data[12]));
+        float32_t h_px = aout_ntoh_f32(*((uint32_t*) &data[8]));
+        float32_t h_py = aout_ntoh_f32(*((uint32_t*) &data[12]));
+        float32_t h_vx = aout_ntoh_f32(*((uint32_t*) &data[16]));
+        float32_t h_vy = aout_ntoh_f32(*((uint32_t*) &data[20]));
+        float32_t h_r  = aout_ntoh_f32(*((uint32_t*) &data[24]));
+        float32_t h_fx = aout_ntoh_f32(*((uint32_t*) &data[28]));
+        float32_t h_fy = aout_ntoh_f32(*((uint32_t*) &data[32]));
 
         res = aout_stream_read_sv_msg_state(&stream, &msg);
 
         ASSERT(AOUT_IS_OK(res));
         ASSERT_EQ(msg.tick.value, h_tick);
-        ASSERT_EQ(msg.position.x, h_position_x);
-        ASSERT_EQ(msg.position.y, h_position_y);
+        ASSERT_EQ(msg.state.p.x, h_px);
+        ASSERT_EQ(msg.state.p.y, h_py);
+        ASSERT_EQ(msg.state.v.x, h_vx);
+        ASSERT_EQ(msg.state.v.y, h_vy);
+        ASSERT_EQ(msg.state.r, h_r);
+        ASSERT_EQ(msg.state.f.x, h_fx);
+        ASSERT_EQ(msg.state.f.y, h_fy);
 
         res = aout_stream_read_sv_msg_state(&stream, &msg);
 
@@ -425,8 +467,13 @@ TEST stream_read_sv_msg_state(void) {
 
         // Values should not have changed
         ASSERT_EQ(msg.tick.value, h_tick);
-        ASSERT_EQ(msg.position.x, h_position_x);
-        ASSERT_EQ(msg.position.y, h_position_y);
+        ASSERT_EQ(msg.state.p.x, h_px);
+        ASSERT_EQ(msg.state.p.y, h_py);
+        ASSERT_EQ(msg.state.v.x, h_vx);
+        ASSERT_EQ(msg.state.v.y, h_vy);
+        ASSERT_EQ(msg.state.r, h_r);
+        ASSERT_EQ(msg.state.f.x, h_fx);
+        ASSERT_EQ(msg.state.f.y, h_fy);
 
         PASS();
 }
