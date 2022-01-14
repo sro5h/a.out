@@ -19,6 +19,7 @@ typedef struct aout_application {
         GLFWwindow* window;
         aout_renderer* renderer;
         aout_mesh player_mesh;
+        aout_mesh server_mesh;
         bool is_running;
         // Networking
         aout_client* client;

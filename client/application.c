@@ -119,7 +119,12 @@ aout_application* aout_application_create(
         }
 
         aout_renderer_set_view(self->renderer, 640, 480);
-        self->player_mesh = aout_player_mesh_create();
+        self->player_mesh = aout_player_mesh_create(
+                (aout_rgba8) { 0xf6, 0x08, 0x1e, 0xff }
+        );
+        self->server_mesh = aout_player_mesh_create(
+                (aout_rgba8) { 0x31, 0x93, 0xd8, 0xff }
+        );
 
         self->client = aout_client_create((aout_client_adapter) {
                 .on_connection = aout_application_on_connection,
@@ -280,11 +285,23 @@ static void aout_application_update(
         interpolated.rotation = self->player_state.r;
         interpolated.scale = (aout_vec2) { .x = 1.0f, .y = 1.0f };
 
+        aout_transform server_trans = {
+                .position = self->server_state.p,
+                .rotation = self->server_state.r,
+                .scale = (aout_vec2) { .x = 1.0f, .y = 1.0f }
+        };
+
         int width, height;
         glfwGetFramebufferSize(self->window, &width, &height);
         assert(width > 0); assert(height > 0);
 
         aout_renderer_begin(self->renderer, width, height);
+
+        aout_renderer_render_mesh(
+                self->renderer,
+                &self->server_mesh,
+                &server_trans
+        );
 
         aout_renderer_render_mesh(
                 self->renderer,
