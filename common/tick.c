@@ -16,3 +16,15 @@ bool aout_tick_filter_rate(
 
         return (self->value % rate) == 0;
 }
+
+COMMON_API int32_t aout_tick_cmp(
+                aout_tick a,
+                aout_tick b) {
+        if (a.value < b. value) {
+                return -1;
+        } else if (a.value > b.value) {
+                return 1;
+        } else {
+                return 0;
+        }
+}

@@ -212,6 +212,12 @@ error:
         return AOUT_ERR(AOUT_SERVER_ERR);
 }
 
+void aout_server_flush(
+                aout_server* self) {
+        assert(self);
+        enet_host_flush(self->host);
+}
+
 static void aout_server_on_connect(
                 aout_server* self,
                 ENetPeer* peer) {

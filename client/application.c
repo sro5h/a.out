@@ -35,6 +35,11 @@ static void aout_application_on_msg_state(
                 aout_sv_msg_state* msg,
                 void* context);
 
+static void aout_application_reconcile(
+                aout_application* self,
+                aout_tick tick,
+                aout_state_full const* server_state);
+
 static void on_sigint(
                 void* context);
 
@@ -229,20 +234,11 @@ static void aout_application_update_fixed(
         assert(self);
         (void) delta_time;
 
+        aout_client_update(self->client);
+
         glfwPollEvents();
 
         //if (!aout_tick_filter_rate(&self->tick, 2)) { return; }
-
-        // Send input
-        /*if (self->is_connected) {
-                aout_cl_msg_input msg = { 0 };
-                msg.up = glfwGetKey(self->window, GLFW_KEY_W) == GLFW_PRESS;
-                msg.down = glfwGetKey(self->window, GLFW_KEY_S) == GLFW_PRESS;
-                msg.left = glfwGetKey(self->window, GLFW_KEY_A) == GLFW_PRESS;
-                msg.right = glfwGetKey(self->window, GLFW_KEY_D) == GLFW_PRESS;
-
-                aout_client_send_msg_input(self->client, &msg);
-        }*/
 
         aout_input input = { 0 };
         input.right = glfwGetKey(self->window, GLFW_KEY_D) == GLFW_PRESS;
@@ -265,7 +261,7 @@ static void aout_application_update_fixed(
                 aout_client_send_msg_input(self->client, &msg);
         }
 
-        aout_client_update(self->client);
+        aout_client_flush(self->client);
 }
 
 static void aout_application_update(
@@ -332,21 +328,24 @@ static void aout_application_on_msg_state(
 
         assert(self->is_connected);
 
-        /*self->server_state.position = msg->position;
+        self->server_state = msg->state;
 
         if (aout_ring_empty(self->predictions)) {
                 self->player_state_prev = self->player_state;
                 self->player_state = self->server_state;
         } else {
-                aout_application_reconcile(self, msg->tick, self->server_state);
-        }*/
+                aout_application_reconcile(self, msg->tick, &self->server_state);
+        }
 }
 
-/*static void aout_application_reconcile(
+static void aout_application_reconcile(
                 aout_application* self,
                 aout_tick tick,
-                aout_transform const* server_state) {
+                aout_state_full const* server_state) {
         assert(self); assert(server_state);
+
+        // TODO: Maybe first do a sanity check whether tick is less than
+        // back.tick?
 
         while (!aout_ring_empty(self->predictions)) {
                 aout_prediction const* p = aout_ring_front(self->predictions);
@@ -363,30 +362,48 @@ static void aout_application_on_msg_state(
         aout_prediction const* front = aout_ring_front(self->predictions);
         assert(aout_tick_cmp(front->tick, tick) == 0);
 
-        if (!aout_transform_eq(&front->state, &server_state)) {
-                aout_transform reconciled = server_state;
-                // TODO: should pop front, front shouldn't be calculated, as it
-                // is already in the server_state
+        if (!aout_state_full_eql(&front->state, server_state)) {
+                // Front shouldn't be calculated, as it is already in the
+                // server_state
+                aout_ring_pop_front(self->predictions);
+
                 // TODO: Maybe sent fat state (i.e. also velocity, force etc.)
                 // to each connected client for its own body
                 // Bodies of other players don't need as detailed state as they
                 // aren't predicted.
 
+                // Reset physics scene
+                // TODO: Will this even get applied? Won't it be simply
+                // overwritten by aout_apply_movement?
+                cpBodySetPosition(self->player_body, cpv(server_state->p.x, server_state->p.y));
+                cpBodySetVelocity(self->player_body, cpv(server_state->v.x, server_state->v.y));
+                cpBodySetForce(self->player_body, cpv(server_state->f.x, server_state->f.y));
+
                 // TODO: Maybe use aout_ring_foreach();
                 for (size_t i = 0; i < aout_ring_size(self->predictions); ++i) {
-                        aout_prediction const* p = aout_ring_at(self->predictions, i);
-                        // Reset physics scene
-                        // TODO: Maybe remembering position isn't enough (velocity, force etc.)
-                        // See also above^
-                        cpBodySetPosition(self->player_body, p->state.position);
+                        aout_prediction* p = aout_ring_at(self->predictions, i);
 
-                        aout_apply_movement(self->player_body, p->input);
+                        aout_movement_apply(self->player_body, &p->input);
                         cpSpaceStep(self->space, self->time_step);
-                }
-        }
 
-        aout_ring_pop_front(self->predictions);
-}*/
+                        aout_state_full reconciled = aout_state_full_from_body(
+                                self->player_body
+                        );
+                        p->state = reconciled;
+                }
+
+                // Apply the final state
+                // TODO: How should this be done correctly? Keep in mind that
+                // aout_application_reconcile can be called multiple times.
+                // For now keep self->player_state_prev and only update
+                // self->player_state
+                aout_prediction const* p = aout_ring_back(self->predictions);
+                self->player_state = p->state;
+        } else {
+                // Prediction was correct
+                aout_ring_pop_front(self->predictions);
+        }
+}
 
 static void on_sigint(
                 void* context) {

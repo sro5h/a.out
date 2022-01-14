@@ -158,17 +158,18 @@ static void aout_application_update_fixed(
 
         // Send current state to clients
         // TODO: Send state of all connected clients
-        if (self->bodies[0]) {
+        if (self->players[0].body) {
                 aout_sv_msg_state msg = { 0 };
                 // TODO: Send tick from input message whose input was applied
-                // msg.tick = ...;
-                msg.state = aout_state_full_from_body(self->bodies[0]);
+                msg.tick = self->players[0].last_input_tick;
+                msg.state = aout_state_full_from_body(self->players[0].body);
 
                 aout_server_send_msg_state(self->server, 0, &msg);
         }
 
-        // TODO: Send immediately
-        // aout_server_flush(self->server);
+        aout_logd("TICK");
+
+        aout_server_flush(self->server);
 }
 
 static void aout_application_update(
@@ -185,7 +186,7 @@ static void aout_application_on_connection(
         assert(server); assert(context);
         aout_application* self = context;
 
-        assert(!self->bodies[connection.peer_id]);
+        assert(!self->players[connection.peer_id].body);
 
         cpBody* body = cpSpaceAddBody(self->space, cpBodyNew(
                 CLIENT_BODY_MASS,
@@ -207,7 +208,7 @@ static void aout_application_on_connection(
         cpShapeSetElasticity(shape, 0.0f);
         cpShapeSetFriction(shape, 0.7f);
 
-        self->bodies[connection.peer_id] = body;
+        self->players[connection.peer_id].body = body;
 }
 
 static void aout_application_on_disconnection(
@@ -217,13 +218,13 @@ static void aout_application_on_disconnection(
         assert(server); assert(context);
         aout_application* self = context;
 
-        cpBody* body = self->bodies[connection.peer_id];
-        assert(body);
+        aout_player* player = &self->players[connection.peer_id];
+        assert(player->body);
 
         // Don't use post step callbacks as this will never be called inside
         // cpSpaceStep.
-        aout_body_free(body);
-        self->bodies[connection.peer_id] = NULL;
+        aout_body_free(player->body);
+        player->body = NULL;
 }
 
 static void aout_application_on_msg_input(
@@ -235,10 +236,11 @@ static void aout_application_on_msg_input(
         (void) connection;
         aout_application* self = context;
 
-        assert(self->bodies[0]);
+        assert(self->players[0].body);
 
         // TODO: Should only be called once per tick (i.e. in update_fixed)
-        aout_movement_apply(self->bodies[0], &msg->input);
+        aout_movement_apply(self->players[0].body, &msg->input);
+        self->players[0].last_input_tick = msg->tick;
 }
 
 static void on_sigint(

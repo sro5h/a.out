@@ -11,11 +11,16 @@
 typedef struct cpBody cpBody;
 typedef struct cpSpace cpSpace;
 
+typedef struct aout_player {
+        cpBody* body;
+        aout_tick last_input_tick;
+} aout_player;
+
 typedef struct aout_application {
         // Physics
         cpSpace* space;
         // TODO: Allocate on creation
-        cpBody* bodies[AOUT_SERVER_MAX_CONNECTIONS];
+        aout_player players[AOUT_SERVER_MAX_CONNECTIONS];
         // Networking
         aout_server* server;
         // Timing

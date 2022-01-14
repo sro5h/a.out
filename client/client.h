@@ -40,6 +40,9 @@ aout_res aout_client_send_msg_input(
                 aout_client* self,
                 aout_cl_msg_input* msg);
 
+void aout_client_flush(
+                aout_client* self);
+
 aout_connection aout_client_get_connection(
                 aout_client const* self);
 

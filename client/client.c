@@ -154,6 +154,12 @@ error:
         return AOUT_ERR(AOUT_CLIENT_ERR);
 }
 
+void aout_client_flush(
+                aout_client* self) {
+        assert(self);
+        enet_host_flush(self->host);
+}
+
 aout_connection aout_client_get_connection(
                 aout_client const* self) {
         assert(self);

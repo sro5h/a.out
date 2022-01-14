@@ -40,4 +40,7 @@ aout_res aout_server_send_msg_state(
                 uint16_t peer_id,
                 aout_sv_msg_state* msg);
 
+void aout_server_flush(
+                aout_server* self);
+
 #endif
