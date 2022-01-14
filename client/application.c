@@ -362,7 +362,7 @@ static void aout_application_reconcile(
         aout_prediction const* front = aout_ring_front(self->predictions);
         assert(aout_tick_cmp(front->tick, tick) == 0);
 
-        if (!aout_state_full_eql(&front->state, server_state)) {
+        //if (!aout_state_full_eql(&front->state, server_state)) {
                 // Front shouldn't be calculated, as it is already in the
                 // server_state
                 aout_ring_pop_front(self->predictions);
@@ -374,7 +374,7 @@ static void aout_application_reconcile(
 
                 // Reset physics scene
                 // TODO: Will this even get applied? Won't it be simply
-                // overwritten by aout_apply_movement?
+                // overwritten by aout_apply_movement? Talking about velocity, force
                 cpBodySetPosition(self->player_body, cpv(server_state->p.x, server_state->p.y));
                 cpBodySetVelocity(self->player_body, cpv(server_state->v.x, server_state->v.y));
                 cpBodySetForce(self->player_body, cpv(server_state->f.x, server_state->f.y));
@@ -399,10 +399,10 @@ static void aout_application_reconcile(
                 // self->player_state
                 aout_prediction const* p = aout_ring_back(self->predictions);
                 self->player_state = p->state;
-        } else {
+        /*} else {
                 // Prediction was correct
                 aout_ring_pop_front(self->predictions);
-        }
+        }*/
 }
 
 static void on_sigint(
