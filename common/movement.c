@@ -20,6 +20,11 @@ COMMON_API void aout_movement_apply(
                 direction.y -= 1;
         }
 
-        cpVect velocity = cpvmult(cpvnormalize(direction), 250);
+        cpVect velocity = cpvzero;
+
+        if (cpvlengthsq(direction) != 0.0) {
+                velocity = cpvmult(cpvnormalize(direction), 250);
+        }
+
         cpBodySetVelocity(body, velocity);
 }
