@@ -47,7 +47,12 @@ aout_client* aout_client_create(
         self->connection = (aout_connection) { 0 };
         self->adapter = adapter;
 
-        self->host = enet_host_create(NULL, 1, 2, 0, 0);
+        ENetAddress address = {
+                .host = ENET_HOST_ANY,
+                .port = 0
+        };
+
+        self->host = enet_host_create(&address, 1, 2, 0, 0);
 
         if (!self->host) {
                 // TODO: Could be changed to mirror application error handling
@@ -95,9 +100,10 @@ aout_res aout_client_connect(
                 uint16_t port) {
         assert(self);
 
-        ENetAddress address;
-        address.host = aout_hton_u32(ip);
-        address.port = port;
+        ENetAddress address = {
+                .host = aout_hton_u32(ip),
+                .port = port
+        };
 
         ENetPeer* peer = enet_host_connect(self->host, &address, 2, 0);
 
@@ -278,7 +284,8 @@ static void aout_client_on_receive_msg_state(
         }
 
         aout_logd("[0x%08x] sv_msg_state received: ", self->connection.id);
-        aout_logd("{ .state.p = { %f, %f } }", msg.state.p.x, msg.state.p.y);
+        aout_logd("{ .state.p = { %f, %f }, .tick = %d }",
+                        msg.state.p.x, msg.state.p.y, msg.tick.value);
 
         aout_client_adapter* adapter = &self->adapter;
         if (adapter->on_msg_state) {
