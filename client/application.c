@@ -255,6 +255,12 @@ static void aout_application_update_fixed(
         self->player_state_prev = self->player_state;
         self->player_state = aout_state_full_from_body(self->player_body);
 
+        aout_ring_push_back(self->predictions, &(aout_prediction) {
+                .tick = self->tick,
+                .input = input,
+                .state = self->player_state
+        });
+
         if (self->is_connected) {
                 aout_cl_msg_input msg = {
                         .tick  = self->tick,
@@ -348,6 +354,7 @@ static void aout_application_on_msg_state(
         if (aout_ring_empty(self->predictions)) {
                 self->player_state_prev = self->player_state;
                 self->player_state = self->server_state;
+                aout_logd("I AM EMPTY YOU IDIOT");
         } else {
                 aout_application_reconcile(self, msg->tick, &self->server_state);
         }
@@ -375,7 +382,12 @@ static void aout_application_reconcile(
         assert(!aout_ring_empty(self->predictions));
 
         aout_prediction const* front = aout_ring_front(self->predictions);
-        assert(aout_tick_cmp(front->tick, tick) == 0);
+
+        if (aout_tick_cmp(front->tick, tick) != 0) {
+                aout_loge("state message received out of order, tick %d",
+                                tick.value);
+                return;
+        }
 
         //if (!aout_state_full_eql(&front->state, server_state)) {
                 // Front shouldn't be calculated, as it is already in the
@@ -412,8 +424,13 @@ static void aout_application_reconcile(
                 // aout_application_reconcile can be called multiple times.
                 // For now keep self->player_state_prev and only update
                 // self->player_state
-                aout_prediction const* p = aout_ring_back(self->predictions);
-                self->player_state = p->state;
+                if (aout_ring_empty(self->predictions)) {
+                        aout_logd("no prediction left");
+                } else {
+                        aout_logd("is this the problem?");
+                        aout_prediction const* p = aout_ring_back(self->predictions);
+                        self->player_state = p->state;
+                }
         /*} else {
                 // Prediction was correct
                 aout_ring_pop_front(self->predictions);

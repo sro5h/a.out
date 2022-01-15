@@ -2,6 +2,7 @@
 #define SERVER_APPLICATION_H
 
 #include "server.h"
+#include <common/input.h>
 #include <common/tick.h>
 #include <signal.h>
 
@@ -13,6 +14,7 @@ typedef struct cpSpace cpSpace;
 
 typedef struct aout_player {
         cpBody* body;
+        aout_input last_input;
         aout_tick last_input_tick;
 } aout_player;
 

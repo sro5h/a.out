@@ -151,7 +151,22 @@ static void aout_application_update_fixed(
                 double delta_time) {
         assert(self);
 
+        // Reset input, could also replay last input in case non was received
+        if (self->players[0].body) {
+                self->players[0].last_input = (aout_input) { 0 };
+                // Maybe should advance last_input_tick by one
+                self->players[0].last_input_tick = (aout_tick) { 0 };
+        }
+
         aout_server_update(self->server);
+
+        if (self->players[0].body) {
+                aout_movement_apply(
+                        self->players[0].body,
+                        &self->players[0].last_input
+                );
+        }
+
         cpSpaceStep(self->space, delta_time);
 
         // Send current state to clients
@@ -237,7 +252,21 @@ static void aout_application_on_msg_input(
         assert(self->players[0].body);
 
         // TODO: Should only be called once per tick (i.e. in update_fixed)
-        aout_movement_apply(self->players[0].body, &msg->input);
+        // Simply store received input in self->players[0].last_input
+        // Could buffer inputs to combat latency variation, but this will have
+        // the effect that the latency between client and server is fixed to
+        // the latency of the first input.
+        // Could fix this by having a flexible 'target' latency based on some
+        // kind of average of the last n latencies. Would mean though that some
+        // inputs will be skipped...
+        // Could also synchronise the client latency on connection to the server
+        // but then there is a problem if the latency increases and thus all
+        // inputs suddenly arrive to late.
+        // Maybe a buffer of 2-4 input packets is best, so that sudden spikes
+        // in latency get smoothed out (at least to some degree). Will increase
+        // latency and the amount of lag compensation for hit detection though.
+        //aout_movement_apply(self->players[0].body, &msg->input);
+        self->players[0].last_input = msg->input;
         self->players[0].last_input_tick = msg->tick;
 }
 
