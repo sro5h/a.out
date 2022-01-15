@@ -108,8 +108,8 @@ aout_res aout_application_run(
                 aout_application* self) {
         assert(self);
 
-        uint64_t last_time = stm_now();
-        double accumulator = 0.0;
+        uint64_t  last_time = stm_now();
+        float64_t accumulator = 0.0;
 
         while (aout_application_is_running(self)) {
                 if (self->sigint_raised) {
@@ -119,11 +119,9 @@ aout_res aout_application_run(
                         break;
                 }
 
-                const uint64_t now = stm_now();
-                const double delta_time = stm_sec(stm_diff(now, last_time));
-                last_time = now;
+                float64_t const delta_time = stm_sec(stm_laptime(&last_time));
 
-                const double time_step = self->time_step;
+                float64_t const time_step = self->time_step;
                 for (accumulator += delta_time; accumulator > time_step;
                                 accumulator -= time_step) {
                         aout_tick_increment(&self->tick);
