@@ -4,9 +4,9 @@
 #include <common/log.h>
 #include <common/util.h>
 
-#include <chipmunk/chipmunk.h>
 #include <sokol/sokol_time.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define CLIENT_BODY_MASS   10
@@ -41,7 +41,6 @@ static void on_sigint(
 
 aout_application* aout_application_create(
                 void) {
-        // Bodies must be zero
         aout_application* self = calloc(1, sizeof(*self));
 
         if (!self) {
@@ -51,17 +50,6 @@ aout_application* aout_application_create(
         self->is_running = true;
         self->time_step = 1.0 / 32;
         self->sigint_raised = 0;
-
-        self->space = cpSpaceNew();
-
-        if (!self->space) {
-                aout_loge("could not create space");
-                goto error;
-        }
-
-        cpSpaceSetIterations(self->space, 10);
-        cpSpaceSetSleepTimeThreshold(self->space, 0.5f);
-        // TODO: Create physics scene
 
         self->server = aout_server_create((aout_server_adapter) {
                 .on_connection = aout_application_on_connection,
@@ -99,7 +87,6 @@ void aout_application_destroy(
         }
 
         aout_server_destroy(self->server);
-        aout_space_free(self->space);
         free(self);
 }
 
@@ -150,19 +137,21 @@ bool aout_application_is_running(
 static void aout_application_update_fixed(
                 aout_application* self,
                 double delta_time) {
+        (void) delta_time;
         assert(self);
 
         aout_server_update(self->server);
-        cpSpaceStep(self->space, delta_time);
 
         // Send current state to clients
         // TODO: Send state of all connected clients
-        if (self->bodies[0]) {
-                aout_sv_msg_state msg = { 0 };
-                msg.position.x = cpBodyGetPosition(self->bodies[0]).x;
-                msg.position.y = cpBodyGetPosition(self->bodies[0]).y;
-
-                aout_server_send_msg_state(self->server, 0, &msg);
+        if (self->players[0].connection.id) {
+                aout_server_send_msg_state(
+                        self->server,
+                        0,
+                        &(aout_sv_msg_state) {
+                                .position = self->players[0].state.p,
+                        }
+                );
         }
 
         // TODO: Send immediately
@@ -183,29 +172,9 @@ static void aout_application_on_connection(
         assert(server); assert(context);
         aout_application* self = context;
 
-        assert(!self->bodies[connection.peer_id]);
-
-        cpBody* body = cpSpaceAddBody(self->space, cpBodyNew(
-                CLIENT_BODY_MASS,
-                cpMomentForCircle(
-                        CLIENT_BODY_MASS,
-                        0,
-                        CLIENT_BODY_RADIUS,
-                        cpvzero
-                )
-        ));
-
-        cpBodySetPosition(body, cpvzero);
-
-        cpShape* shape = cpSpaceAddShape(self->space, cpCircleShapeNew(
-                body,
-                CLIENT_BODY_RADIUS,
-                cpvzero
-        ));
-        cpShapeSetElasticity(shape, 0.0f);
-        cpShapeSetFriction(shape, 0.7f);
-
-        self->bodies[connection.peer_id] = body;
+        self->players[0] = (aout_player) {
+                .connection = connection,
+        };
 }
 
 static void aout_application_on_disconnection(
@@ -213,15 +182,10 @@ static void aout_application_on_disconnection(
                 aout_connection connection,
                 void* context) {
         assert(server); assert(context);
+        (void) connection;
         aout_application* self = context;
 
-        cpBody* body = self->bodies[connection.peer_id];
-        assert(body);
-
-        // Don't use post step callbacks as this will never be called inside
-        // cpSpaceStep.
-        aout_body_free(body);
-        self->bodies[connection.peer_id] = NULL;
+        self->players[0] = (aout_player) { 0 };
 }
 
 static void aout_application_on_msg_input(
@@ -233,9 +197,7 @@ static void aout_application_on_msg_input(
         (void) connection;
         aout_application* self = context;
 
-        assert(self->bodies[0]);
-
-        cpVect direction = cpvzero;
+        aout_vec2 direction = { 0 };
 
         if (msg->right) {
                 direction.x += 1;
@@ -250,12 +212,11 @@ static void aout_application_on_msg_input(
                 direction.y -= 1;
         }
 
-        cpVect velocity = cpvmult(cpvnormalize(direction), 250);
-        cpBodySetVelocity(self->bodies[0], velocity);
-        /*cpVect change = cpvsub(desired, cpBodyGetVelocity(self->bodies[0]));
-        float32_t mass = cpBodyGetMass(self->bodies[0]);
-        cpVect force = cpvmult(cpvmult(change, mass), 64.f);
-        cpBodySetForce(self->bodies[0], force);*/
+        aout_vec2 velocity = aout_vec2_mul(aout_vec2_norm(direction), 25);
+        self->players[0].state.p = aout_vec2_add(
+                self->players[0].state.p,
+                velocity
+        );
 }
 
 static void on_sigint(

@@ -2,26 +2,23 @@
 #define SERVER_APPLICATION_H
 
 #include "server.h"
+#include <common/state.h>
 #include <common/tick.h>
 #include <signal.h>
 
 // TODO: Move to application.c and convert to static const
 #define AOUT_SERVER_MAX_CONNECTIONS 10
 
-typedef struct cpBody cpBody;
-typedef struct cpSpace cpSpace;
+typedef struct aout_player {
+        aout_connection connection;
+        aout_state state;
+} aout_player;
 
 typedef struct aout_application {
-        // Physics
-        cpSpace* space;
-        // TODO: Allocate on creation
-        cpBody* bodies[AOUT_SERVER_MAX_CONNECTIONS];
-        // Networking
+        aout_player players[AOUT_SERVER_MAX_CONNECTIONS];
         aout_server* server;
-        // Timing
         double time_step;
         aout_tick tick;
-        // Other
         bool is_running;
         sig_atomic_t sigint_raised;
 } aout_application;
