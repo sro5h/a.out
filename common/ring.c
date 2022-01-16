@@ -46,6 +46,15 @@ void aout_ring_destroy(
         }
 }
 
+void aout_ring_clear(
+                aout_ring* self) {
+        assert(self);
+
+        self->head = self->capacity;
+        self->tail = 0;
+        self->size = 0;
+}
+
 void aout_ring_push_back(
                 aout_ring* self,
                 void const* value) {

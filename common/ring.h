@@ -19,6 +19,9 @@ COMMON_API aout_ring* aout_ring_create(
 COMMON_API void aout_ring_destroy(
                 aout_ring* self);
 
+COMMON_API void aout_ring_clear(
+                aout_ring* self);
+
 COMMON_API void aout_ring_push_back(
                 aout_ring* self,
                 void const* value);

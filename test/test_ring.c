@@ -70,6 +70,11 @@ TEST ring_uint8_push_back(void) {
         ASSERT_EQ(*((uint8_t*) aout_ring_at(r, 3)), 7);
         ASSERT_EQ(*((uint8_t*) aout_ring_at(r, 4)), 42);
 
+        aout_ring_clear(r);
+        ASSERT(aout_ring_empty(r));
+        ASSERT_EQ(aout_ring_size(r), 0);
+        ASSERT_EQ(aout_ring_begin(r), aout_ring_end(r));
+
         aout_ring_destroy(r);
 
         PASS();
@@ -164,6 +169,11 @@ TEST ring_uint8_push_back_then_pop_front(void) {
         ASSERT_EQ(*((uint8_t*) aout_ring_at(r, 2)), 42);
         ASSERT_EQ(*((uint8_t*) aout_ring_at(r, 3)), 37);
 
+        aout_ring_clear(r);
+        ASSERT(aout_ring_empty(r));
+        ASSERT_EQ(aout_ring_size(r), 0);
+        ASSERT_EQ(aout_ring_begin(r), aout_ring_end(r));
+
         aout_ring_destroy(r);
 
         PASS();
@@ -237,6 +247,11 @@ TEST ring_uint32_push_back(void) {
         ASSERT_EQ(*((uint32_t*) aout_ring_at(r, 2)), 3290932);
         ASSERT_EQ(*((uint32_t*) aout_ring_at(r, 3)), 7);
         ASSERT_EQ(*((uint32_t*) aout_ring_at(r, 4)), 42);
+
+        aout_ring_clear(r);
+        ASSERT(aout_ring_empty(r));
+        ASSERT_EQ(aout_ring_size(r), 0);
+        ASSERT_EQ(aout_ring_begin(r), aout_ring_end(r));
 
         aout_ring_destroy(r);
 
@@ -331,6 +346,11 @@ TEST ring_uint32_push_back_then_pop_front(void) {
         ASSERT_EQ(*((uint32_t*) aout_ring_at(r, 1)), 8);
         ASSERT_EQ(*((uint32_t*) aout_ring_at(r, 2)), 42);
         ASSERT_EQ(*((uint32_t*) aout_ring_at(r, 3)), 89032099);
+
+        aout_ring_clear(r);
+        ASSERT(aout_ring_empty(r));
+        ASSERT_EQ(aout_ring_size(r), 0);
+        ASSERT_EQ(aout_ring_begin(r), aout_ring_end(r));
 
         aout_ring_destroy(r);
 
