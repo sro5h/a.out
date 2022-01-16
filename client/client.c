@@ -213,7 +213,7 @@ static void aout_client_on_receive(
         assert(connection->id == peer->connectID);
 
         // TODO: Remove below
-        aout_logd("[0x%08x] packet received", connection->id);
+        //aout_logd("[0x%08x] packet received", connection->id);
 
         aout_stream stream = {
                 .data = packet->data,
@@ -271,9 +271,8 @@ static void aout_client_on_receive_msg_state(
                 return;
         }
 
-        aout_logd("[0x%08x] sv_msg_state received: ", self->connection.id);
-        aout_logd("{ .position = { %f, %f } }", msg.position.x, msg.position.y);
-
+        //aout_logd("[0x%08x] sv_msg_state received: ", self->connection.id);
+        //aout_logd("{ .position = { %f, %f } }", msg.position.x, msg.position.y);
         aout_client_adapter* adapter = &self->adapter;
         if (adapter->on_msg_state) {
                 adapter->on_msg_state(self, &msg, adapter->context);

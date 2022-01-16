@@ -272,7 +272,7 @@ static void aout_server_on_receive(
         aout_connection const* connection = peer->data;
         assert(connection->id == peer->connectID);
 
-        aout_logd("[0x%08x] packet received", connection->id);
+        //aout_logd("[0x%08x] packet received", connection->id);
 
         aout_stream stream = {
                 .data = packet->data,
@@ -307,7 +307,7 @@ static void aout_server_on_receive_msg_input(
                 return;
         }
 
-        aout_logd("[0x%08x] cl_msg_input received: ", connection->id);
+        //aout_logd("[0x%08x] cl_msg_input received: ", connection->id);
 
         aout_server_adapter* adapter = &self->adapter;
         if (adapter->on_msg_input) {
