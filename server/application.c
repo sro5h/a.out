@@ -48,7 +48,7 @@ aout_application* aout_application_create(
         }
 
         self->is_running = true;
-        self->time_step = 1.0 / 32;
+        self->time_step = 1.0 / 20;
         self->sigint_raised = 0;
 
         self->server = aout_server_create((aout_server_adapter) {

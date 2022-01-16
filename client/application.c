@@ -46,7 +46,7 @@ aout_application* aout_application_create(
 
         self->is_running = true;
         self->is_connected = false;
-        self->time_step = 1.0 / 32;
+        self->time_step = 1.0 / 20;
         self->sigint_raised = 0;
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
