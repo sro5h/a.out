@@ -30,6 +30,7 @@ typedef struct aout_application {
         aout_tick tick;
         // Other
         bool is_running;
+        bool received;
         sig_atomic_t sigint_raised;
 } aout_application;
 

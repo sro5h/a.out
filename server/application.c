@@ -150,6 +150,7 @@ static void aout_application_update_fixed(
                 aout_application* self,
                 double delta_time) {
         assert(self);
+        self->received = false;
 
         // Reset input, could also replay last input in case non was received
         if (self->players[0].body) {
@@ -250,6 +251,7 @@ static void aout_application_on_msg_input(
         aout_application* self = context;
 
         assert(self->players[0].body);
+        assert(!self->received);
 
         // TODO: Should only be called once per tick (i.e. in update_fixed)
         // Simply store received input in self->players[0].last_input
@@ -268,6 +270,7 @@ static void aout_application_on_msg_input(
         //aout_movement_apply(self->players[0].body, &msg->input);
         self->players[0].last_input = msg->input;
         self->players[0].last_input_tick = msg->tick;
+        self->received = true;
 }
 
 static void on_sigint(
