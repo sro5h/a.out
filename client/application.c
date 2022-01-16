@@ -63,7 +63,10 @@ aout_application* aout_application_create(
 
         glfwSetWindowPos(self->window, 0, 0);
         glfwMakeContextCurrent(self->window);
-        glfwSwapInterval(1);
+        // Disable vsync to fix update_fixed being called twice after another.
+        // Maybe add a separate rendering thread in the future so that vsync
+        // can be enabled.
+        glfwSwapInterval(0);
 
         self->renderer = aout_renderer_create();
 
