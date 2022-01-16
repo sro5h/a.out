@@ -29,15 +29,16 @@ static char const* fs_source =
         "} frag;\n"
         "out vec4 color;\n"
         "void main() {\n"
-        "       float len = length(frag.uv);\n"
-        "       float fw = length(fwidth(frag.uv));\n"
+        "       float len  = length(frag.uv);\n"
+        "       float fw   = length(fwidth(frag.uv));\n"
         "       float mask = smoothstep(-1, fw - 1, -len);\n"
-        "       color = frag.color * mask;\n"
+        "       float outline      = 1 - fw;\n"
+        "       float outline_mask = smoothstep(outline - fw, outline, len);\n"
+        "       color = frag.color * outline_mask * mask;\n"
         "}\n";
 
 aout_mesh aout_player_mesh_create(
-                void) {
-        aout_rgba8 color = { 0xf6, 0x08, 0x1e, 0xff };
+                aout_rgba8 color) {
         aout_vertex const vertices[] = {
                 {
                         .position = { 0.f, 0.f },
