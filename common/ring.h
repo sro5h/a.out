@@ -1,6 +1,7 @@
 #ifndef COMMON_RING_H
 #define COMMON_RING_H
 
+#include "result.h"
 #include "types.h"
 
 typedef struct aout_ring {
@@ -11,6 +12,14 @@ typedef struct aout_ring {
         size_t head;
         size_t tail;
 } aout_ring;
+
+COMMON_API aout_res aout_ring_init(
+                aout_ring* self,
+                size_t capacity,
+                size_t value_size);
+
+COMMON_API void aout_ring_fini(
+                aout_ring* self);
 
 COMMON_API aout_ring* aout_ring_create(
                 size_t capacity,

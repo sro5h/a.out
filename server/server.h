@@ -15,11 +15,6 @@ typedef struct aout_server {
         aout_server_adapter adapter;
 } aout_server;
 
-typedef enum aout_server_res {
-        AOUT_SERVER_OK,
-        AOUT_SERVER_ERR,
-} aout_server_res;
-
 aout_server* aout_server_create(
                 aout_server_adapter adapter,
                 size_t connection_count);

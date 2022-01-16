@@ -12,11 +12,6 @@ typedef struct aout_stream {
         size_t index;
 } aout_stream;
 
-typedef enum aout_stream_res {
-        AOUT_STREAM_OK,
-        AOUT_STREAM_ERR_END_REACHED,
-} aout_stream_res;
-
 COMMON_API aout_res aout_stream_write_u8(
                 aout_stream* self,
                 uint8_t value);

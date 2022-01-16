@@ -90,7 +90,6 @@ TEST stream_write_u8(void) {
         res = aout_stream_write_u8(&stream, 1);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(stream.data[0], u);
         ASSERT_EQ(stream.data[1], 1);
         ASSERT_EQ(stream.data[2], (uint8_t) -156);
@@ -180,7 +179,6 @@ TEST stream_write_u16(void) {
         res = aout_stream_write_u16(&stream, u2);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(stream.data[0], ((uint8_t*) &h0)[0]);
         ASSERT_EQ(stream.data[1], ((uint8_t*) &h0)[1]);
         ASSERT_EQ(stream.data[2], ((uint8_t*) &h1)[0]);
@@ -248,7 +246,6 @@ TEST stream_write_u32(void) {
         res = aout_stream_write_u32(&stream, u1);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(stream.data[0], ((uint8_t*) &h0)[0]);
         ASSERT_EQ(stream.data[1], ((uint8_t*) &h0)[1]);
         ASSERT_EQ(stream.data[2], ((uint8_t*) &h0)[2]);
@@ -334,7 +331,6 @@ TEST stream_write_u64(void) {
         res = aout_stream_write_u64(&stream, u1);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(stream.data[ 0], ((uint8_t*) &h0)[0]);
         ASSERT_EQ(stream.data[ 1], ((uint8_t*) &h0)[1]);
         ASSERT_EQ(stream.data[ 2], ((uint8_t*) &h0)[2]);
@@ -411,7 +407,6 @@ TEST stream_write_f32(void) {
         res = aout_stream_write_f32(&stream, f1);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(stream.data[0], ((uint8_t*) &h0)[0]);
         ASSERT_EQ(stream.data[1], ((uint8_t*) &h0)[1]);
         ASSERT_EQ(stream.data[2], ((uint8_t*) &h0)[2]);
@@ -497,7 +492,6 @@ TEST stream_write_f64(void) {
         res = aout_stream_write_f64(&stream, f1);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(stream.data[ 0], ((uint8_t*) &h0)[0]);
         ASSERT_EQ(stream.data[ 1], ((uint8_t*) &h0)[1]);
         ASSERT_EQ(stream.data[ 2], ((uint8_t*) &h0)[2]);
@@ -597,7 +591,6 @@ TEST stream_read_u8(void) {
         res = aout_stream_read_u8(&stream, &u);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 10);
 
         PASS();
@@ -655,7 +648,6 @@ TEST stream_read_u16(void) {
         res = aout_stream_read_u16(&stream, &u);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 10);
 
         PASS();
@@ -689,7 +681,6 @@ TEST stream_read_u32(void) {
         res = aout_stream_read_u32(&stream, &u);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 8);
 
         PASS();
@@ -723,7 +714,6 @@ TEST stream_read_u64(void) {
         res = aout_stream_read_u64(&stream, &u);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 16);
 
         PASS();
@@ -757,7 +747,6 @@ TEST stream_read_f32(void) {
         res = aout_stream_read_f32(&stream, &u);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 8);
 
         PASS();
@@ -791,7 +780,6 @@ TEST stream_read_f64(void) {
         res = aout_stream_read_f64(&stream, &u);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 16);
 
         PASS();
@@ -831,7 +819,6 @@ TEST stream_write_u8_then_read_u8(void) {
         ASSERT(AOUT_IS_OK(res));
         res = aout_stream_write_u8(&stream, 23);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 10);
 
         ASSERT_EQ(stream.data[0], 21);
@@ -870,7 +857,6 @@ TEST stream_write_u8_then_read_u8(void) {
         ASSERT(AOUT_IS_OK(res));
         res = aout_stream_read_u8(&stream, &results[0]);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 10);
 
         ASSERT_EQ(results[0], 21);
@@ -913,7 +899,6 @@ TEST stream_write_u16_then_read_u16(void) {
         ASSERT(AOUT_IS_OK(res));
         res = aout_stream_write_u16(&stream, 2339);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 10);
 
         uint16_t h0 = aout_hton_u16(21000);
@@ -948,7 +933,6 @@ TEST stream_write_u16_then_read_u16(void) {
         ASSERT(AOUT_IS_OK(res));
         res = aout_stream_read_u16(&stream, &results[0]);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 10);
 
         ASSERT_EQ(results[0], 21000);
@@ -980,7 +964,6 @@ TEST stream_write_u32_then_read_u32(void) {
         ASSERT(AOUT_IS_OK(res));
         res = aout_stream_write_u32(&stream, 2339);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 8);
 
         uint32_t h0 = aout_hton_u32(210000);
@@ -1006,7 +989,6 @@ TEST stream_write_u32_then_read_u32(void) {
         ASSERT(AOUT_IS_OK(res));
         res = aout_stream_read_u32(&stream, &results[0]);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 8);
 
         ASSERT_EQ(results[0], 210000);
@@ -1035,7 +1017,6 @@ TEST stream_write_u64_then_read_u64(void) {
         ASSERT(AOUT_IS_OK(res));
         res = aout_stream_write_u64(&stream, 2339);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 16);
 
         uint64_t h0 = aout_hton_u64(21000000);
@@ -1070,7 +1051,6 @@ TEST stream_write_u64_then_read_u64(void) {
         ASSERT(AOUT_IS_OK(res));
         res = aout_stream_read_u64(&stream, &results[0]);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 16);
 
         ASSERT_EQ(results[0], 21000000);
@@ -1099,7 +1079,6 @@ TEST stream_write_f32_then_read_f32(void) {
         ASSERT(AOUT_IS_OK(res));
         res = aout_stream_write_f32(&stream, 0.001f);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 8);
 
         uint32_t h0 = aout_hton_f32(3.14159f);
@@ -1125,7 +1104,6 @@ TEST stream_write_f32_then_read_f32(void) {
         ASSERT(AOUT_IS_OK(res));
         res = aout_stream_read_f32(&stream, &results[0]);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 8);
 
         ASSERT_EQ(results[0], 3.14159f);
@@ -1154,7 +1132,6 @@ TEST stream_write_f64_then_read_f64(void) {
         ASSERT(AOUT_IS_OK(res));
         res = aout_stream_write_f64(&stream, 2339.0001);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 16);
 
         uint64_t h0 = aout_hton_f64(3.1415926535);
@@ -1189,7 +1166,6 @@ TEST stream_write_f64_then_read_f64(void) {
         ASSERT(AOUT_IS_OK(res));
         res = aout_stream_read_f64(&stream, &results[0]);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT_EQ(aout_stream_get_count(&stream), 16);
 
         ASSERT_EQ(results[0], 3.1415926535);

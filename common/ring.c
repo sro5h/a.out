@@ -11,6 +11,32 @@ static size_t aout_ring_byte_index(
                 aout_ring const* self,
                 size_t index);
 
+aout_res aout_ring_init(
+                aout_ring* self,
+                size_t capacity,
+                size_t value_size) {
+        assert(self);
+
+        // Reserve one dummy value at the end
+        self->values = calloc(capacity + 1, value_size);
+
+        if (!self->values) {
+                return AOUT_ERR;
+        }
+
+        self->capacity = capacity;
+        self->value_size = value_size;
+        self->head = capacity;
+
+        return AOUT_OK;
+}
+
+void aout_ring_fini(
+                aout_ring* self) {
+        assert(self);
+        free(self->values);
+}
+
 aout_ring* aout_ring_create(
                 size_t capacity,
                 size_t value_size) {
@@ -20,16 +46,9 @@ aout_ring* aout_ring_create(
                 goto error;
         }
 
-        // Reserve one dummy value at the end
-        self->values = calloc(capacity + 1, value_size);
-
-        if (!self->values) {
+        if (AOUT_IS_ERR(aout_ring_init(self, capacity, value_size))) {
                 goto error;
         }
-
-        self->capacity = capacity;
-        self->value_size = value_size;
-        self->head = capacity;
 
         return self;
 
@@ -41,7 +60,7 @@ error:
 void aout_ring_destroy(
                 aout_ring* self) {
         if (self) {
-                free(self->values);
+                aout_ring_fini(self);
                 free(self);
         }
 }

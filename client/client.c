@@ -102,7 +102,7 @@ aout_res aout_client_connect(
         ENetPeer* peer = enet_host_connect(self->host, &address, 2, 0);
 
         if (!peer) {
-                return AOUT_ERR(AOUT_CLIENT_ERR);
+                return AOUT_ERR;
         }
 
         return AOUT_OK;
@@ -151,7 +151,7 @@ error:
         assert(packet); assert(packet->referenceCount == 0);
         enet_packet_destroy(packet);
 
-        return AOUT_ERR(AOUT_CLIENT_ERR);
+        return AOUT_ERR;
 }
 
 aout_connection aout_client_get_connection(

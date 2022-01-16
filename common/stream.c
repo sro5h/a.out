@@ -52,7 +52,7 @@ aout_res aout_stream_write_bytes(
         assert(self); assert(values);
 
         if (!aout_stream_has_capacity(self, size)) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         memcpy(&self->data[self->index], values, size);
@@ -145,7 +145,7 @@ aout_res aout_stream_read_bytes(
         assert(self); assert(values);
 
         if (!aout_stream_has_capacity(self, size)) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         memcpy(values, &self->data[self->index], size);

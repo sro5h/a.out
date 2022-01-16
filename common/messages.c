@@ -25,7 +25,7 @@ aout_res aout_stream_write_cl_msg_input(
         assert(self); assert(msg);
 
         if (!aout_stream_has_capacity(self, sizeof(*msg))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         // Ignore return values, as aout_stream_has_capacity returned true
@@ -52,7 +52,7 @@ aout_res aout_stream_write_sv_msg_connection(
         // Make sure there is enough space to write each type on its own. This
         // leaves the option to optimize how many bytes are written.
         if (!aout_stream_has_capacity(self, sizeof(*msg))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         // Ignore return values, as aout_stream_has_capacity returned true
@@ -71,7 +71,7 @@ aout_res aout_stream_write_sv_msg_state(
         assert(self); assert(msg);
 
         if (!aout_stream_has_capacity(self, sizeof(*msg))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         aout_res res = { 0 };
@@ -125,23 +125,23 @@ aout_res aout_stream_read_cl_msg_input(
         aout_cl_msg_input tmp;
 
         if (AOUT_IS_ERR(aout_stream_read_u64(self, &tmp.tick.value))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.up))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.down))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.left))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.right))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         *msg = tmp;
@@ -156,11 +156,11 @@ aout_res aout_stream_read_sv_msg_connection(
         aout_sv_msg_connection tmp;
 
         if (AOUT_IS_ERR(aout_stream_read_u32(self, &tmp.id))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         if (AOUT_IS_ERR(aout_stream_read_u16(self, &tmp.peer_id))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         *msg = tmp;
@@ -175,15 +175,15 @@ aout_res aout_stream_read_sv_msg_state(
         aout_sv_msg_state tmp;
 
         if (AOUT_IS_ERR(aout_stream_read_u64(self, &tmp.tick.value))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         if (AOUT_IS_ERR(aout_stream_read_f32(self, &tmp.position.x))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         if (AOUT_IS_ERR(aout_stream_read_f32(self, &tmp.position.y))) {
-                return AOUT_ERR(AOUT_STREAM_ERR_END_REACHED);
+                return AOUT_ERR;
         }
 
         *msg = tmp;

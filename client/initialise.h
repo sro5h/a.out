@@ -3,11 +3,11 @@
 
 #include <common/result.h>
 
-typedef enum aout_initialise_res {
+typedef enum aout_res_initialise {
         AOUT_INITIALISE_OK,
         AOUT_INITIALISE_ERR_ENET,
         AOUT_INITIALISE_ERR_GLFW,
-} aout_initialise_res;
+} aout_res_initialise;
 
 aout_res aout_initialise(
                 void);

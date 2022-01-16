@@ -22,11 +22,11 @@ aout_res aout_on_sigint(
         sig_action.sa_flags = 0;
 
         if (sigemptyset(&sig_action.sa_mask) < 0) {
-                return AOUT_ERR(AOUT_SIG_ERR);
+                return AOUT_ERR;
         }
 
         if (sigaction(SIGINT, &sig_action, NULL) < 0) {
-                return AOUT_ERR(AOUT_SIG_ERR);
+                return AOUT_ERR;
         }
 
         return AOUT_OK;

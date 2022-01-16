@@ -17,11 +17,6 @@ typedef struct aout_client {
         aout_client_adapter adapter;
 } aout_client;
 
-typedef enum aout_client_res {
-        AOUT_CLIENT_OK,
-        AOUT_CLIENT_ERR
-} aout_client_res;
-
 aout_client* aout_client_create(
                 aout_client_adapter adapter);
 

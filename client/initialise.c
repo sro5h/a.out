@@ -10,12 +10,12 @@ aout_res aout_initialise(
         stm_setup();
 
         if (enet_initialize() != 0) {
-                return AOUT_ERR(AOUT_INITIALISE_ERR_ENET);
+                return AOUT_RES(AOUT_INITIALISE_ERR_ENET);
         }
 
         if (!glfwInit()) {
                 enet_deinitialize();
-                return AOUT_ERR(AOUT_INITIALISE_ERR_GLFW);
+                return AOUT_RES(AOUT_INITIALISE_ERR_GLFW);
         }
 
         return AOUT_OK;

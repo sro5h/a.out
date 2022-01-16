@@ -159,7 +159,7 @@ error:
         assert(packet); assert(packet->referenceCount == 0);
         enet_packet_destroy(packet);
 
-        return AOUT_ERR(AOUT_SERVER_ERR);
+        return AOUT_ERR;
 }
 
 aout_res aout_server_send_msg_state(
@@ -209,7 +209,7 @@ error:
         assert(packet); assert(packet->referenceCount == 0);
         enet_packet_destroy(packet);
 
-        return AOUT_ERR(AOUT_SERVER_ERR);
+        return AOUT_ERR;
 }
 
 static void aout_server_on_connect(

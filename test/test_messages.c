@@ -45,7 +45,6 @@ TEST stream_write_cl_msg_type(void) {
         cursor = 0;
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
         cursor += sizeof(n_type);
         ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
@@ -98,7 +97,6 @@ TEST stream_write_sv_msg_type(void) {
         cursor = 0;
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT(memcmp(stream.data + cursor, &n_type0, sizeof(n_type0)) == 0);
         cursor += sizeof(n_type0);
         ASSERT(memcmp(stream.data + cursor, &n_type1, sizeof(n_type1)) == 0);
@@ -156,7 +154,6 @@ TEST stream_write_cl_msg_input(void) {
         cursor = 0;
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT(memcmp(stream.data + cursor, &n_tick, sizeof(n_tick)) == 0);
         cursor += sizeof(n_tick);
         ASSERT(memcmp(stream.data + cursor, &n_up, sizeof(n_up)) == 0);
@@ -208,7 +205,6 @@ TEST stream_write_sv_msg_connection(void) {
         cursor = 0;
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT(memcmp(stream.data + cursor, &n_id, sizeof(n_id)) == 0);
         cursor += sizeof(n_id);
         ASSERT(memcmp(stream.data + cursor, &n_peer_id, sizeof(n_peer_id)) == 0);
@@ -257,7 +253,6 @@ TEST stream_write_sv_msg_state(void) {
         cursor = 0;
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
         ASSERT(memcmp(stream.data + cursor, &n_tick, sizeof(n_tick)) == 0);
         cursor += sizeof(n_tick);
         ASSERT(memcmp(stream.data + cursor, &n_px, sizeof(n_px)) == 0);
@@ -355,7 +350,6 @@ TEST stream_read_cl_msg_input(void) {
 
         res = aout_stream_read_cl_msg_input(&stream, &msg);
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
 
         // Values should not have changed
         ASSERT_EQ(msg.tick.value, h_tick);
@@ -388,7 +382,6 @@ TEST stream_read_sv_msg_connection(void) {
         res = aout_stream_read_sv_msg_connection(&stream, &msg);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
 
         // Values should not have changed
         ASSERT_EQ(msg.id, h_id);
@@ -421,7 +414,6 @@ TEST stream_read_sv_msg_state(void) {
         res = aout_stream_read_sv_msg_state(&stream, &msg);
 
         ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(res.code, AOUT_STREAM_ERR_END_REACHED);
 
         // Values should not have changed
         ASSERT_EQ(msg.tick.value, h_tick);
