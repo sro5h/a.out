@@ -137,8 +137,8 @@ aout_res aout_application_run(
                 aout_application* self) {
         assert(self);
 
-        uint64_t last_time = stm_now();
-        double accumulator = 0.0;
+        uint64_t  last_time = stm_now();
+        float64_t accumulator = 0.0;
 
         while (aout_application_is_running(self)) {
                 if (glfwWindowShouldClose(self->window) || self->sigint_raised) {
@@ -148,9 +148,7 @@ aout_res aout_application_run(
                         break;
                 }
 
-                uint64_t  const now = stm_now();
-                float64_t const delta_time = stm_sec(stm_diff(now, last_time));
-                last_time = now;
+                float64_t const delta_time = stm_sec(stm_laptime(&last_time));
 
                 float64_t const time_step = self->time_step;
                 for (accumulator += delta_time; accumulator > time_step;
