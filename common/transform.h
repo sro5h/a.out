@@ -1,7 +1,7 @@
 #ifndef COMMON_TRANSFORM_H
 #define COMMON_TRANSFORM_H
 
-#include "vector2.h"
+#include "vec2.h"
 
 typedef struct aout_transform {
         aout_vec2 position;

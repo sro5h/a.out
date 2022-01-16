@@ -10,7 +10,7 @@ common_sources = [
   'tick.c',
   'transform.c',
   'util.c',
-  'vector2.c'
+  'vec2.c'
 ]
 
 common_public_headers = include_directories(
@@ -21,6 +21,7 @@ common_dependencies = [
 ]
 
 if build_machine.system() == 'linux'
+  common_dependencies += meson.get_compiler('c').find_library('m')
   common_dependencies += dependency('threads')
 endif
 

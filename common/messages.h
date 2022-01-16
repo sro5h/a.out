@@ -4,7 +4,7 @@
 #include "result.h"
 #include "stream.h"
 #include "tick.h"
-#include "vector2.h"
+#include "vec2.h"
 
 #define AOUT_TYPE_CL_MSG_TYPE uint32_t
 

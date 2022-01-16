@@ -1,5 +1,5 @@
-#ifndef COMMON_VECTOR2_H
-#define COMMON_VECTOR2_H
+#ifndef COMMON_VEC2_H
+#define COMMON_VEC2_H
 
 #include "types.h"
 
@@ -22,5 +22,14 @@ COMMON_API aout_vec2 aout_vec2_mul(
 COMMON_API aout_vec2 aout_vec2_div(
                 aout_vec2 v,
                 float32_t f);
+
+COMMON_API float32_t aout_vec2_length_sq(
+                aout_vec2 v);
+
+COMMON_API float32_t aout_vec2_length(
+                aout_vec2 v);
+
+COMMON_API aout_vec2 aout_vec2_norm(
+                aout_vec2 v);
 
 #endif
