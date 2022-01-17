@@ -3,10 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static size_t aout_ring_index(
-                aout_ring const* self,
-                size_t index);
-
 static size_t aout_ring_byte_index(
                 aout_ring const* self,
                 size_t index);
@@ -26,7 +22,6 @@ aout_res aout_ring_init(
 
         self->capacity = capacity;
         self->value_size = value_size;
-        self->head = capacity;
 
         return AOUT_OK;
 }
@@ -69,8 +64,7 @@ void aout_ring_clear(
                 aout_ring* self) {
         assert(self);
 
-        self->head = self->capacity;
-        self->tail = 0;
+        self->root = 0;
         self->size = 0;
 }
 
@@ -79,18 +73,16 @@ void aout_ring_push_back(
                 void const* value) {
         assert(self); assert(value);
 
-        self->head = aout_ring_index(self, self->head + 1);
-
         // Check whether ring was already full
-        if (self->tail == aout_ring_index(self, self->head + 1)) {
-                self->tail = aout_ring_index(self, self->tail + 1);
+        if (self->size == self->capacity) {
+                self->root = aout_ring_index(self, 1);
         } else {
                 ++self->size;
         }
 
         unsigned char* bytes = self->values;
         memcpy(
-                bytes + aout_ring_byte_index(self, self->head),
+                bytes + aout_ring_byte_index(self, self->size - 1),
                 value,
                 self->value_size
         );
@@ -104,7 +96,7 @@ void aout_ring_pop_front(
                 return;
         }
 
-        self->tail = aout_ring_index(self, self->tail + 1);
+        self->root = aout_ring_index(self, 1);
         --self->size;
 }
 
@@ -116,7 +108,7 @@ void* aout_ring_at(
         //assert(index < aout_ring_size(self));
 
         unsigned char* values = self->values;
-        return values + aout_ring_byte_index(self, self->tail + index);
+        return values + aout_ring_byte_index(self, index);
 }
 
 void* aout_ring_front(
@@ -157,13 +149,13 @@ bool aout_ring_empty(
         return aout_ring_size(self) == 0;
 }
 
-static size_t aout_ring_index(
+size_t aout_ring_index(
                 aout_ring const* self,
                 size_t index) {
-        return index % (self->capacity + 1);
+        return (self->root + index) % (self->capacity + 1);
 }
 
-static size_t aout_ring_byte_index(
+size_t aout_ring_byte_index(
                 aout_ring const* self,
                 size_t index) {
         return aout_ring_index(self, index) * self->value_size;

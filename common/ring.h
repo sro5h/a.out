@@ -9,8 +9,7 @@ typedef struct aout_ring {
         size_t value_size;
         size_t size;
         size_t capacity;
-        size_t head;
-        size_t tail;
+        size_t root;
 } aout_ring;
 
 COMMON_API aout_res aout_ring_init(
@@ -60,6 +59,8 @@ COMMON_API size_t aout_ring_size(
 COMMON_API bool aout_ring_empty(
                 aout_ring const* self);
 
-// ring.is_empty() <=> ring.head + 1 == ring.tail (mod ring.capacity)
+COMMON_API size_t aout_ring_index(
+                aout_ring const* self,
+                size_t index);
 
 #endif
