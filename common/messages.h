@@ -1,6 +1,7 @@
 #ifndef COMMON_MESSAGES_H
 #define COMMON_MESSAGES_H
 
+#include "input.h"
 #include "result.h"
 #include "stream.h"
 #include "tick.h"
@@ -22,7 +23,7 @@ typedef enum aout_sv_msg_type {
 // TODO: Rename to *_command
 typedef struct aout_cl_msg_input {
         aout_tick tick;
-        uint8_t up, down, left, right;
+        aout_input input;
 } aout_cl_msg_input;
 
 typedef struct aout_sv_msg_connection {

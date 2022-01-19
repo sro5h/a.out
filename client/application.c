@@ -206,13 +206,19 @@ static void aout_application_update_fixed(
 
         // Send input
         if (self->is_connected) {
-                aout_cl_msg_input msg = { 0 };
-                msg.up = glfwGetKey(self->window, GLFW_KEY_W) == GLFW_PRESS;
-                msg.down = glfwGetKey(self->window, GLFW_KEY_S) == GLFW_PRESS;
-                msg.left = glfwGetKey(self->window, GLFW_KEY_A) == GLFW_PRESS;
-                msg.right = glfwGetKey(self->window, GLFW_KEY_D) == GLFW_PRESS;
+                aout_input input = { 0 };
+                input.right = glfwGetKey(self->window, GLFW_KEY_D) == GLFW_PRESS;
+                input.left = glfwGetKey(self->window, GLFW_KEY_A) == GLFW_PRESS;
+                input.up = glfwGetKey(self->window, GLFW_KEY_W) == GLFW_PRESS;
+                input.down = glfwGetKey(self->window, GLFW_KEY_S) == GLFW_PRESS;
 
-                aout_client_send_msg_input(self->client, &msg);
+                aout_client_send_msg_input(
+                        self->client,
+                        &(aout_cl_msg_input) {
+                                .tick = self->tick,
+                                .input = input
+                        }
+                );
         }
 
         aout_client_update(self->client);

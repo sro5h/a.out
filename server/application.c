@@ -213,16 +213,16 @@ static void aout_application_on_msg_input(
 
         aout_vec2 direction = { 0 };
 
-        if (msg->right) {
+        if (msg->input.right) {
                 direction.x += 1;
         }
-        if (msg->left) {
+        if (msg->input.left) {
                 direction.x -= 1;
         }
-        if (msg->up) {
+        if (msg->input.up) {
                 direction.y += 1;
         }
-        if (msg->down) {
+        if (msg->input.down) {
                 direction.y -= 1;
         }
 

@@ -32,13 +32,13 @@ aout_res aout_stream_write_cl_msg_input(
         aout_res res = { 0 };
         res = aout_stream_write_u64(self, msg->tick.value);
         assert(AOUT_IS_OK(res));
-        res = aout_stream_write_u8(self, msg->up);
+        res = aout_stream_write_u8(self, msg->input.right);
         assert(AOUT_IS_OK(res));
-        res = aout_stream_write_u8(self, msg->down);
+        res = aout_stream_write_u8(self, msg->input.left);
         assert(AOUT_IS_OK(res));
-        res = aout_stream_write_u8(self, msg->left);
+        res = aout_stream_write_u8(self, msg->input.up);
         assert(AOUT_IS_OK(res));
-        res = aout_stream_write_u8(self, msg->right);
+        res = aout_stream_write_u8(self, msg->input.down);
         assert(AOUT_IS_OK(res));
 
         return AOUT_OK;
@@ -128,19 +128,19 @@ aout_res aout_stream_read_cl_msg_input(
                 return AOUT_ERR;
         }
 
-        if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.up))) {
+        if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.input.right))) {
                 return AOUT_ERR;
         }
 
-        if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.down))) {
+        if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.input.left))) {
                 return AOUT_ERR;
         }
 
-        if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.left))) {
+        if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.input.up))) {
                 return AOUT_ERR;
         }
 
-        if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.right))) {
+        if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.input.down))) {
                 return AOUT_ERR;
         }
 

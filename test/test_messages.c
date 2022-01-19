@@ -123,16 +123,18 @@ TEST stream_write_cl_msg_input(void) {
         size_t cursor = 0;
         aout_cl_msg_input msg = {
                 .tick.value = 1337,
-                .up = false,
-                .down = true,
-                .left = true,
-                .right = false
+                .input = {
+                        .right = false,
+                        .left = true,
+                        .up = false,
+                        .down = true
+                }
         };
         uint64_t n_tick = aout_hton_u64(msg.tick.value);
-        uint8_t n_up = msg.up;
-        uint8_t n_down = msg.down;
-        uint8_t n_left = msg.left;
-        uint8_t n_right = msg.right;
+        uint8_t n_right = msg.input.right;
+        uint8_t n_left = msg.input.left;
+        uint8_t n_up = msg.input.up;
+        uint8_t n_down = msg.input.down;
 
         res = aout_stream_write_cl_msg_input(&stream, &msg);
         cursor = 0;
@@ -140,14 +142,14 @@ TEST stream_write_cl_msg_input(void) {
         ASSERT(AOUT_IS_OK(res));
         ASSERT(memcmp(stream.data + cursor, &n_tick, sizeof(n_tick)) == 0);
         cursor += sizeof(n_tick);
+        ASSERT(memcmp(stream.data + cursor, &n_right, sizeof(n_right)) == 0);
+        cursor += sizeof(n_right);
+        ASSERT(memcmp(stream.data + cursor, &n_left, sizeof(n_left)) == 0);
+        cursor += sizeof(n_left);
         ASSERT(memcmp(stream.data + cursor, &n_up, sizeof(n_up)) == 0);
         cursor += sizeof(n_up);
         ASSERT(memcmp(stream.data + cursor, &n_down, sizeof(n_down)) == 0);
         cursor += sizeof(n_down);
-        ASSERT(memcmp(stream.data + cursor, &n_left, sizeof(n_left)) == 0);
-        cursor += sizeof(n_left);
-        ASSERT(memcmp(stream.data + cursor, &n_right, sizeof(n_right)) == 0);
-        cursor += sizeof(n_right);
         ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         res = aout_stream_write_cl_msg_input(&stream, &msg);
@@ -156,14 +158,14 @@ TEST stream_write_cl_msg_input(void) {
         ASSERT(AOUT_IS_ERR(res));
         ASSERT(memcmp(stream.data + cursor, &n_tick, sizeof(n_tick)) == 0);
         cursor += sizeof(n_tick);
+        ASSERT(memcmp(stream.data + cursor, &n_right, sizeof(n_right)) == 0);
+        cursor += sizeof(n_right);
+        ASSERT(memcmp(stream.data + cursor, &n_left, sizeof(n_left)) == 0);
+        cursor += sizeof(n_left);
         ASSERT(memcmp(stream.data + cursor, &n_up, sizeof(n_up)) == 0);
         cursor += sizeof(n_up);
         ASSERT(memcmp(stream.data + cursor, &n_down, sizeof(n_down)) == 0);
         cursor += sizeof(n_down);
-        ASSERT(memcmp(stream.data + cursor, &n_left, sizeof(n_left)) == 0);
-        cursor += sizeof(n_left);
-        ASSERT(memcmp(stream.data + cursor, &n_right, sizeof(n_right)) == 0);
-        cursor += sizeof(n_right);
         ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         free(data);
@@ -334,29 +336,29 @@ TEST stream_read_cl_msg_input(void) {
         aout_res res = { 0 };
         aout_cl_msg_input msg = { 0 };
         uint64_t h_tick = aout_ntoh_u64(*((uint64_t*) &data[0]));
-        uint8_t h_up = data[8];
-        uint8_t h_down = data[9];
-        uint8_t h_left = data[10];
-        uint8_t h_right = data[11];
+        uint8_t h_right = data[8];
+        uint8_t h_left = data[9];
+        uint8_t h_up = data[10];
+        uint8_t h_down = data[11];
 
         res = aout_stream_read_cl_msg_input(&stream, &msg);
 
         ASSERT(AOUT_IS_OK(res));
         ASSERT_EQ(msg.tick.value, h_tick);
-        ASSERT_EQ(msg.up, h_up);
-        ASSERT_EQ(msg.down, h_down);
-        ASSERT_EQ(msg.left, h_left);
-        ASSERT_EQ(msg.right, h_right);
+        ASSERT_EQ(msg.input.right, h_right);
+        ASSERT_EQ(msg.input.left, h_left);
+        ASSERT_EQ(msg.input.up, h_up);
+        ASSERT_EQ(msg.input.down, h_down);
 
         res = aout_stream_read_cl_msg_input(&stream, &msg);
         ASSERT(AOUT_IS_ERR(res));
 
         // Values should not have changed
         ASSERT_EQ(msg.tick.value, h_tick);
-        ASSERT_EQ(msg.up, h_up);
-        ASSERT_EQ(msg.down, h_down);
-        ASSERT_EQ(msg.left, h_left);
-        ASSERT_EQ(msg.right, h_right);
+        ASSERT_EQ(msg.input.right, h_right);
+        ASSERT_EQ(msg.input.left, h_left);
+        ASSERT_EQ(msg.input.up, h_up);
+        ASSERT_EQ(msg.input.down, h_down);
 
         PASS();
 }
