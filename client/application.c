@@ -1,8 +1,9 @@
 #include "application.h"
-#include "player_mesh.h"
+#include "mesh_player.h"
 
 #include <common/console.h>
 #include <common/log.h>
+#include <common/state.h>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -12,7 +13,8 @@
 typedef struct aout_application {
         GLFWwindow* window;
         aout_renderer* renderer;
-        aout_mesh player_mesh;
+        aout_mesh mesh_player;
+        aout_mesh mesh_server;
         bool is_running;
 
         aout_client* client;
@@ -22,8 +24,9 @@ typedef struct aout_application {
         aout_tick tick;
 
         sig_atomic_t sigint_raised;
-        aout_transform player_transform;
-        aout_transform player_transform_prev;
+        aout_state state_server;
+        aout_state state;
+        aout_state state_prev;
 } aout_application;
 
 
@@ -94,8 +97,11 @@ aout_application* aout_application_create(
         }
 
         aout_renderer_set_view(self->renderer, 640, 480);
-        self->player_mesh = aout_player_mesh_create((aout_rgba8) {
+        self->mesh_player = aout_mesh_player_create((aout_rgba8) {
                 0x74, 0x00, 0xB8, 0xff
+        });
+        self->mesh_server = aout_mesh_player_create((aout_rgba8) {
+                0x5e, 0x60, 0xce, 0xff
         });
 
         self->client = aout_client_create((aout_client_adapter) {
@@ -204,14 +210,18 @@ static void aout_application_update_fixed(
 
         //if (!aout_tick_filter_rate(&self->tick, 2)) { return; }
 
+        aout_input input = { 0 };
+        input.right = glfwGetKey(self->window, GLFW_KEY_D) == GLFW_PRESS;
+        input.left = glfwGetKey(self->window, GLFW_KEY_A) == GLFW_PRESS;
+        input.up = glfwGetKey(self->window, GLFW_KEY_W) == GLFW_PRESS;
+        input.down = glfwGetKey(self->window, GLFW_KEY_S) == GLFW_PRESS;
+
+        // Apply input
+        self->state_prev = self->state;
+        aout_state_apply_input(&self->state, &input);
+
         // Send input
         if (self->is_connected) {
-                aout_input input = { 0 };
-                input.right = glfwGetKey(self->window, GLFW_KEY_D) == GLFW_PRESS;
-                input.left = glfwGetKey(self->window, GLFW_KEY_A) == GLFW_PRESS;
-                input.up = glfwGetKey(self->window, GLFW_KEY_W) == GLFW_PRESS;
-                input.down = glfwGetKey(self->window, GLFW_KEY_S) == GLFW_PRESS;
-
                 aout_client_send_msg_input(
                         self->client,
                         &(aout_cl_msg_input) {
@@ -231,10 +241,19 @@ static void aout_application_update(
         assert(self);
         (void) delta_time;
 
-        aout_transform interpolated = { 0 };
-        interpolated = aout_transform_add(
-                aout_transform_mul(self->player_transform, alpha),
-                aout_transform_mul(self->player_transform_prev, 1.0 - alpha)
+        aout_transform trans = {
+                .position = self->state.p,
+                .scale = { 1.f, 1.f }
+        };
+
+        aout_transform trans_prev = {
+                .position = self->state_prev.p,
+                .scale = { 1.f, 1.f }
+        };
+
+        aout_transform interpolated = aout_transform_add(
+                aout_transform_mul(trans, alpha),
+                aout_transform_mul(trans_prev, 1.0 - alpha)
         );
 
         int width, height;
@@ -245,7 +264,16 @@ static void aout_application_update(
 
         aout_renderer_render_mesh(
                 self->renderer,
-                &self->player_mesh,
+                &self->mesh_server,
+                &(aout_transform) {
+                        .position = self->state_server.p,
+                        .scale = { 1.f, 1.f }
+                }
+        );
+
+        aout_renderer_render_mesh(
+                self->renderer,
+                &self->mesh_player,
                 &interpolated
         );
 
@@ -285,8 +313,7 @@ static void aout_application_on_msg_state(
 
         assert(self->is_connected);
 
-        self->player_transform_prev = self->player_transform;
-        self->player_transform.position = msg->position;
+        self->state_server.p = msg->position;
 }
 
 static void on_sigint(

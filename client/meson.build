@@ -4,7 +4,7 @@ client_sources = [
   'implementation.c',
   'initialise.c',
   'main.c',
-  'player_mesh.c',
+  'mesh_player.c',
   'renderer.c'
 ]
 

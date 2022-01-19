@@ -1,4 +1,4 @@
-#include "player_mesh.h"
+#include "mesh_player.h"
 #include "vertex.h"
 
 #include <cglm/mat4.h>
@@ -37,7 +37,7 @@ static char const* fs_source =
         "       color = frag.color * outline_mask * mask;\n"
         "}\n";
 
-aout_mesh aout_player_mesh_create(
+aout_mesh aout_mesh_player_create(
                 aout_rgba8 color) {
         aout_vertex const vertices[] = {
                 {
