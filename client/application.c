@@ -310,7 +310,7 @@ static void aout_application_on_msg_state(
 
         assert(self->is_connected);
 
-        self->state_server.p = msg->position;
+        self->state_server = msg->state;
 }
 
 static void on_sigint(

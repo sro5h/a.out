@@ -3,9 +3,9 @@
 
 #include "input.h"
 #include "result.h"
+#include "state.h"
 #include "stream.h"
 #include "tick.h"
-#include "vec2.h"
 
 #define AOUT_TYPE_CL_MSG_TYPE uint32_t
 
@@ -33,7 +33,7 @@ typedef struct aout_sv_msg_connection {
 
 typedef struct aout_sv_msg_state {
         aout_tick tick;
-        aout_vec2 position;
+        aout_state state;
 } aout_sv_msg_state;
 
 COMMON_API aout_res aout_stream_write_cl_msg_type(

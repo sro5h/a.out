@@ -233,11 +233,16 @@ TEST stream_write_sv_msg_state(void) {
         size_t cursor = 0;
         aout_sv_msg_state msg = {
                 .tick.value = 3993,
-                .position = { .x = 3.14159f, .y = -32.3299f }
+                .state = {
+                        .p = { .x = 3.14159f, .y = -32.3299f },
+                        .v = { .x = -255.32f, .y = 0.329191f }
+                }
         };
         uint64_t n_tick = aout_hton_u64(msg.tick.value);
-        uint32_t n_px = aout_hton_f32(msg.position.x);
-        uint32_t n_py = aout_hton_f32(msg.position.y);
+        uint32_t n_px = aout_hton_f32(msg.state.p.x);
+        uint32_t n_py = aout_hton_f32(msg.state.p.y);
+        uint32_t n_vx = aout_hton_f32(msg.state.v.x);
+        uint32_t n_vy = aout_hton_f32(msg.state.v.y);
 
         res = aout_stream_write_sv_msg_state(&stream, &msg);
         cursor = 0;
@@ -249,6 +254,10 @@ TEST stream_write_sv_msg_state(void) {
         cursor += sizeof(n_px);
         ASSERT(memcmp(stream.data + cursor, &n_py, sizeof(n_py)) == 0);
         cursor += sizeof(n_py);
+        ASSERT(memcmp(stream.data + cursor, &n_vx, sizeof(n_vx)) == 0);
+        cursor += sizeof(n_vx);
+        ASSERT(memcmp(stream.data + cursor, &n_vy, sizeof(n_vy)) == 0);
+        cursor += sizeof(n_vy);
         ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         res = aout_stream_write_sv_msg_state(&stream, &msg);
@@ -261,6 +270,10 @@ TEST stream_write_sv_msg_state(void) {
         cursor += sizeof(n_px);
         ASSERT(memcmp(stream.data + cursor, &n_py, sizeof(n_py)) == 0);
         cursor += sizeof(n_py);
+        ASSERT(memcmp(stream.data + cursor, &n_vx, sizeof(n_vx)) == 0);
+        cursor += sizeof(n_vx);
+        ASSERT(memcmp(stream.data + cursor, &n_vy, sizeof(n_vy)) == 0);
+        cursor += sizeof(n_vy);
         ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
         free(data);
@@ -394,7 +407,8 @@ TEST stream_read_sv_msg_connection(void) {
 
 TEST stream_read_sv_msg_state(void) {
         uint8_t data[] = { 54, 223, -20, 84, 59, 81, 10, 98, 32, 129, -32,
-                           239, 12, 4, 9, 94, 49, 3 };
+                           239, 12, 4, 9, 94, 49, 3, 17, 83, -124, 51, 98,
+                           12, 27, -3 };
         aout_stream stream = {
                 .data = data,
                 .data_size = sizeof(data)
@@ -403,15 +417,19 @@ TEST stream_read_sv_msg_state(void) {
         aout_res res = { 0 };
         aout_sv_msg_state msg = { 0 };
         uint64_t h_tick = aout_ntoh_u64(*((uint64_t*) &data[0]));
-        float32_t h_position_x = aout_ntoh_f32(*((uint32_t*) &data[8]));
-        float32_t h_position_y = aout_ntoh_f32(*((uint32_t*) &data[12]));
+        float32_t h_px = aout_ntoh_f32(*((uint32_t*) &data[8]));
+        float32_t h_py = aout_ntoh_f32(*((uint32_t*) &data[12]));
+        float32_t h_vx = aout_ntoh_f32(*((uint32_t*) &data[16]));
+        float32_t h_vy = aout_ntoh_f32(*((uint32_t*) &data[20]));
 
         res = aout_stream_read_sv_msg_state(&stream, &msg);
 
         ASSERT(AOUT_IS_OK(res));
         ASSERT_EQ(msg.tick.value, h_tick);
-        ASSERT_EQ(msg.position.x, h_position_x);
-        ASSERT_EQ(msg.position.y, h_position_y);
+        ASSERT_EQ(msg.state.p.x, h_px);
+        ASSERT_EQ(msg.state.p.y, h_py);
+        ASSERT_EQ(msg.state.v.x, h_vx);
+        ASSERT_EQ(msg.state.v.y, h_vy);
 
         res = aout_stream_read_sv_msg_state(&stream, &msg);
 
@@ -419,8 +437,10 @@ TEST stream_read_sv_msg_state(void) {
 
         // Values should not have changed
         ASSERT_EQ(msg.tick.value, h_tick);
-        ASSERT_EQ(msg.position.x, h_position_x);
-        ASSERT_EQ(msg.position.y, h_position_y);
+        ASSERT_EQ(msg.state.p.x, h_px);
+        ASSERT_EQ(msg.state.p.y, h_py);
+        ASSERT_EQ(msg.state.v.x, h_vx);
+        ASSERT_EQ(msg.state.v.y, h_vy);
 
         PASS();
 }

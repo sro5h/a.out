@@ -77,9 +77,13 @@ aout_res aout_stream_write_sv_msg_state(
         aout_res res = { 0 };
         res = aout_stream_write_u64(self, msg->tick.value);
         assert(AOUT_IS_OK(res));
-        res = aout_stream_write_f32(self, msg->position.x);
+        res = aout_stream_write_f32(self, msg->state.p.x);
         assert(AOUT_IS_OK(res));
-        res = aout_stream_write_f32(self, msg->position.y);
+        res = aout_stream_write_f32(self, msg->state.p.y);
+        assert(AOUT_IS_OK(res));
+        res = aout_stream_write_f32(self, msg->state.v.x);
+        assert(AOUT_IS_OK(res));
+        res = aout_stream_write_f32(self, msg->state.v.y);
         assert(AOUT_IS_OK(res));
 
         return AOUT_OK;
@@ -178,11 +182,19 @@ aout_res aout_stream_read_sv_msg_state(
                 return AOUT_ERR;
         }
 
-        if (AOUT_IS_ERR(aout_stream_read_f32(self, &tmp.position.x))) {
+        if (AOUT_IS_ERR(aout_stream_read_f32(self, &tmp.state.p.x))) {
                 return AOUT_ERR;
         }
 
-        if (AOUT_IS_ERR(aout_stream_read_f32(self, &tmp.position.y))) {
+        if (AOUT_IS_ERR(aout_stream_read_f32(self, &tmp.state.p.y))) {
+                return AOUT_ERR;
+        }
+
+        if (AOUT_IS_ERR(aout_stream_read_f32(self, &tmp.state.v.x))) {
+                return AOUT_ERR;
+        }
+
+        if (AOUT_IS_ERR(aout_stream_read_f32(self, &tmp.state.v.y))) {
                 return AOUT_ERR;
         }
 

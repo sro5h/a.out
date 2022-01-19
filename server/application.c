@@ -175,7 +175,8 @@ static void aout_application_update_fixed(
                         self->server,
                         0,
                         &(aout_sv_msg_state) {
-                                .position = player->state.p,
+                                .tick = player->last_input_msg.tick,
+                                .state = player->state,
                         }
                 );
         }
