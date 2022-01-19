@@ -185,7 +185,7 @@ static void aout_client_on_disconnect(
                 aout_client* self,
                 ENetPeer* peer) {
         assert(self); assert(peer);
-        assert(self->peer);
+        assert(self->peer); // TODO: This will be NULL on failed connection
 
         aout_connection* connection = &self->connection;
         assert(connection->id != 0);
