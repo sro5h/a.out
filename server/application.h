@@ -6,27 +6,7 @@
 #include <common/tick.h>
 #include <signal.h>
 
-// TODO: Move to application.c and convert to static const
-#define AOUT_SERVER_MAX_CONNECTIONS 10
-
-typedef struct aout_player {
-        aout_connection connection;
-        aout_state state;
-} aout_player;
-
-typedef struct aout_application {
-        aout_player players[AOUT_SERVER_MAX_CONNECTIONS];
-        aout_server* server;
-        double time_step;
-        aout_tick tick;
-        bool is_running;
-        sig_atomic_t sigint_raised;
-} aout_application;
-
-typedef enum aout_application_res {
-        AOUT_APPLICATION_OK,
-        AOUT_APPLICATION_ERR
-} aout_application_res;
+typedef struct aout_application aout_application;
 
 aout_application* aout_application_create(
                 void);

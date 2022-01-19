@@ -11,6 +11,22 @@
 
 #define CLIENT_BODY_MASS   10
 #define CLIENT_BODY_RADIUS 10
+#define SERVER_MAX_CONNECTIONS 10
+
+typedef struct aout_player {
+        aout_connection connection;
+        aout_state state;
+} aout_player;
+
+typedef struct aout_application {
+        aout_player players[SERVER_MAX_CONNECTIONS];
+        aout_server* server;
+        double time_step;
+        aout_tick tick;
+        bool is_running;
+        sig_atomic_t sigint_raised;
+} aout_application;
+
 
 static void aout_application_update_fixed(
                 aout_application* self,
@@ -56,7 +72,7 @@ aout_application* aout_application_create(
                 .on_disconnection = aout_application_on_disconnection,
                 .on_msg_input = aout_application_on_msg_input,
                 .context = self
-        }, AOUT_SERVER_MAX_CONNECTIONS);
+        }, SERVER_MAX_CONNECTIONS);
 
         if (!self->server) {
                 aout_loge("could not create server");

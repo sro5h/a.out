@@ -8,30 +8,7 @@
 
 #include <signal.h>
 
-typedef struct GLFWwindow GLFWwindow;
-
-typedef struct aout_application {
-        // Window and graphics
-        GLFWwindow* window;
-        aout_renderer* renderer;
-        aout_mesh player_mesh;
-        bool is_running;
-        // Networking
-        aout_client* client;
-        bool is_connected;
-        // Timing
-        double time_step; // Maybe use ticks_per_second instead
-        aout_tick tick;
-        // Other
-        sig_atomic_t sigint_raised;
-        aout_transform player_transform;
-        aout_transform player_transform_prev;
-} aout_application;
-
-typedef enum aout_application_res {
-        AOUT_APPLICATION_OK,
-        AOUT_APPLICATION_ERR
-} aout_application_res;
+typedef struct aout_application aout_application;
 
 aout_application* aout_application_create(
                 void);

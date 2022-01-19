@@ -9,6 +9,24 @@
 #include <sokol/sokol_time.h>
 #include <stdlib.h>
 
+typedef struct aout_application {
+        GLFWwindow* window;
+        aout_renderer* renderer;
+        aout_mesh player_mesh;
+        bool is_running;
+
+        aout_client* client;
+        bool is_connected;
+
+        double time_step; // Maybe use ticks_per_second instead
+        aout_tick tick;
+
+        sig_atomic_t sigint_raised;
+        aout_transform player_transform;
+        aout_transform player_transform_prev;
+} aout_application;
+
+
 static void aout_application_update_fixed(
                 aout_application* self,
                 float64_t delta_time);
