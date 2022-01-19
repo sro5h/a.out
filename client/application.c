@@ -77,7 +77,7 @@ aout_application* aout_application_create(
 
         aout_renderer_set_view(self->renderer, 640, 480);
         self->player_mesh = aout_player_mesh_create((aout_rgba8) {
-                0xf6, 0x08, 0x1e, 0xff 
+                0x74, 0x00, 0xB8, 0xff
         });
 
         self->client = aout_client_create((aout_client_adapter) {
