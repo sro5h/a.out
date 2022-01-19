@@ -16,6 +16,8 @@
 typedef struct aout_player {
         aout_connection connection;
         aout_state state;
+        aout_cl_msg_input last_input_msg;
+        bool last_input_applied;
 } aout_player;
 
 typedef struct aout_application {
@@ -156,14 +158,24 @@ static void aout_application_update_fixed(
 
         aout_server_update(self->server);
 
+        aout_player* player = &self->players[0];
+
+        if (player->connection.id && !player->last_input_applied) {
+                aout_state_apply_input(
+                        &player->state,
+                        &player->last_input_msg.input
+                );
+                player->last_input_applied = true;
+        }
+
         // Send current state to clients
         // TODO: Send state of all connected clients
-        if (self->players[0].connection.id) {
+        if (player->connection.id) {
                 aout_server_send_msg_state(
                         self->server,
                         0,
                         &(aout_sv_msg_state) {
-                                .position = self->players[0].state.p,
+                                .position = player->state.p,
                         }
                 );
         }
@@ -211,26 +223,9 @@ static void aout_application_on_msg_input(
         (void) connection;
         aout_application* self = context;
 
-        aout_vec2 direction = { 0 };
-
-        if (msg->input.right) {
-                direction.x += 1;
-        }
-        if (msg->input.left) {
-                direction.x -= 1;
-        }
-        if (msg->input.up) {
-                direction.y += 1;
-        }
-        if (msg->input.down) {
-                direction.y -= 1;
-        }
-
-        aout_vec2 velocity = aout_vec2_mul(aout_vec2_norm(direction), 25);
-        self->players[0].state.p = aout_vec2_add(
-                self->players[0].state.p,
-                velocity
-        );
+        // Only store the last received input message
+        self->players[0].last_input_msg = *msg;
+        self->players[0].last_input_applied = false;
 }
 
 static void on_sigint(

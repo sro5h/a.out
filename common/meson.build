@@ -6,6 +6,7 @@ common_sources = [
   'log.c',
   'messages.c',
   'ring.c',
+  'state.c',
   'stream.c',
   'tick.c',
   'transform.c',
