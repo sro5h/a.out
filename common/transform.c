@@ -44,3 +44,13 @@ aout_transform aout_transform_div(
                 .scale = aout_vec2_div(t.scale, f)
         };
 }
+
+aout_transform aout_transform_lerp(
+                aout_transform a,
+                aout_transform b,
+                float32_t t) {
+        return aout_transform_add(
+                aout_transform_mul(a, t),
+                aout_transform_mul(b, 1.0f - t)
+        );
+}

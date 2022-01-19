@@ -251,10 +251,7 @@ static void aout_application_update(
                 .scale = { 1.f, 1.f }
         };
 
-        aout_transform interpolated = aout_transform_add(
-                aout_transform_mul(trans, alpha),
-                aout_transform_mul(trans_prev, 1.0 - alpha)
-        );
+        aout_transform interp = aout_transform_lerp(trans, trans_prev, alpha);
 
         int width, height;
         glfwGetFramebufferSize(self->window, &width, &height);
@@ -274,7 +271,7 @@ static void aout_application_update(
         aout_renderer_render_mesh(
                 self->renderer,
                 &self->mesh_player,
-                &interpolated
+                &interp
         );
 
         aout_renderer_end(self->renderer);

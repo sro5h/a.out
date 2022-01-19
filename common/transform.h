@@ -25,4 +25,9 @@ COMMON_API aout_transform aout_transform_div(
                 aout_transform t,
                 float32_t f);
 
+COMMON_API aout_transform aout_transform_lerp(
+                aout_transform a,
+                aout_transform b,
+                float32_t t);
+
 #endif
