@@ -1,8 +1,10 @@
 #include "application.h"
 #include "mesh_player.h"
+#include "prediction.h"
 
 #include <common/console.h>
 #include <common/log.h>
+#include <common/ring.h>
 #include <common/state.h>
 
 #define GLFW_INCLUDE_NONE
@@ -27,6 +29,7 @@ typedef struct aout_application {
         aout_state state_server;
         aout_state state;
         aout_state state_prev;
+        aout_ring* predictions;
 } aout_application;
 
 
@@ -65,10 +68,21 @@ aout_application* aout_application_create(
                 return NULL;
         }
 
+        size_t const tick_rate = 20;
         self->is_running = true;
         self->is_connected = false;
-        self->time_step = 1.0 / 20;
+        self->time_step = 1.0 / tick_rate;
         self->sigint_raised = 0;
+
+        self->predictions = aout_ring_create(
+                tick_rate,
+                sizeof(aout_prediction)
+        );
+
+        if (!self->predictions) {
+                aout_loge("could not create predictions ring");
+                goto error;
+        }
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -154,6 +168,7 @@ void aout_application_destroy(
         aout_client_destroy(self->client);
         aout_renderer_destroy(self->renderer);
         glfwDestroyWindow(self->window);
+        aout_ring_destroy(self->predictions);
         free(self);
 }
 
@@ -219,6 +234,12 @@ static void aout_application_update_fixed(
         // Apply input
         self->state_prev = self->state;
         aout_state_apply_input(&self->state, &input);
+
+        aout_ring_push(self->predictions, &(aout_prediction) {
+                .tick = self->tick,
+                .input = input,
+                .state = self->state
+        });
 
         // Send input
         if (self->is_connected) {
@@ -311,6 +332,43 @@ static void aout_application_on_msg_state(
         assert(self->is_connected);
 
         self->state_server = msg->state;
+
+        if (aout_ring_empty(self->predictions)) {
+                self->state = msg->state;
+                return;
+        }
+
+        while (!aout_ring_empty(self->predictions)) {
+                aout_prediction const* p = aout_ring_front(self->predictions);
+                if (aout_tick_cmp(p->tick, msg->tick) < 0) {
+                        aout_ring_pop(self->predictions);
+                } else {
+                        break;
+                }
+        }
+
+        aout_prediction const* front = aout_ring_front(self->predictions);
+        if (aout_ring_empty(self->predictions)
+                        || aout_tick_cmp(front->tick, msg->tick) != 0) {
+                aout_loge("prediction %ld missing", msg->tick.value);
+                return;
+        }
+
+        if (aout_state_close(&front->state, &msg->state)) {
+                aout_ring_pop(self->predictions);
+                return;
+        }
+
+        self->state = msg->state;
+
+        for (size_t i = 0; i < aout_ring_end(self->predictions); ++i) {
+                aout_prediction* p = aout_ring_at(self->predictions, i);
+
+                aout_state_apply_input(&self->state, &p->input);
+                p->state = self->state;
+        }
+
+        aout_ring_pop(self->predictions);
 }
 
 static void on_sigint(

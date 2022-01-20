@@ -88,6 +88,12 @@ void aout_ring_push_back(
         );
 }
 
+void aout_ring_push(
+                aout_ring* self,
+                void const* value) {
+        aout_ring_push_back(self, value);
+}
+
 void aout_ring_pop_front(
                 aout_ring* self) {
         assert(self);
@@ -98,6 +104,11 @@ void aout_ring_pop_front(
 
         self->root = aout_ring_index(self, 1);
         --self->size;
+}
+
+void aout_ring_pop(
+                aout_ring* self) {
+        aout_ring_pop_front(self);
 }
 
 void* aout_ring_at(

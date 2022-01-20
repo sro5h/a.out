@@ -17,4 +17,8 @@ COMMON_API bool aout_tick_filter_rate(
                 aout_tick const* self,
                 uint32_t rate);
 
+COMMON_API int32_t aout_tick_cmp(
+                aout_tick a,
+                aout_tick b);
+
 #endif
