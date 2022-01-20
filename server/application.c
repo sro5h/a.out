@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define AOUT_SERVER_REAPPLY_LAST_INPUT
+
 #define CLIENT_BODY_MASS   10
 #define CLIENT_BODY_RADIUS 10
 #define SERVER_MAX_CONNECTIONS 10
@@ -160,7 +162,11 @@ static void aout_application_update_fixed(
 
         aout_player* player = &self->players[0];
 
+#ifdef AOUT_SERVER_REAPPLY_LAST_INPUT
+        if (player->connection.id /*&& !player->last_input_applied*/) {
+#else
         if (player->connection.id && !player->last_input_applied) {
+#endif
                 aout_state_apply_input(
                         &player->state,
                         &player->last_input_msg.input
@@ -179,6 +185,8 @@ static void aout_application_update_fixed(
                                 .state = player->state,
                         }
                 );
+                // TODO: Is this ok in case of no reapplying?
+                aout_tick_increment(&player->last_input_msg.tick);
         }
 
         // TODO: Send immediately
