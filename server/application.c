@@ -169,7 +169,7 @@ static void aout_application_update_fixed(
 #endif
                 aout_state_apply_input(
                         &player->state,
-                        &player->last_input_msg.input
+                        &player->last_input_msg.inputs[0]
                 );
                 player->last_input_applied = true;
         }

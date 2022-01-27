@@ -108,71 +108,6 @@ TEST stream_write_sv_msg_type(void) {
         PASS();
 }
 
-TEST stream_write_cl_msg_input(void) {
-        size_t const size = sizeof(aout_cl_msg_input) + 2;
-        uint8_t* data = calloc(size, sizeof(*data));
-
-        ASSERT(data);
-
-        aout_stream stream = {
-                .data = data,
-                .data_size = size
-        };
-
-        aout_res res = { 0 };
-        size_t cursor = 0;
-        aout_cl_msg_input msg = {
-                .tick.value = 1337,
-                .input = {
-                        .right = false,
-                        .left = true,
-                        .up = false,
-                        .down = true
-                }
-        };
-        uint64_t n_tick = aout_hton_u64(msg.tick.value);
-        uint8_t n_right = msg.input.right;
-        uint8_t n_left = msg.input.left;
-        uint8_t n_up = msg.input.up;
-        uint8_t n_down = msg.input.down;
-
-        res = aout_stream_write_cl_msg_input(&stream, &msg);
-        cursor = 0;
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT(memcmp(stream.data + cursor, &n_tick, sizeof(n_tick)) == 0);
-        cursor += sizeof(n_tick);
-        ASSERT(memcmp(stream.data + cursor, &n_right, sizeof(n_right)) == 0);
-        cursor += sizeof(n_right);
-        ASSERT(memcmp(stream.data + cursor, &n_left, sizeof(n_left)) == 0);
-        cursor += sizeof(n_left);
-        ASSERT(memcmp(stream.data + cursor, &n_up, sizeof(n_up)) == 0);
-        cursor += sizeof(n_up);
-        ASSERT(memcmp(stream.data + cursor, &n_down, sizeof(n_down)) == 0);
-        cursor += sizeof(n_down);
-        ASSERT(memval(stream.data + cursor, 0, size - cursor));
-
-        res = aout_stream_write_cl_msg_input(&stream, &msg);
-        cursor = 0;
-
-        ASSERT(AOUT_IS_ERR(res));
-        ASSERT(memcmp(stream.data + cursor, &n_tick, sizeof(n_tick)) == 0);
-        cursor += sizeof(n_tick);
-        ASSERT(memcmp(stream.data + cursor, &n_right, sizeof(n_right)) == 0);
-        cursor += sizeof(n_right);
-        ASSERT(memcmp(stream.data + cursor, &n_left, sizeof(n_left)) == 0);
-        cursor += sizeof(n_left);
-        ASSERT(memcmp(stream.data + cursor, &n_up, sizeof(n_up)) == 0);
-        cursor += sizeof(n_up);
-        ASSERT(memcmp(stream.data + cursor, &n_down, sizeof(n_down)) == 0);
-        cursor += sizeof(n_down);
-        ASSERT(memval(stream.data + cursor, 0, size - cursor));
-
-        free(data);
-        data = NULL;
-        PASS();
-}
-
 TEST stream_write_sv_msg_connection(void) {
         size_t const size = sizeof(aout_sv_msg_connection) + 4;
         uint8_t* data = calloc(size, sizeof(*data));
@@ -339,43 +274,6 @@ TEST stream_read_sv_msg_type(void) {
         PASS();
 }
 
-TEST stream_read_cl_msg_input(void) {
-        uint8_t data[] = { 7, 32, -1, 39, 80, 21, 48, 79, 32, 129, -32, 239, 12, 4 };
-        aout_stream stream = {
-                .data = data,
-                .data_size = sizeof(data)
-        };
-
-        aout_res res = { 0 };
-        aout_cl_msg_input msg = { 0 };
-        uint64_t h_tick = aout_ntoh_u64(*((uint64_t*) &data[0]));
-        uint8_t h_right = data[8];
-        uint8_t h_left = data[9];
-        uint8_t h_up = data[10];
-        uint8_t h_down = data[11];
-
-        res = aout_stream_read_cl_msg_input(&stream, &msg);
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(msg.tick.value, h_tick);
-        ASSERT_EQ(msg.input.right, h_right);
-        ASSERT_EQ(msg.input.left, h_left);
-        ASSERT_EQ(msg.input.up, h_up);
-        ASSERT_EQ(msg.input.down, h_down);
-
-        res = aout_stream_read_cl_msg_input(&stream, &msg);
-        ASSERT(AOUT_IS_ERR(res));
-
-        // Values should not have changed
-        ASSERT_EQ(msg.tick.value, h_tick);
-        ASSERT_EQ(msg.input.right, h_right);
-        ASSERT_EQ(msg.input.left, h_left);
-        ASSERT_EQ(msg.input.up, h_up);
-        ASSERT_EQ(msg.input.down, h_down);
-
-        PASS();
-}
-
 TEST stream_read_sv_msg_connection(void) {
         uint8_t data[] = { 32, 129, -32, 239, 12, 4, 9, 94, 49, 3 };
         aout_stream stream = {
@@ -445,7 +343,7 @@ TEST stream_read_sv_msg_state(void) {
         PASS();
 }
 
-TEST stream_write_cl_msg_type_then_read_cl_msg_type(void) {
+TEST stream_write_then_read_cl_msg_type(void) {
         size_t const size = sizeof(aout_cl_msg_type) + 2;
         uint8_t* data = calloc(size, sizeof(*data));
 
@@ -481,7 +379,7 @@ TEST stream_write_cl_msg_type_then_read_cl_msg_type(void) {
         PASS();
 }
 
-TEST stream_write_sv_msg_type_then_read_sv_msg_type(void) {
+TEST stream_write_then_read_sv_msg_type(void) {
         size_t const size = sizeof(aout_sv_msg_type) + 2;
         uint8_t* data = calloc(size, sizeof(*data));
 
@@ -517,21 +415,75 @@ TEST stream_write_sv_msg_type_then_read_sv_msg_type(void) {
         PASS();
 }
 
+TEST stream_write_then_read_cl_msg_input(void) {
+        size_t const size = sizeof(aout_cl_msg_input) + 2;
+        uint8_t* data = calloc(size, sizeof(*data));
+
+        ASSERT(data);
+
+        aout_stream stream = {
+                .data = data,
+                .data_size = size
+        };
+
+        aout_res res = { 0 };
+        aout_cl_msg_input msg = {
+                .tick.value = 1337,
+                .inputs = {
+                        { true, false, true, false },
+                        { true, true, true, false },
+                        { false, true, false, false }
+                }
+        };
+
+        res = aout_stream_write_cl_msg_input(&stream, &msg);
+
+        ASSERT(AOUT_IS_OK(res));
+
+        aout_stream_reset(&stream);
+
+        aout_cl_msg_input dst = { 0 };
+        res = aout_stream_read_cl_msg_input(&stream, &dst);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT(aout_tick_cmp(msg.tick, dst.tick) == 0);
+        for (size_t i = 0; i < AOUT_CL_MSG_INPUT_BUFFER_COUNT; ++i) {
+                ASSERT_EQ(msg.inputs[i].right, dst.inputs[i].right);
+                ASSERT_EQ(msg.inputs[i].left, dst.inputs[i].left);
+                ASSERT_EQ(msg.inputs[i].up, dst.inputs[i].up);
+                ASSERT_EQ(msg.inputs[i].down, dst.inputs[i].down);
+        }
+
+        res = aout_stream_read_cl_msg_input(&stream, &dst);
+
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT(aout_tick_cmp(msg.tick, dst.tick) == 0);
+        for (size_t i = 0; i < AOUT_CL_MSG_INPUT_BUFFER_COUNT; ++i) {
+                ASSERT_EQ(msg.inputs[i].right, dst.inputs[i].right);
+                ASSERT_EQ(msg.inputs[i].left, dst.inputs[i].left);
+                ASSERT_EQ(msg.inputs[i].up, dst.inputs[i].up);
+                ASSERT_EQ(msg.inputs[i].down, dst.inputs[i].down);
+        }
+
+        free(data);
+        data = NULL;
+        PASS();
+}
+
 SUITE(test_messages) {
         RUN_TEST(stream_write_cl_msg_type);
         RUN_TEST(stream_write_sv_msg_type);
-        RUN_TEST(stream_write_cl_msg_input);
         RUN_TEST(stream_write_sv_msg_connection);
         RUN_TEST(stream_write_sv_msg_state);
 
         RUN_TEST(stream_read_cl_msg_type);
         RUN_TEST(stream_read_sv_msg_type);
-        RUN_TEST(stream_read_cl_msg_input);
         RUN_TEST(stream_read_sv_msg_connection);
         RUN_TEST(stream_read_sv_msg_state);
 
-        RUN_TEST(stream_write_cl_msg_type_then_read_cl_msg_type);
-        RUN_TEST(stream_write_sv_msg_type_then_read_sv_msg_type);
+        RUN_TEST(stream_write_then_read_cl_msg_type);
+        RUN_TEST(stream_write_then_read_sv_msg_type);
+        RUN_TEST(stream_write_then_read_cl_msg_input);
 }
 
 GREATEST_MAIN_DEFS();

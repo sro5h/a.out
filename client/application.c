@@ -247,7 +247,7 @@ static void aout_application_update_fixed(
                         self->client,
                         &(aout_cl_msg_input) {
                                 .tick = self->tick,
-                                .input = input
+                                .inputs = { input }
                         }
                 );
         }

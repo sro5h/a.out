@@ -32,14 +32,18 @@ aout_res aout_stream_write_cl_msg_input(
         aout_res res = { 0 };
         res = aout_stream_write_u64(self, msg->tick.value);
         assert(AOUT_IS_OK(res));
-        res = aout_stream_write_u8(self, msg->input.right);
-        assert(AOUT_IS_OK(res));
-        res = aout_stream_write_u8(self, msg->input.left);
-        assert(AOUT_IS_OK(res));
-        res = aout_stream_write_u8(self, msg->input.up);
-        assert(AOUT_IS_OK(res));
-        res = aout_stream_write_u8(self, msg->input.down);
-        assert(AOUT_IS_OK(res));
+
+        for (size_t i = 0; i < AOUT_CL_MSG_INPUT_BUFFER_COUNT; ++i) {
+                aout_input const* input = &msg->inputs[i];
+                res = aout_stream_write_u8(self, input->right);
+                assert(AOUT_IS_OK(res));
+                res = aout_stream_write_u8(self, input->left);
+                assert(AOUT_IS_OK(res));
+                res = aout_stream_write_u8(self, input->up);
+                assert(AOUT_IS_OK(res));
+                res = aout_stream_write_u8(self, input->down);
+                assert(AOUT_IS_OK(res));
+        }
 
         return AOUT_OK;
 }
@@ -132,20 +136,23 @@ aout_res aout_stream_read_cl_msg_input(
                 return AOUT_ERR;
         }
 
-        if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.input.right))) {
-                return AOUT_ERR;
-        }
+        for (size_t i = 0; i < AOUT_CL_MSG_INPUT_BUFFER_COUNT; ++i) {
+                aout_input* input = &tmp.inputs[i];
+                if (AOUT_IS_ERR(aout_stream_read_u8(self, &input->right))) {
+                        return AOUT_ERR;
+                }
 
-        if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.input.left))) {
-                return AOUT_ERR;
-        }
+                if (AOUT_IS_ERR(aout_stream_read_u8(self, &input->left))) {
+                        return AOUT_ERR;
+                }
 
-        if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.input.up))) {
-                return AOUT_ERR;
-        }
+                if (AOUT_IS_ERR(aout_stream_read_u8(self, &input->up))) {
+                        return AOUT_ERR;
+                }
 
-        if (AOUT_IS_ERR(aout_stream_read_u8(self, &tmp.input.down))) {
-                return AOUT_ERR;
+                if (AOUT_IS_ERR(aout_stream_read_u8(self, &input->down))) {
+                        return AOUT_ERR;
+                }
         }
 
         *msg = tmp;
