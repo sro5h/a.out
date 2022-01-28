@@ -34,6 +34,10 @@ COMMON_API void aout_ring_push_back(
                 aout_ring* self,
                 void const* value);
 
+COMMON_API void aout_ring_push_front(
+                aout_ring* self,
+                void const* value);
+
 COMMON_API void aout_ring_push(
                 aout_ring* self,
                 void const* value);

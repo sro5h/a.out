@@ -73,7 +73,7 @@ void aout_ring_push_back(
                 void const* value) {
         assert(self); assert(value);
 
-        // Check whether ring was already full
+        // Check whether ring is already full
         if (self->size == self->capacity) {
                 self->root = aout_ring_index(self, 1);
         } else {
@@ -83,6 +83,26 @@ void aout_ring_push_back(
         unsigned char* bytes = self->values;
         memcpy(
                 bytes + aout_ring_byte_index(self, self->size - 1),
+                value,
+                self->value_size
+        );
+}
+
+void aout_ring_push_front(
+                aout_ring* self,
+                void const* value) {
+        assert(self); assert(value);
+
+        // self->capacity == -1 (mod self->capacity + 1)
+        self->root = aout_ring_index(self, self->capacity);
+
+        if (self->size < self->capacity) {
+                ++self->size;
+        }
+
+        unsigned char* bytes = self->values;
+        memcpy(
+                bytes + aout_ring_byte_index(self, 0),
                 value,
                 self->value_size
         );
