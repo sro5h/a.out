@@ -18,8 +18,8 @@
 typedef struct aout_player {
         aout_connection connection;
         aout_state state;
-        aout_cl_msg_input last_input_msg;
-        bool last_input_applied;
+        aout_cl_msg_input last_msg_input;
+        aout_tick tick; // Should correspond to state
 } aout_player;
 
 typedef struct aout_application {
@@ -130,7 +130,6 @@ aout_res aout_application_run(
                 const float64_t time_step = self->time_step;
                 for (accumulator += delta_time; accumulator > time_step;
                                 accumulator -= time_step) {
-                        aout_tick_increment(&self->tick);
                         aout_application_update_fixed(self, time_step);
                 }
 
@@ -158,21 +157,31 @@ static void aout_application_update_fixed(
         (void) delta_time;
         assert(self);
 
+        self->tick = aout_tick_increment(self->tick, 1);
+        // TODO: Should do for all players
+        self->players[0].tick = aout_tick_increment(self->players[0].tick, 1);
+
         aout_server_update(self->server);
 
         aout_player* player = &self->players[0];
 
-#ifdef AOUT_SERVER_REAPPLY_LAST_INPUT
-        if (player->connection.id /*&& !player->last_input_applied*/) {
-#else
-        if (player->connection.id && !player->last_input_applied) {
-#endif
+        // First skip to oldest input in lastest input msg
+        if (aout_tick_cmp(player->tick, player->last_msg_input.tick) < 0) {
+                player->tick = player->last_msg_input.tick;
+        }
+
+        // Check whether the expected input is old enough to be in the latest
+        // input msg
+        size_t index = aout_tick_diff(player->tick, player->last_msg_input.tick);
+        if (index < AOUT_CL_MSG_INPUT_BUFFER_COUNT) {
                 aout_state_apply_input(
                         &player->state,
-                        &player->last_input_msg.inputs[0]
+                        &player->last_msg_input.inputs[index]
                 );
-                player->last_input_applied = true;
         }
+        //} else {
+        // Maybe replay last input
+        //}
 
         // Send current state to clients
         // TODO: Send state of all connected clients
@@ -181,12 +190,10 @@ static void aout_application_update_fixed(
                         self->server,
                         0,
                         &(aout_sv_msg_state) {
-                                .tick = player->last_input_msg.tick,
-                                .state = player->state,
+                                .tick = player->tick,
+                                .state = player->state
                         }
                 );
-                // TODO: Is this ok in case of no reapplying?
-                aout_tick_increment(&player->last_input_msg.tick);
         }
 
         // TODO: Send immediately
@@ -207,9 +214,7 @@ static void aout_application_on_connection(
         assert(server); assert(context);
         aout_application* self = context;
 
-        self->players[0] = (aout_player) {
-                .connection = connection,
-        };
+        self->players[0] = (aout_player) { .connection = connection };
 }
 
 static void aout_application_on_disconnection(
@@ -232,9 +237,11 @@ static void aout_application_on_msg_input(
         (void) connection;
         aout_application* self = context;
 
-        // Only store the last received input message
-        self->players[0].last_input_msg = *msg;
-        self->players[0].last_input_applied = false;
+        // Only store the latest received input message
+        aout_player* player = &self->players[0];
+        if (aout_tick_cmp(msg->tick, player->last_msg_input.tick) > 0) {
+                player->last_msg_input = *msg;
+        }
 }
 
 static void on_sigint(

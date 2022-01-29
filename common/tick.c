@@ -1,20 +1,31 @@
 #include "tick.h"
 
-void aout_tick_increment(
-                aout_tick* self) {
-        assert(self);
-        assert(self->value < UINT64_MAX);
+aout_tick aout_tick_increment(
+                aout_tick tick,
+                uint64_t amount) {
+        assert(tick.value + amount <= UINT64_MAX);
 
-        ++self->value;
+        return (aout_tick) {
+                .value = tick.value + amount
+        };
+}
+
+aout_tick aout_tick_decrement(
+                aout_tick tick,
+                uint64_t amount) {
+        assert(tick.value >= amount);
+
+        return (aout_tick) {
+                .value = tick.value - amount
+        };
 }
 
 bool aout_tick_filter_rate(
-                aout_tick const* self,
-                uint32_t rate) {
-        assert(self);
+                aout_tick tick,
+                uint64_t rate) {
         assert(rate != 0);
 
-        return (self->value % rate) == 0;
+        return (tick.value % rate) == 0;
 }
 
 int32_t aout_tick_cmp(
@@ -27,4 +38,10 @@ int32_t aout_tick_cmp(
         } else {
                 return 0;
         }
+}
+
+int64_t aout_tick_diff(
+                aout_tick a,
+                aout_tick b) {
+        return ((int64_t) a.value) - ((int64_t) b.value);
 }
