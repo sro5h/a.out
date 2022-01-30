@@ -21,7 +21,6 @@ typedef struct aout_application {
 
         aout_client* client;
         bool is_connected;
-        aout_ring* inputs;
 
         double time_step; // Maybe use ticks_per_second instead
         aout_tick tick;
@@ -77,16 +76,6 @@ aout_application* aout_application_create(
         self->is_connected = false;
         self->time_step = 1.0 / tick_rate;
         self->sigint_raised = 0;
-
-        self->inputs = aout_ring_create(
-                AOUT_CL_MSG_INPUT_BUFFER_COUNT,
-                sizeof(aout_input)
-        );
-
-        if (!self->inputs) {
-                aout_loge("could not create inputs ring");
-                goto error;
-        }
 
         self->predictions = aout_ring_create(
                 tick_rate,
@@ -183,7 +172,6 @@ void aout_application_destroy(
         aout_renderer_destroy(self->renderer);
         glfwDestroyWindow(self->window);
         aout_ring_destroy(self->predictions);
-        aout_ring_destroy(self->inputs);
         free(self);
 }
 
@@ -245,9 +233,6 @@ static void aout_application_update_fixed(
         input.left = glfwGetKey(self->window, GLFW_KEY_A) == GLFW_PRESS;
         input.up = glfwGetKey(self->window, GLFW_KEY_W) == GLFW_PRESS;
         input.down = glfwGetKey(self->window, GLFW_KEY_S) == GLFW_PRESS;
-
-        // Add input to buffer
-        aout_ring_push(self->inputs, &input);
 
         // Apply input
         self->state_prev = self->state;
@@ -387,23 +372,22 @@ static void aout_application_send_msg_input(
                 aout_application* self) {
         assert(self);
 
+        if (aout_ring_size(self->predictions) < AOUT_CL_MSG_INPUT_BUFFER_COUNT) {
+                aout_loge("prediction buffer should have at least %d elements",
+                                AOUT_CL_MSG_INPUT_BUFFER_COUNT);
+                return;
+        }
+
         aout_cl_msg_input msg = { 0 };
-        // msg.tick is the tick of the oldest input in the message
         msg.tick = aout_tick_decrement(
                 self->tick,
                 AOUT_CL_MSG_INPUT_BUFFER_COUNT - 1
         );
 
-        // For now skip the first two ticks when the ring isn't full
-        if (aout_ring_size(self->inputs) < AOUT_CL_MSG_INPUT_BUFFER_COUNT) {
-                return;
-        }
-
-        assert(aout_ring_size(self->inputs) == AOUT_CL_MSG_INPUT_BUFFER_COUNT);
-
-        for (size_t i = 0; i != aout_ring_end(self->inputs); ++i) {
-                aout_input const* input = aout_ring_at(self->inputs, i);
-                msg.inputs[i] = *input;
+        for (size_t i = 0; i < AOUT_CL_MSG_INPUT_BUFFER_COUNT; ++i) {
+                aout_prediction const* p = aout_ring_rat(self->predictions, i);
+                // Oldest input should be first
+                msg.inputs[AOUT_CL_MSG_INPUT_BUFFER_COUNT - 1 - i] = p->input;
         }
 
         aout_client_send_msg_input(self->client, &msg);

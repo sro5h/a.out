@@ -142,6 +142,15 @@ void* aout_ring_at(
         return values + aout_ring_byte_index(self, index);
 }
 
+// Maybe undefined behaviour if index > aout_ring_size - 1!
+void* aout_ring_rat(
+                aout_ring const* self,
+                size_t index) {
+        assert(self);
+
+        return aout_ring_at(self, aout_ring_size(self) - 1 - index);
+}
+
 void* aout_ring_front(
                 aout_ring const* self) {
         assert(self);

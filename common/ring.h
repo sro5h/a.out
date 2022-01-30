@@ -52,6 +52,10 @@ COMMON_API void* aout_ring_at(
                 aout_ring const* self,
                 size_t index);
 
+COMMON_API void* aout_ring_rat(
+                aout_ring const* self,
+                size_t index);
+
 COMMON_API void* aout_ring_front(
                 aout_ring const* self);
 
