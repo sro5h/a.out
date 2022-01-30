@@ -196,8 +196,7 @@ static void aout_application_update_fixed(
                 );
         }
 
-        // TODO: Send immediately
-        // aout_server_flush(self->server);
+        aout_server_flush(self->server);
 }
 
 static void aout_application_update(

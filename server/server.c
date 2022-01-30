@@ -109,6 +109,12 @@ void aout_server_update(
         enet_host_flush(self->host);
 }
 
+void aout_server_flush(
+                aout_server* self) {
+        assert(self);
+        enet_host_flush(self->host);
+}
+
 aout_res aout_server_send_msg_connection(
                 aout_server* self,
                 uint16_t peer_id,

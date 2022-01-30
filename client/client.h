@@ -26,6 +26,9 @@ void aout_client_destroy(
 void aout_client_update(
                 aout_client* self);
 
+void aout_client_flush(
+                aout_client* self);
+
 aout_res aout_client_connect(
                 aout_client* self,
                 uint32_t ip,

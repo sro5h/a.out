@@ -25,6 +25,9 @@ void aout_server_destroy(
 void aout_server_update(
                 aout_server* self);
 
+void aout_server_flush(
+                aout_server* self);
+
 aout_res aout_server_send_msg_connection(
                 aout_server* self,
                 uint16_t peer_id,

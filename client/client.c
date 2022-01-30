@@ -89,6 +89,12 @@ void aout_client_update(
         }
 }
 
+void aout_client_flush(
+                aout_client* self) {
+        assert(self);
+        enet_host_flush(self->host);
+}
+
 aout_res aout_client_connect(
                 aout_client* self,
                 uint32_t ip,

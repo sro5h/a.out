@@ -224,7 +224,9 @@ static void aout_application_update_fixed(
         (void) delta_time;
 
         self->tick = aout_tick_increment(self->tick, 1);
+
         glfwPollEvents();
+        aout_client_update(self->client);
 
         //if (!aout_tick_filter_rate(self->tick, 2)) { return; }
 
@@ -249,7 +251,7 @@ static void aout_application_update_fixed(
                 aout_application_send_msg_input(self);
         }
 
-        aout_client_update(self->client);
+        aout_client_flush(self->client);
 }
 
 static void aout_application_update(
