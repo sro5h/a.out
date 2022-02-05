@@ -183,6 +183,8 @@ aout_res aout_application_run(
         float64_t accumulator = 0.0;
 
         while (aout_application_is_running(self)) {
+                glfwPollEvents();
+
                 if (glfwWindowShouldClose(self->window) || self->sigint_raised) {
                         if (self->sigint_raised) { printf("\n"); } // CTRL-C
                         aout_application_stop(self);
@@ -190,9 +192,9 @@ aout_res aout_application_run(
                         break;
                 }
 
+                float64_t const time_step = self->time_step;
                 float64_t const delta_time = stm_sec(stm_laptime(&last_time));
 
-                float64_t const time_step = self->time_step;
                 for (accumulator += delta_time; accumulator > time_step;
                                 accumulator -= time_step) {
                         aout_application_update_fixed(self, time_step);
@@ -225,7 +227,6 @@ static void aout_application_update_fixed(
 
         self->tick = aout_tick_increment(self->tick, 1);
 
-        glfwPollEvents();
         aout_client_update(self->client);
 
         //if (!aout_tick_filter_rate(self->tick, 2)) { return; }
