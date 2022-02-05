@@ -26,7 +26,7 @@ if build_machine.system() == 'linux'
   common_dependencies += dependency('threads')
 endif
 
-common_dependencies += dependency('libchipmunk')
+common_dependencies += dependency('chipmunk')
 
 build_args = [
 ]
