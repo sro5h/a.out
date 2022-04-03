@@ -2,8 +2,10 @@
 
 #include <common/console.h>
 #include <common/log.h>
+#include <common/movement.h>
 #include <common/util.h>
 
+#include <chipmunk/chipmunk.h>
 #include <sokol/sokol_time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,6 +19,7 @@
 
 typedef struct aout_player {
         aout_connection connection;
+        cpBody* body;
         aout_state state;
         aout_cl_msg_input last_msg_input;
         aout_tick tick; // Should correspond to state
@@ -24,7 +27,9 @@ typedef struct aout_player {
 
 typedef struct aout_application {
         aout_player players[SERVER_MAX_CONNECTIONS];
+        size_t player_count;
         aout_server* server;
+        cpSpace* space;
         double time_step;
         aout_tick tick;
         bool is_running;
@@ -67,9 +72,20 @@ aout_application* aout_application_create(
                 return NULL;
         }
 
+        self->player_count = 0;
         self->is_running = true;
         self->time_step = 1.0 / 20;
         self->sigint_raised = 0;
+
+        self->space = cpSpaceNew();
+
+        if (!self->space) {
+                aout_loge("could not create space");
+                goto error;
+        }
+
+        cpSpaceSetIterations(self->space, 10);
+        cpSpaceSetSleepTimeThreshold(self->space, 0.5f);
 
         self->server = aout_server_create((aout_server_adapter) {
                 .on_connection = aout_application_on_connection,
@@ -107,6 +123,7 @@ void aout_application_destroy(
         }
 
         aout_server_destroy(self->server);
+        aout_space_free(self->space);
         free(self);
 }
 
@@ -158,10 +175,18 @@ static void aout_application_update_fixed(
         assert(self);
 
         self->tick = aout_tick_increment(self->tick, 1);
-        // TODO: Should do for all players
-        self->players[0].tick = aout_tick_increment(self->players[0].tick, 1);
+
+        if (self->player_count > 0) {
+                // TODO: Should do for all players
+                self->players[0].tick = aout_tick_increment(self->players[0].tick, 1);
+        }
 
         aout_server_update(self->server);
+
+        // TODO: Remove
+        if (self->player_count == 0) {
+                return;
+        }
 
         aout_player* player = &self->players[0];
 
@@ -174,14 +199,22 @@ static void aout_application_update_fixed(
         // input msg
         size_t index = aout_tick_diff(player->tick, player->last_msg_input.tick);
         if (index < AOUT_CL_MSG_INPUT_BUFFER_COUNT) {
-                aout_state_apply_input(
+                // TODO: Remove
+                /*aout_state_apply_input(
                         &player->state,
+                        &player->last_msg_input.inputs[index]
+                );*/
+                aout_body_apply_input(
+                        player->body,
                         &player->last_msg_input.inputs[index]
                 );
         }
         //} else {
         // Maybe replay last input
         //}
+
+        cpSpaceStep(self->space, delta_time);
+        player->state = aout_state_from_body(player->body);
 
         // Send current state to clients
         // TODO: Send state of all connected clients
@@ -213,7 +246,13 @@ static void aout_application_on_connection(
         assert(server); assert(context);
         aout_application* self = context;
 
-        self->players[0] = (aout_player) { .connection = connection };
+        self->players[0] = (aout_player) {
+                .connection = connection,
+                .body = cpSpaceAddBody(self->space, cpBodyNewKinematic()),
+        };
+
+        cpBodySetPosition(self->players[0].body, cpvzero);
+        self->player_count = 1;
 }
 
 static void aout_application_on_disconnection(
@@ -224,7 +263,9 @@ static void aout_application_on_disconnection(
         (void) connection;
         aout_application* self = context;
 
+        aout_body_free(self->players[0].body);
         self->players[0] = (aout_player) { 0 };
+        self->player_count = 0;
 }
 
 static void aout_application_on_msg_input(

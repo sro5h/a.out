@@ -265,6 +265,7 @@ static void aout_application_update_fixed(
         (void) delta_time;
 
         self->tick = aout_tick_increment(self->tick, 1);
+        self->state_prev = self->state;
 
         aout_client_update(self->client);
 
@@ -276,13 +277,12 @@ static void aout_application_update_fixed(
         input.up = glfwGetKey(self->window, GLFW_KEY_W) == GLFW_PRESS;
         input.down = glfwGetKey(self->window, GLFW_KEY_S) == GLFW_PRESS;
 
-        // Apply input
-        self->state_prev = self->state;
+        /*// Apply input
         //aout_state_apply_input(&self->state, &input);
         aout_body_apply_input(self->body, &input);
         cpSpaceStep(self->space, delta_time);
 
-        self->state = aout_state_from_body(self->body);
+        self->state = aout_state_from_body(self->body);*/
 
         aout_ring_push(self->predictions, &(aout_prediction) {
                 .tick = self->tick,
@@ -375,6 +375,9 @@ static void aout_application_on_msg_state(
         assert(self->is_connected);
 
         self->state_server = msg->state;
+
+        // DISABLE PREDICTION
+        return;
 
         if (aout_ring_empty(self->predictions)) {
                 self->state = msg->state;
