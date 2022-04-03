@@ -151,13 +151,13 @@ aout_application* aout_application_create(
         ));
         cpBodySetPosition(self->body, cpvzero);
 
-        /*cpShape* shape = cpSpaceAddShape(self->space, cpCircleShapeNew(
+        cpShape* shape = cpSpaceAddShape(self->space, cpCircleShapeNew(
                 self->body,
                 10,
                 cpvzero
         ));
         cpShapeSetElasticity(shape, 0.0f);
-        cpShapeSetFriction(shape, 0.7f);*/
+        cpShapeSetFriction(shape, 0.7f);
 
         self->client = aout_client_create((aout_client_adapter) {
                 .on_connection = aout_application_on_connection,

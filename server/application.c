@@ -261,6 +261,14 @@ static void aout_application_on_connection(
 
         cpBodySetPosition(self->players[0].body, cpvzero);
         self->player_count = 1;
+
+        cpShape* shape = cpSpaceAddShape(self->space, cpCircleShapeNew(
+                self->players[0].body,
+                10,
+                cpvzero
+        ));
+        cpShapeSetElasticity(shape, 0.0f);
+        cpShapeSetFriction(shape, 0.7f);
 }
 
 static void aout_application_on_disconnection(
