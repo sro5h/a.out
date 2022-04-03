@@ -277,12 +277,11 @@ static void aout_application_update_fixed(
         input.up = glfwGetKey(self->window, GLFW_KEY_W) == GLFW_PRESS;
         input.down = glfwGetKey(self->window, GLFW_KEY_S) == GLFW_PRESS;
 
-        /*// Apply input
-        //aout_state_apply_input(&self->state, &input);
+        // Apply input
         aout_body_apply_input(self->body, &input);
         cpSpaceStep(self->space, delta_time);
 
-        self->state = aout_state_from_body(self->body);*/
+        self->state = aout_state_from_body(self->body);
 
         aout_ring_push(self->predictions, &(aout_prediction) {
                 .tick = self->tick,
@@ -376,9 +375,6 @@ static void aout_application_on_msg_state(
 
         self->state_server = msg->state;
 
-        // DISABLE PREDICTION
-        return;
-
         if (aout_ring_empty(self->predictions)) {
                 self->state = msg->state;
                 return;
@@ -406,11 +402,17 @@ static void aout_application_on_msg_state(
         }
 
         self->state = msg->state;
+        // Reset body to msg->state
+        cpBodySetPosition(self->body, cpv(msg->state.p.x, msg->state.p.y));
+        cpBodySetVelocity(self->body, cpv(msg->state.v.x, msg->state.v.y));
 
         for (size_t i = 0; i < aout_ring_end(self->predictions); ++i) {
                 aout_prediction* p = aout_ring_at(self->predictions, i);
 
-                aout_state_apply_input(&self->state, &p->input);
+                //aout_state_apply_input(&self->state, &p->input);
+                aout_body_apply_input(self->body, &p->input);
+                cpSpaceStep(self->space, self->time_step);
+                self->state = aout_state_from_body(self->body);
                 p->state = self->state;
         }
 
