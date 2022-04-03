@@ -137,10 +137,10 @@ aout_application* aout_application_create(
         cpSpaceSetIterations(self->space, 10);
         cpSpaceSetSleepTimeThreshold(self->space, 0.5f);
 
-        self->body = cpSpaceAddBody(self->space, cpBodyNewKinematic());
-        cpBodySetPosition(self->body, cpvzero);
+        //self->body = cpSpaceAddBody(self->space, cpBodyNewKinematic());
+        //cpBodySetPosition(self->body, cpvzero);
         // Create player body
-        /*self->body = cpSpaceAddBody(self->space, cpBodyNew(
+        self->body = cpSpaceAddBody(self->space, cpBodyNew(
                 10,
                 cpMomentForCircle(
                         10,
@@ -151,7 +151,7 @@ aout_application* aout_application_create(
         ));
         cpBodySetPosition(self->body, cpvzero);
 
-        cpShape* shape = cpSpaceAddShape(self->space, cpCircleShapeNew(
+        /*cpShape* shape = cpSpaceAddShape(self->space, cpCircleShapeNew(
                 self->body,
                 10,
                 cpvzero

@@ -22,8 +22,9 @@ void aout_body_apply_input(
                 direction.y -= 1;
         }
 
-        aout_vec2 velocity = aout_vec2_mul(aout_vec2_norm(direction), 250);
-        cpBodySetVelocity(body, cpv(velocity.x, velocity.y));
+        aout_vec2 velocity = aout_vec2_mul(aout_vec2_norm(direction), 2500);
+        //cpBodySetVelocity(body, cpv(velocity.x, velocity.y));
+        cpBodySetForce(body, cpv(velocity.x, velocity.y));
 }
 
 aout_state aout_state_from_body(

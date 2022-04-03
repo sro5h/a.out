@@ -248,7 +248,15 @@ static void aout_application_on_connection(
 
         self->players[0] = (aout_player) {
                 .connection = connection,
-                .body = cpSpaceAddBody(self->space, cpBodyNewKinematic()),
+                .body = cpSpaceAddBody(self->space, cpBodyNew(
+                        10,
+                        cpMomentForCircle(
+                                10,
+                                0,
+                                10,
+                                cpvzero
+                        )
+                )),
         };
 
         cpBodySetPosition(self->players[0].body, cpvzero);
