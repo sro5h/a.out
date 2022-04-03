@@ -29,6 +29,7 @@ endif
 
 client_dependencies += dependency('glfw3')
 client_dependencies += dependency('libenet')
+client_dependencies += dependency('chipmunk')
 
 build_args = [
 ]

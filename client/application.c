@@ -4,9 +4,12 @@
 
 #include <common/console.h>
 #include <common/log.h>
+#include <common/movement.h>
 #include <common/ring.h>
 #include <common/state.h>
+#include <common/util.h>
 
+#include <chipmunk/chipmunk.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <sokol/sokol_time.h>
@@ -18,6 +21,9 @@ typedef struct aout_application {
         aout_mesh mesh_player;
         aout_mesh mesh_server;
         bool is_running;
+
+        cpSpace* space;
+        cpBody* body;
 
         aout_client* client;
         bool is_connected;
@@ -121,6 +127,38 @@ aout_application* aout_application_create(
                 0x5e, 0x60, 0xce, 0xff
         });
 
+        self->space = cpSpaceNew();
+
+        if (!self->space) {
+                aout_loge("could not create space");
+                goto error;
+        }
+
+        cpSpaceSetIterations(self->space, 10);
+        cpSpaceSetSleepTimeThreshold(self->space, 0.5f);
+
+        self->body = cpSpaceAddBody(self->space, cpBodyNewKinematic());
+        cpBodySetPosition(self->body, cpvzero);
+        // Create player body
+        /*self->body = cpSpaceAddBody(self->space, cpBodyNew(
+                10,
+                cpMomentForCircle(
+                        10,
+                        0,
+                        10,
+                        cpvzero
+                )
+        ));
+        cpBodySetPosition(self->body, cpvzero);
+
+        cpShape* shape = cpSpaceAddShape(self->space, cpCircleShapeNew(
+                self->body,
+                10,
+                cpvzero
+        ));
+        cpShapeSetElasticity(shape, 0.0f);
+        cpShapeSetFriction(shape, 0.7f);*/
+
         self->client = aout_client_create((aout_client_adapter) {
                 .on_connection = aout_application_on_connection,
                 .on_disconnection = aout_application_on_disconnection,
@@ -169,6 +207,7 @@ void aout_application_destroy(
         //assert(self->window); assert(self->client);
 
         aout_client_destroy(self->client);
+        aout_space_free(self->space);
         aout_renderer_destroy(self->renderer);
         glfwDestroyWindow(self->window);
         aout_ring_destroy(self->predictions);
@@ -239,7 +278,11 @@ static void aout_application_update_fixed(
 
         // Apply input
         self->state_prev = self->state;
-        aout_state_apply_input(&self->state, &input);
+        //aout_state_apply_input(&self->state, &input);
+        aout_body_apply_input(self->body, &input);
+        cpSpaceStep(self->space, delta_time);
+
+        self->state = aout_state_from_body(self->body);
 
         aout_ring_push(self->predictions, &(aout_prediction) {
                 .tick = self->tick,

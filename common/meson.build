@@ -5,6 +5,7 @@ common_sources = [
   'id_pool.c',
   'log.c',
   'messages.c',
+  'movement.c',
   'ring.c',
   'state.c',
   'stream.c',
