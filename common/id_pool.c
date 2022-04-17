@@ -56,8 +56,7 @@ aout_id_pool* aout_id_pool_create(
         self->slots = calloc(self->size, sizeof(*self->slots));
         assert(self->slots);
 
-        // TODO: Maybe also change to calloc?
-        self->unused_indices = malloc(sizeof(size_t) * size);
+        self->unused_indices = calloc(self->size, sizeof(*self->unused_indices));
         assert(self->unused_indices);
 
         // Populate unused indices with [size - 1 .. 0]
@@ -106,8 +105,7 @@ void aout_id_pool_id_destroy(
         size_t index = aout_id_index(id);
         assert(index < self->size);
 
-        // Protect against double free
-        // TODO: Only do this in debug mode
+        // Protect against double free in debug mode
         assert(aout_id_pool_id_is_valid(self, id));
         for (size_t i = 0; i < self->unused_indices_top; ++i) {
                 assert(self->unused_indices[i] != index);
