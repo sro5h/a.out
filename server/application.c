@@ -176,9 +176,12 @@ static void aout_application_update_fixed(
 
         self->tick = aout_tick_increment(self->tick, 1);
 
-        if (self->player_count > 0) {
-                // TODO: Should do for all players
-                self->players[0].tick = aout_tick_increment(self->players[0].tick, 1);
+        for (size_t i = 0; i < SERVER_MAX_CONNECTIONS; ++ i) {
+                if (!self->players[i].connection.id) { continue; }
+
+                self->players[i].tick = aout_tick_increment(
+                        self->players[i].tick, 1
+                );
         }
 
         aout_server_update(self->server);
@@ -188,45 +191,54 @@ static void aout_application_update_fixed(
                 return;
         }
 
-        aout_player* player = &self->players[0];
+        for (size_t i = 0; i < SERVER_MAX_CONNECTIONS; ++ i) {
+                aout_player* player = &self->players[i];
 
-        // First skip to oldest input in lastest input msg
-        if (aout_tick_cmp(player->tick, player->last_msg_input.tick) < 0) {
-                player->tick = player->last_msg_input.tick;
-        }
+                if (!player->connection.id) { continue; }
 
-        // Check whether the expected input is old enough to be in the latest
-        // input msg
-        size_t index = aout_tick_diff(player->tick, player->last_msg_input.tick);
-        if (index < AOUT_CL_MSG_INPUT_BUFFER_COUNT) {
-                // TODO: Remove
-                /*aout_state_apply_input(
-                        &player->state,
-                        &player->last_msg_input.inputs[index]
-                );*/
-                aout_body_apply_input(
-                        player->body,
-                        &player->last_msg_input.inputs[index]
+                // First skip to oldest input in lastest input msg
+                if (aout_tick_cmp(player->tick, player->last_msg_input.tick) < 0) {
+                        player->tick = player->last_msg_input.tick;
+                }
+
+                // Check whether the expected input is old enough to be in the
+                // latest input msg
+                size_t index = aout_tick_diff(
+                        player->tick, player->last_msg_input.tick
                 );
+
+                if (index < AOUT_CL_MSG_INPUT_BUFFER_COUNT) {
+                        aout_body_apply_input(
+                                player->body,
+                                &player->last_msg_input.inputs[index]
+                        );
+                }
+                //} else {
+                // Maybe replay last input
+                //}
         }
-        //} else {
-        // Maybe replay last input
-        //}
 
         cpSpaceStep(self->space, delta_time);
-        player->state = aout_state_from_body(player->body);
 
-        // Send current state to clients
-        // TODO: Send state of all connected clients
-        if (player->connection.id) {
-                aout_server_send_msg_state(
-                        self->server,
-                        0,
-                        &(aout_sv_msg_state) {
-                                .tick = player->tick,
-                                .state = player->state
-                        }
-                );
+        for (size_t i = 0; i < SERVER_MAX_CONNECTIONS; ++ i) {
+                aout_player* player = &self->players[i];
+
+                if (!player->connection.id) { continue; }
+
+                player->state = aout_state_from_body(player->body);
+
+                // Send current state to clients
+                // TODO: Send state of all connected clients
+                if (player->connection.id) {
+                        aout_server_send_msg_state(
+                                self->server,
+                                player->connection.peer_id,
+                                &(aout_sv_msg_state) {
+                                        .tick = player->tick,
+                                        .state = player->state
+                                }
+                        );
+                }
         }
 
         aout_server_flush(self->server);
@@ -246,7 +258,9 @@ static void aout_application_on_connection(
         assert(server); assert(context);
         aout_application* self = context;
 
-        self->players[0] = (aout_player) {
+        assert(!self->players[connection.peer_id].connection.id);
+
+        self->players[connection.peer_id] = (aout_player) {
                 .connection = connection,
                 .body = cpSpaceAddBody(self->space, cpBodyNew(
                         1,
@@ -258,11 +272,11 @@ static void aout_application_on_connection(
                         )
                 )),
         };
+        ++ self->player_count;
 
-        cpBody* body = self->players[0].body;
+        cpBody* body = self->players[connection.peer_id].body;
         cpBodySetVelocityUpdateFunc(body, aout_body_velocity_update);
         cpBodySetPosition(body, cpvzero);
-        self->player_count = 1;
 
         cpShape* shape = cpSpaceAddShape(self->space, cpCircleShapeNew(
                 body,
@@ -278,12 +292,13 @@ static void aout_application_on_disconnection(
                 aout_connection connection,
                 void* context) {
         assert(server); assert(context);
-        (void) connection;
         aout_application* self = context;
 
-        aout_body_free(self->players[0].body);
-        self->players[0] = (aout_player) { 0 };
-        self->player_count = 0;
+        assert(self->players[connection.peer_id].connection.id);
+
+        aout_body_free(self->players[connection.peer_id].body);
+        self->players[connection.peer_id] = (aout_player) { 0 };
+        -- self->player_count;
 }
 
 static void aout_application_on_msg_input(
@@ -292,11 +307,12 @@ static void aout_application_on_msg_input(
                 aout_cl_msg_input* msg,
                 void* context) {
         assert(server); assert(msg); assert(context);
-        (void) connection;
         aout_application* self = context;
 
+        assert(self->players[connection.peer_id].connection.id);
+
         // Only store the latest received input message
-        aout_player* player = &self->players[0];
+        aout_player* player = &self->players[connection.peer_id];
         if (aout_tick_cmp(msg->tick, player->last_msg_input.tick) > 0) {
                 player->last_msg_input = *msg;
         }
