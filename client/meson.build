@@ -1,6 +1,8 @@
 client_sources = [
   'application.c',
   'client.c',
+  'debug_draw.c',
+  'debug_draw_glue.c',
   'implementation.c',
   'initialise.c',
   'main.c',
