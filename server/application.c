@@ -138,7 +138,6 @@ aout_res aout_application_run(
                 if (self->sigint_raised) {
                         printf("\n"); // CTRL-C
                         aout_application_stop(self);
-                        // TODO: Could also move this check to the end of loop
                         break;
                 }
 
@@ -185,11 +184,6 @@ static void aout_application_update_fixed(
         }
 
         aout_server_update(self->server);
-
-        // TODO: Remove
-        if (self->player_count == 0) {
-                return;
-        }
 
         for (size_t i = 0; i < SERVER_MAX_CONNECTIONS; ++ i) {
                 aout_player* player = &self->players[i];
