@@ -2,12 +2,28 @@
 
 #include <chipmunk/chipmunk.h>
 
+#define AOUT_PLAYER_FORCE (5000)
+#define AOUT_PLAYER_FRICTION (0.7)
+#define AOUT_PLAYER_VELOCITY_MAX (250.0)
+
+void aout_body_velocity_update(
+                cpBody* body,
+                cpVect gravity,
+                cpFloat damping,
+                cpFloat dt) {
+        damping *= AOUT_PLAYER_FRICTION;
+        cpBodyUpdateVelocity(body, gravity, damping, dt);
+        cpBodySetVelocity(body, cpvclamp(
+                cpBodyGetVelocity(body), AOUT_PLAYER_VELOCITY_MAX
+        ));
+}
+
 void aout_body_apply_input(
                 cpBody* body,
                 aout_input* input) {
         assert(body); assert(input);
 
-        aout_vec2 direction = { 0 };
+        cpVect direction = { 0 };
 
         if (input->right) {
                 direction.x += 1;
@@ -22,9 +38,8 @@ void aout_body_apply_input(
                 direction.y -= 1;
         }
 
-        aout_vec2 velocity = aout_vec2_mul(aout_vec2_norm(direction), 2500);
-        //cpBodySetVelocity(body, cpv(velocity.x, velocity.y));
-        cpBodySetForce(body, cpv(velocity.x, velocity.y));
+        cpVect force = cpvmult(cpvnormalize(direction), AOUT_PLAYER_FORCE);
+        cpBodySetForce(body, force);
 }
 
 aout_state aout_state_from_body(

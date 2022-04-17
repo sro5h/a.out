@@ -249,9 +249,9 @@ static void aout_application_on_connection(
         self->players[0] = (aout_player) {
                 .connection = connection,
                 .body = cpSpaceAddBody(self->space, cpBodyNew(
-                        10,
+                        1,
                         cpMomentForCircle(
-                                10,
+                                1,
                                 0,
                                 10,
                                 cpvzero
@@ -259,11 +259,13 @@ static void aout_application_on_connection(
                 )),
         };
 
-        cpBodySetPosition(self->players[0].body, cpvzero);
+        cpBody* body = self->players[0].body;
+        cpBodySetVelocityUpdateFunc(body, aout_body_velocity_update);
+        cpBodySetPosition(body, cpvzero);
         self->player_count = 1;
 
         cpShape* shape = cpSpaceAddShape(self->space, cpCircleShapeNew(
-                self->players[0].body,
+                body,
                 10,
                 cpvzero
         ));
