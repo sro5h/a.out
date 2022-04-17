@@ -226,7 +226,6 @@ aout_res aout_application_run(
                 if (glfwWindowShouldClose(self->window) || self->sigint_raised) {
                         if (self->sigint_raised) { printf("\n"); } // CTRL-C
                         aout_application_stop(self);
-                        // TODO: Maybe move check to end of loop
                         break;
                 }
 
