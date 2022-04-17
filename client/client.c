@@ -50,12 +50,14 @@ aout_client* aout_client_create(
         self->host = enet_host_create(NULL, 1, 2, 0, 0);
 
         if (!self->host) {
-                // TODO: Could be changed to mirror application error handling
-                free(self);
-                return NULL;
+                goto error;
         }
 
         return self;
+
+error:
+        aout_client_destroy(self);
+        return NULL;
 }
 
 void aout_client_destroy(
