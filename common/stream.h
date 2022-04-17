@@ -4,10 +4,8 @@
 #include "result.h"
 #include "types.h"
 
-// TODO: Add writer and reader structs that encapsulate a buffer and its
-// current read or write index.
 typedef struct aout_stream {
-        uint8_t* data; // TODO: Add data type ubyte_t?
+        uint8_t* data;
         size_t data_size;
         size_t index;
 } aout_stream;
@@ -38,7 +36,7 @@ COMMON_API aout_res aout_stream_write_f64(
 
 COMMON_API aout_res aout_stream_write_bytes(
                 aout_stream* self,
-                uint8_t* values, // TODO: Add data type ubyte_t?
+                uint8_t* values,
                 size_t size);
 
 COMMON_API aout_res aout_stream_read_u8(
@@ -73,14 +71,11 @@ COMMON_API aout_res aout_stream_read_bytes(
 COMMON_API bool aout_stream_has_capacity(
                 aout_stream* self,
                 size_t size);
-// TODO: Maybe rename
-// bool aout_stream_query_capacity
-// bool aout_stream_query_overflow
 
 COMMON_API size_t aout_stream_get_count(
                 aout_stream* self);
 
-COMMON_API void aout_stream_reset( // TODO: Find better name
+COMMON_API void aout_stream_reset(
                 aout_stream* self);
 
 #endif

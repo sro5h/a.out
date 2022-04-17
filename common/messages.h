@@ -22,7 +22,6 @@ typedef enum aout_sv_msg_type {
 
 #define AOUT_CL_MSG_INPUT_BUFFER_COUNT (3)
 
-// TODO: Rename to *_command
 typedef struct aout_cl_msg_input {
         aout_tick tick;
         aout_input inputs[AOUT_CL_MSG_INPUT_BUFFER_COUNT];

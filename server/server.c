@@ -354,6 +354,6 @@ static uint32_t aout_server_get_packet_flags(
                 return ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT
                         | ENET_PACKET_FLAG_UNSEQUENCED;
         default:
-                return ENET_PACKET_FLAG_RELIABLE; // TODO: Change?
+                return ENET_PACKET_FLAG_RELIABLE;
         }
 }

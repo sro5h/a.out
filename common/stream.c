@@ -163,8 +163,8 @@ bool aout_stream_has_capacity(
                 aout_stream* self,
                 size_t size) {
         assert(self);
-        assert(self->index <= self->data_size); // TODO: Treat as error?
-        // No don't treat that as an error. The index should only be modified
+        assert(self->index <= self->data_size);
+        // Don't treat that as an error. The index should only be modified
         // by aout_stream_* functions and thus never be invalid.
 
         return (self->index + size) <= self->data_size;
