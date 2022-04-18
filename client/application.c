@@ -1,4 +1,5 @@
 #include "application.h"
+#include "debug_draw_glue.h"
 #include "mesh_player.h"
 #include "prediction.h"
 
@@ -17,6 +18,7 @@
 
 typedef struct aout_application {
         GLFWwindow* window;
+        aout_debug_draw* debug_draw;
         aout_renderer* renderer;
         aout_mesh mesh_player;
         aout_mesh mesh_server;
@@ -127,6 +129,15 @@ aout_application* aout_application_create(
                 0x5e, 0x60, 0xce, 0xff
         });
 
+        self->debug_draw = aout_debug_draw_new();
+
+        if (!self->debug_draw) {
+                aout_loge("could not create debug draw");
+                goto error;
+        }
+
+        aout_debug_draw_set_view(self->debug_draw, 640, 480);
+
         self->space = cpSpaceNew();
 
         if (!self->space) {
@@ -143,7 +154,7 @@ aout_application* aout_application_create(
                 cpMomentForCircle(
                         1,
                         0,
-                        10,
+                        50,
                         cpvzero
                 )
         ));
@@ -152,7 +163,7 @@ aout_application* aout_application_create(
 
         cpShape* shape = cpSpaceAddShape(self->space, cpCircleShapeNew(
                 self->body,
-                10,
+                50,
                 cpvzero
         ));
         cpShapeSetElasticity(shape, 0.0f);
@@ -207,6 +218,7 @@ void aout_application_destroy(
 
         aout_client_destroy(self->client);
         aout_space_free(self->space);
+        aout_debug_draw_del(self->debug_draw);
         aout_renderer_destroy(self->renderer);
         glfwDestroyWindow(self->window);
         aout_ring_destroy(self->predictions);
@@ -302,6 +314,12 @@ static void aout_application_update(
         assert(self);
         (void) delta_time;
 
+        aout_debug_draw_clear(self->debug_draw);
+        cpSpaceDebugDrawOptions options = aout_debug_draw_default_impl(
+                self->debug_draw
+        );
+        cpSpaceDebugDraw(self->space, &options);
+
         aout_transform trans = {
                 .position = self->state.p,
                 .scale = { 1.f, 1.f }
@@ -319,6 +337,8 @@ static void aout_application_update(
         assert(width > 0); assert(height > 0);
 
         aout_renderer_begin(self->renderer, width, height);
+
+        aout_debug_draw_flush(self->debug_draw);
 
         aout_renderer_render_mesh(
                 self->renderer,

@@ -1,6 +1,10 @@
 #include "debug_draw.h"
 
+#include <cglm/affine.h>
+#include <cglm/mat4.h>
 #include <sokol/sokol_gfx.h>
+
+#include <assert.h>
 
 #define AOUT_VERTEX_COUNT_MAX (64 * 1024)
 #define AOUT_INDEX_COUNT_MAX  (4 * AOUT_VERTEX_COUNT_MAX)
@@ -26,7 +30,7 @@ typedef struct priv_vertex {
 typedef uint16_t priv_index;
 
 typedef struct aout_debug_draw {
-        cpTransform view_matrix;
+        mat4 view_matrix;
         float line_scale;
 
         sg_buffer vertex_buffer, index_buffer;
@@ -38,9 +42,10 @@ typedef struct aout_debug_draw {
         size_t vertex_count, index_count;
 } aout_debug_draw;
 
-typedef struct priv_view_matrix {
+// TODO: Remove
+/*typedef struct priv_view_matrix {
         float entries[16];
-} priv_view_matrix;
+} priv_view_matrix;*/
 
 static
 priv_rgba8 cp_to_rgba(
@@ -64,8 +69,14 @@ cpSpaceDebugColor rgba_to_cp(
         };
 }
 
-aout_debug_draw aout_make_debug_draw(
+aout_debug_draw* aout_debug_draw_new(
                 void) {
+        aout_debug_draw* self = calloc(1, sizeof(*self));
+
+        if (!self) {
+                return NULL;
+        }
+
         sg_buffer vertex_buffer = sg_make_buffer(&(sg_buffer_desc) {
                 .label = "aout_debug_draw vertex buffer",
                 .size = AOUT_VERTEX_COUNT_MAX * sizeof(priv_vertex),
@@ -82,9 +93,9 @@ aout_debug_draw aout_make_debug_draw(
 
         sg_shader shader = sg_make_shader(&(sg_shader_desc) {
                 .vs.uniform_blocks[0] = {
-                        .size = sizeof(priv_view_matrix),
+                        .size = sizeof(mat4),
                         .uniforms[0] = {
-                                .name = "view_matrix",
+                                .name = "mvp",
                                 .type = SG_UNIFORMTYPE_MAT4
                         },
                 },
@@ -95,7 +106,7 @@ aout_debug_draw aout_make_debug_draw(
                         layout(location = 3) in vec4 fill;
                         layout(location = 4) in vec4 outline;
 
-                        uniform mat4 view_matrix;
+                        uniform mat4 mvp;
 
                         out struct {
                                 vec2 uv;
@@ -104,7 +115,7 @@ aout_debug_draw aout_make_debug_draw(
                         } frag;
 
                         void main() {
-                                gl_Position = view_matrix * vec4(pos + radius * uv, 0, 1);
+                                gl_Position = mvp * vec4(pos + radius * uv, 0, 1);
                                 frag.uv = uv;
                                 frag.fill = fill;
                                 frag.fill.rgb *= fill.a;
@@ -133,46 +144,51 @@ aout_debug_draw aout_make_debug_draw(
                 ),
         });
 
-        return (aout_debug_draw) {
-                .line_scale = 1.0f,
-                .vertex_buffer = vertex_buffer,
+        self->line_scale = 1.0f,
+        self->vertex_buffer = vertex_buffer,
+        self->index_buffer = index_buffer,
+        self->bindings = (sg_bindings) {
+                .vertex_buffers[0] = vertex_buffer,
                 .index_buffer = index_buffer,
-                .bindings = (sg_bindings) {
-                        .vertex_buffers[0] = vertex_buffer,
-                        .index_buffer = index_buffer,
+        },
+        self->pipeline = sg_make_pipeline(&(sg_pipeline_desc) {
+                .shader = shader,
+                .colors[0].blend = {
+                        .enabled = true,
+                        .src_factor_rgb = SG_BLENDFACTOR_ONE,
+                        .dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
                 },
-                .pipeline = sg_make_pipeline(&(sg_pipeline_desc) {
-                        .shader = shader,
-                        .colors[0].blend = {
-                                .enabled = true,
-                                .src_factor_rgb = SG_BLENDFACTOR_ONE,
-                                .dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
+                .index_type = SG_INDEXTYPE_UINT16,
+                .layout = {
+                        .attrs[0] = {
+                                .offset = offsetof(priv_vertex, pos),
+                                .format = SG_VERTEXFORMAT_FLOAT2
                         },
-                        .index_type = SG_INDEXTYPE_UINT16,
-                        .layout = {
-                                .attrs[0] = {
-                                        .offset = offsetof(priv_vertex, pos),
-                                        .format = SG_VERTEXFORMAT_FLOAT2
-                                },
-                                .attrs[1] = {
-                                        .offset = offsetof(priv_vertex, uv),
-                                        .format = SG_VERTEXFORMAT_FLOAT2
-                                },
-                                .attrs[2] = {
-                                        .offset = offsetof(priv_vertex, r),
-                                        .format = SG_VERTEXFORMAT_FLOAT
-                                },
-                                .attrs[3] = {
-                                        .offset = offsetof(priv_vertex, fill),
-                                        .format = SG_VERTEXFORMAT_UBYTE4N
-                                },
-                                .attrs[4] = {
-                                        .offset = offsetof(priv_vertex, outline),
-                                        .format = SG_VERTEXFORMAT_UBYTE4N
-                                },
+                        .attrs[1] = {
+                                .offset = offsetof(priv_vertex, uv),
+                                .format = SG_VERTEXFORMAT_FLOAT2
                         },
-                }),
-        };
+                        .attrs[2] = {
+                                .offset = offsetof(priv_vertex, r),
+                                .format = SG_VERTEXFORMAT_FLOAT
+                        },
+                        .attrs[3] = {
+                                .offset = offsetof(priv_vertex, fill),
+                                .format = SG_VERTEXFORMAT_UBYTE4N
+                        },
+                        .attrs[4] = {
+                                .offset = offsetof(priv_vertex, outline),
+                                .format = SG_VERTEXFORMAT_UBYTE4N
+                        },
+                },
+        });
+
+        return self;
+}
+
+void aout_debug_draw_del(
+                aout_debug_draw* self) {
+        free(self);
 }
 
 cpSpaceDebugColor aout_debug_draw_color_for_shape(
@@ -188,9 +204,23 @@ cpSpaceDebugColor aout_debug_draw_color_for_shape(
                 if (cpBodyIsSleeping(body)) {
                         return rgba_to_cp((priv_rgba8) { 0x58, 0x6e, 0x75, 0xff });
                 } else {
-                        return rgba_to_cp((priv_rgba8) { 0xf6, 0x08, 0x1e, 0xff });
+                        return rgba_to_cp((priv_rgba8) { 0x00, 0x00, 0x00, 0xff });
                 }
         }
+}
+
+void aout_debug_draw_set_view(
+                aout_debug_draw* self,
+                size_t width,
+                size_t height) {
+        assert(self);
+
+        glm_mat4_identity(self->view_matrix);
+        glm_scale(self->view_matrix, (vec3) {
+                1.0f / width,
+                1.0f / height,
+                1
+        });
 }
 
 static
@@ -290,7 +320,7 @@ void aout_debug_draw_segment(
                 cpVect a,
                 cpVect b,
                 cpSpaceDebugColor color) {
-        aout_debug_draw_fat_segment(debug_draw, a, b, 0.0f, color, color);
+        aout_debug_draw_fat_segment(debug_draw, a, b, 1.0f, color, color);
 }
 
 void aout_debug_draw_fat_segment(
@@ -461,7 +491,8 @@ void aout_debug_draw_bb(
 
 void aout_debug_draw_flush(
                 aout_debug_draw* debug_draw) {
-        cpTransform t = debug_draw->view_matrix;
+        // TODO: Remove
+        /*cpTransform t = debug_draw->view_matrix;
         priv_view_matrix view_matrix = {
                 .entries = {
                         (float) t.a , (float) t.b , 0.0f, 0.0f,
@@ -469,7 +500,7 @@ void aout_debug_draw_flush(
                                 0.0f,         0.0f, 1.0f, 0.0f,
                         (float) t.tx, (float) t.ty, 0.0f, 1.0f,
                 },
-        };
+        };*/
 
         sg_update_buffer(debug_draw->vertex_buffer, &(sg_range) {
                 .ptr = debug_draw->vertices,
@@ -484,8 +515,8 @@ void aout_debug_draw_flush(
         sg_apply_pipeline(debug_draw->pipeline);
         sg_apply_bindings(&debug_draw->bindings);
         sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, &(sg_range) {
-                .ptr = &view_matrix,
-                .size = sizeof(priv_view_matrix),
+                .ptr = &debug_draw->view_matrix,
+                .size = sizeof(debug_draw->view_matrix),
         });
         sg_draw(0, debug_draw->index_count, 1);
 }

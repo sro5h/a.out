@@ -61,8 +61,7 @@ static cpSpaceDebugColor aout_color_for_shape(
 }
 
 cpSpaceDebugDrawOptions aout_debug_draw_default_impl(
-                aout_debug_draw* debug_draw,
-                cpSpace* space) {
+                aout_debug_draw* debug_draw) {
         return (cpSpaceDebugDrawOptions) {
                 .drawDot = aout_draw_dot,
                 .drawCircle = aout_draw_circle,
@@ -74,7 +73,7 @@ cpSpaceDebugDrawOptions aout_debug_draw_default_impl(
                         | CP_SPACE_DEBUG_DRAW_COLLISION_POINTS,
 
                 .colorForShape = aout_color_for_shape,
-                .shapeOutlineColor =   { 0x00 / 255.0f, 0x00 / 255.0f, 0x00 / 255.0f, 1.0f },
+                .shapeOutlineColor =   { 0x33 / 255.0f, 0x33 / 255.0f, 0x33 / 255.0f, 1.0f },
                 .constraintColor =     { 0.0f, 0.75f, 0.0f, 1.0f },
                 .collisionPointColor = { 0.0f, 0.75f, 0.75f, 1.0f },
 

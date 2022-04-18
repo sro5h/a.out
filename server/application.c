@@ -14,7 +14,7 @@
 #define AOUT_SERVER_REAPPLY_LAST_INPUT
 
 #define CLIENT_BODY_MASS   10
-#define CLIENT_BODY_RADIUS 10
+#define CLIENT_BODY_RADIUS 50
 #define SERVER_MAX_CONNECTIONS 10
 
 typedef struct aout_player {
@@ -261,7 +261,7 @@ static void aout_application_on_connection(
                         cpMomentForCircle(
                                 1,
                                 0,
-                                10,
+                                50,
                                 cpvzero
                         )
                 )),
@@ -274,7 +274,7 @@ static void aout_application_on_connection(
 
         cpShape* shape = cpSpaceAddShape(self->space, cpCircleShapeNew(
                 body,
-                10,
+                50,
                 cpvzero
         ));
         cpShapeSetElasticity(shape, 0.0f);
