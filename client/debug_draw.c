@@ -69,7 +69,7 @@ cpSpaceDebugColor rgba_to_cp(
         };
 }
 
-aout_debug_draw* aout_debug_draw_new(
+aout_debug_draw* aout_debug_draw_create(
                 void) {
         aout_debug_draw* self = calloc(1, sizeof(*self));
 
@@ -186,15 +186,15 @@ aout_debug_draw* aout_debug_draw_new(
         return self;
 }
 
-void aout_debug_draw_del(
+void aout_debug_draw_destroy(
                 aout_debug_draw* self) {
         free(self);
 }
 
 cpSpaceDebugColor aout_debug_draw_color_for_shape(
-                aout_debug_draw* debug_draw,
+                aout_debug_draw* self,
                 cpShape* shape) {
-        (void) debug_draw;
+        (void) self;
 
         if (cpShapeGetSensor(shape)) {
                 return rgba_to_cp((priv_rgba8) { 0xff, 0xff, 0xff, 0x1a });
@@ -225,39 +225,39 @@ void aout_debug_draw_set_view(
 
 static
 priv_vertex* aout_debug_draw_push_vertices(
-                aout_debug_draw* debug_draw,
+                aout_debug_draw* self,
                 size_t vcount,
                 const priv_index* index_src,
                 size_t icount) {
         cpAssertHard(
-                debug_draw->vertex_count + vcount <= AOUT_VERTEX_COUNT_MAX
-                        && debug_draw->index_count + icount <= AOUT_INDEX_COUNT_MAX,
+                self->vertex_count + vcount <= AOUT_VERTEX_COUNT_MAX
+                        && self->index_count + icount <= AOUT_INDEX_COUNT_MAX,
                 "Geometry buffer full."
         );
 
-        priv_vertex* vertex_dst = debug_draw->vertices + debug_draw->vertex_count;
-        size_t base = debug_draw->vertex_count;
-        debug_draw->vertex_count += vcount;
+        priv_vertex* vertex_dst = self->vertices + self->vertex_count;
+        size_t base = self->vertex_count;
+        self->vertex_count += vcount;
 
-        priv_index* index_dst = debug_draw->indices + debug_draw->index_count;
+        priv_index* index_dst = self->indices + self->index_count;
         for (size_t i = 0; i < icount; ++i) {
                 index_dst[i] = index_src[i] + (priv_index) base;
         }
-        debug_draw->index_count += icount;
+        self->index_count += icount;
 
         return vertex_dst;
 }
 
 void aout_debug_draw_dot(
-                aout_debug_draw* debug_draw,
+                aout_debug_draw* self,
                 cpFloat size,
                 cpVect pos,
                 cpSpaceDebugColor _fill) {
-        float r = (float) size * 0.5f * debug_draw->line_scale;
+        float r = (float) size * 0.5f * self->line_scale;
         priv_rgba8 fill = cp_to_rgba(_fill);
 
         priv_vertex* vertices = aout_debug_draw_push_vertices(
-                debug_draw,
+                self,
                 4,
                 (priv_index[]) { 0, 1, 2, 0, 2, 3 },
                 6
@@ -278,17 +278,17 @@ void aout_debug_draw_dot(
 }
 
 void aout_debug_draw_circle(
-                aout_debug_draw* debug_draw,
+                aout_debug_draw* self,
                 cpVect pos,
                 cpFloat angle,
                 cpFloat radius,
                 cpSpaceDebugColor _outline,
                 cpSpaceDebugColor _fill) {
-        float r = (float) radius + debug_draw->line_scale;
+        float r = (float) radius + self->line_scale;
         priv_rgba8 fill = cp_to_rgba(_fill), outline = cp_to_rgba(_outline);
 
         priv_vertex* vertices = aout_debug_draw_push_vertices(
-                debug_draw,
+                self,
                 4,
                 (priv_index[]) { 0, 1, 2, 0, 2, 3 },
                 6
@@ -308,7 +308,7 @@ void aout_debug_draw_circle(
         };
 
         aout_debug_draw_segment(
-                debug_draw,
+                self,
                 pos,
                 cpvadd(pos, cpvmult(cpvforangle(angle), 0.75f * radius)),
                 _outline
@@ -316,15 +316,15 @@ void aout_debug_draw_circle(
 }
 
 void aout_debug_draw_segment(
-                aout_debug_draw* debug_draw,
+                aout_debug_draw* self,
                 cpVect a,
                 cpVect b,
                 cpSpaceDebugColor color) {
-        aout_debug_draw_fat_segment(debug_draw, a, b, 1.0f, color, color);
+        aout_debug_draw_fat_segment(self, a, b, 1.0f, color, color);
 }
 
 void aout_debug_draw_fat_segment(
-                aout_debug_draw* debug_draw,
+                aout_debug_draw* self,
                 cpVect a,
                 cpVect b,
                 cpFloat radius,
@@ -335,12 +335,12 @@ void aout_debug_draw_fat_segment(
         };
 
         priv_vertex* vertices = aout_debug_draw_push_vertices(
-                debug_draw, 8, indices, 18
+                self, 8, indices, 18
         );
 
         cpVect t = cpvnormalize(cpvsub(b, a));
 
-        float r = (float) radius + debug_draw->line_scale;
+        float r = (float) radius + self->line_scale;
         priv_rgba8 fill = cp_to_rgba(_fill), outline = cp_to_rgba(_outline);
 
         vertices[0] = (priv_vertex) {
@@ -391,7 +391,7 @@ void aout_debug_draw_fat_segment(
 #define AOUT_MAX_POLY_INDICES (3 * (5 * AOUT_MAX_POLY_VERTICES - 2))
 
 void aout_debug_draw_polygon(
-                aout_debug_draw* debug_draw,
+                aout_debug_draw* self,
                 int count,
                 const cpVect *verts,
                 cpFloat radius,
@@ -430,12 +430,12 @@ void aout_debug_draw_polygon(
                 cursor[12 * i0 + 11] = 4 * i1 + 1;
         }
 
-        float inset = (float) -cpfmax(0, 2 * debug_draw->line_scale - radius);
-        float outset = (float) radius + debug_draw->line_scale;
+        float inset = (float) -cpfmax(0, 2 * self->line_scale - radius);
+        float outset = (float) radius + self->line_scale;
         float r = outset - inset;
 
         priv_vertex* vertices = aout_debug_draw_push_vertices(
-                debug_draw,
+                self,
                 4 * count,
                 indices,
                 3 * (5 * count - 2)
@@ -475,7 +475,7 @@ void aout_debug_draw_polygon(
 }
 
 void aout_debug_draw_bb(
-                aout_debug_draw* debug_draw,
+                aout_debug_draw* self,
                 cpBB bb,
                 cpSpaceDebugColor color) {
         cpVect vertices[] = {
@@ -485,12 +485,12 @@ void aout_debug_draw_bb(
                 cpv(bb.l, bb.b),
         };
         aout_debug_draw_polygon(
-                debug_draw, 4, vertices, 0.0f, color, rgba_to_cp((priv_rgba8) {0})
+                self, 4, vertices, 0.0f, color, rgba_to_cp((priv_rgba8) {0})
         );
 }
 
 void aout_debug_draw_flush(
-                aout_debug_draw* debug_draw) {
+                aout_debug_draw* self) {
         // TODO: Remove
         /*cpTransform t = debug_draw->view_matrix;
         priv_view_matrix view_matrix = {
@@ -502,26 +502,26 @@ void aout_debug_draw_flush(
                 },
         };*/
 
-        sg_update_buffer(debug_draw->vertex_buffer, &(sg_range) {
-                .ptr = debug_draw->vertices,
-                .size = debug_draw->vertex_count * sizeof(priv_vertex),
+        sg_update_buffer(self->vertex_buffer, &(sg_range) {
+                .ptr = self->vertices,
+                .size = self->vertex_count * sizeof(priv_vertex),
 
         });
-        sg_update_buffer(debug_draw->index_buffer, &(sg_range) {
-                .ptr = debug_draw->indices,
-                .size = debug_draw->index_count * sizeof(priv_index),
+        sg_update_buffer(self->index_buffer, &(sg_range) {
+                .ptr = self->indices,
+                .size = self->index_count * sizeof(priv_index),
         });
 
-        sg_apply_pipeline(debug_draw->pipeline);
-        sg_apply_bindings(&debug_draw->bindings);
+        sg_apply_pipeline(self->pipeline);
+        sg_apply_bindings(&self->bindings);
         sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, &(sg_range) {
-                .ptr = &debug_draw->view_matrix,
-                .size = sizeof(debug_draw->view_matrix),
+                .ptr = &self->view_matrix,
+                .size = sizeof(self->view_matrix),
         });
-        sg_draw(0, debug_draw->index_count, 1);
+        sg_draw(0, self->index_count, 1);
 }
 
 void aout_debug_draw_clear(
-                aout_debug_draw* debug_draw) {
-        debug_draw->vertex_count = debug_draw->index_count = 0;
+                aout_debug_draw* self) {
+        self->vertex_count = self->index_count = 0;
 }

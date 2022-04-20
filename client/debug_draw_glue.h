@@ -5,6 +5,6 @@
 #include <chipmunk/chipmunk.h>
 
 cpSpaceDebugDrawOptions aout_debug_draw_default_impl(
-                aout_debug_draw* debug_draw);
+                aout_debug_draw* self);
 
 #endif
