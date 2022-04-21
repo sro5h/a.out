@@ -5,18 +5,18 @@ aout_res aout_stream_write_cl_msg_type(
                 aout_stream* self,
                 aout_cl_msg_type type) {
         assert(self);
-        static_assert(sizeof(AOUT_TYPE_CL_MSG_TYPE) == sizeof(uint32_t));
+        static_assert(sizeof(AOUT_TYPE_CL_MSG_TYPE) == sizeof(uint16_t));
 
-        return aout_stream_write_u32(self, (uint32_t) type);
+        return aout_stream_write_u16(self, (uint16_t) type);
 }
 
 aout_res aout_stream_write_sv_msg_type(
                 aout_stream* self,
                 aout_sv_msg_type type) {
         assert(self);
-        static_assert(sizeof(AOUT_TYPE_SV_MSG_TYPE) == sizeof(uint32_t));
+        static_assert(sizeof(AOUT_TYPE_SV_MSG_TYPE) == sizeof(uint16_t));
 
-        return aout_stream_write_u32(self, (uint32_t) type);
+        return aout_stream_write_u16(self, (uint16_t) type);
 }
 
 aout_res aout_stream_write_cl_msg_input(
@@ -97,10 +97,10 @@ aout_res aout_stream_read_cl_msg_type(
                 aout_stream* self,
                 aout_cl_msg_type* type) {
         assert(self); assert(type);
-        static_assert(sizeof(AOUT_TYPE_CL_MSG_TYPE) == sizeof(uint32_t));
+        static_assert(sizeof(AOUT_TYPE_CL_MSG_TYPE) == sizeof(uint16_t));
 
-        uint32_t tmp;
-        aout_res res = aout_stream_read_u32(self, &tmp);
+        uint16_t tmp;
+        aout_res res = aout_stream_read_u16(self, &tmp);
 
         if (AOUT_IS_OK(res)) {
                 *type = (aout_cl_msg_type) tmp;
@@ -113,10 +113,10 @@ aout_res aout_stream_read_sv_msg_type(
                 aout_stream* self,
                 aout_sv_msg_type* type) {
         assert(self); assert(type);
-        static_assert(sizeof(AOUT_TYPE_SV_MSG_TYPE) == sizeof(uint32_t));
+        static_assert(sizeof(AOUT_TYPE_SV_MSG_TYPE) == sizeof(uint16_t));
 
-        uint32_t tmp;
-        aout_res res = aout_stream_read_u32(self, &tmp);
+        uint16_t tmp;
+        aout_res res = aout_stream_read_u16(self, &tmp);
 
         if (AOUT_IS_OK(res)) {
                 *type = (aout_sv_msg_type) tmp;

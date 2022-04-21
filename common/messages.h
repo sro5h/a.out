@@ -7,13 +7,13 @@
 #include "stream.h"
 #include "tick.h"
 
-#define AOUT_TYPE_CL_MSG_TYPE uint32_t
+#define AOUT_TYPE_CL_MSG_TYPE uint16_t
 
 typedef enum aout_cl_msg_type {
         AOUT_CL_MSG_TYPE_INPUT,
 } aout_cl_msg_type;
 
-#define AOUT_TYPE_SV_MSG_TYPE uint32_t
+#define AOUT_TYPE_SV_MSG_TYPE uint16_t
 
 typedef enum aout_sv_msg_type {
         AOUT_SV_MSG_TYPE_CONNECTION,
@@ -37,13 +37,13 @@ typedef struct aout_sv_msg_state {
         aout_state state;
 } aout_sv_msg_state;
 
-COMMON_API aout_res aout_stream_write_cl_msg_type(
+/*COMMON_API aout_res aout_stream_write_cl_msg_type(
                 aout_stream* self,
                 aout_cl_msg_type type);
 
 COMMON_API aout_res aout_stream_write_sv_msg_type(
                 aout_stream* self,
-                aout_sv_msg_type type);
+                aout_sv_msg_type type);*/
 
 COMMON_API aout_res aout_stream_write_cl_msg_input(
                 aout_stream* self,

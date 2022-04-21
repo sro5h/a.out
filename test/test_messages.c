@@ -7,107 +7,6 @@ static bool memval(
                 uint8_t value,
                 size_t size);
 
-TEST stream_write_cl_msg_type(void) {
-        size_t const size = 2 * sizeof(aout_cl_msg_type) + 2;
-        uint8_t* data = calloc(size, sizeof(*data));
-
-        ASSERT(data);
-
-        aout_stream stream = {
-                .data = data,
-                .data_size = size
-        };
-
-        aout_res res = { 0 };
-        size_t cursor = 0;
-        aout_cl_msg_type type = AOUT_CL_MSG_TYPE_INPUT;
-        uint32_t n_type = aout_hton_u32((uint32_t) type);
-
-        res = aout_stream_write_cl_msg_type(&stream, type);
-        cursor = 0;
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
-        cursor += sizeof(n_type);
-        ASSERT(memval(stream.data + cursor, 0, size - cursor));
-
-        res = aout_stream_write_cl_msg_type(&stream, type);
-        cursor = 0;
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
-        cursor += sizeof(n_type);
-        ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
-        cursor += sizeof(n_type);
-        ASSERT(memval(stream.data + cursor, 0, size - cursor));
-
-        res = aout_stream_write_cl_msg_type(&stream, type);
-        cursor = 0;
-
-        ASSERT(AOUT_IS_ERR(res));
-        ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
-        cursor += sizeof(n_type);
-        ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
-        cursor += sizeof(n_type);
-        ASSERT(memval(stream.data + cursor, 0, size - cursor));
-
-        free(data);
-        data = NULL;
-        PASS();
-}
-
-TEST stream_write_sv_msg_type(void) {
-        size_t const size = 2 * sizeof(aout_sv_msg_type) + 2;
-        uint8_t* data = calloc(size, sizeof(*data));
-
-        ASSERT(data);
-
-        aout_stream stream = {
-                .data = data,
-                .data_size = size
-        };
-
-        aout_res res = { 0 };
-        size_t cursor = 0;
-        aout_sv_msg_type type0 = AOUT_SV_MSG_TYPE_CONNECTION;
-        uint32_t n_type0 = aout_hton_u32((uint32_t) type0);
-
-        res = aout_stream_write_sv_msg_type(&stream, type0);
-        cursor = 0;
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT(memcmp(stream.data + cursor, &n_type0, sizeof(n_type0)) == 0);
-        cursor += sizeof(n_type0);
-        ASSERT(memval(stream.data + cursor, 0, size - cursor));
-
-        aout_sv_msg_type type1 = AOUT_SV_MSG_TYPE_STATE;
-        uint32_t n_type1 = aout_hton_u32((uint32_t) type1);
-
-        res = aout_stream_write_sv_msg_type(&stream, type1);
-        cursor = 0;
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT(memcmp(stream.data + cursor, &n_type0, sizeof(n_type0)) == 0);
-        cursor += sizeof(n_type0);
-        ASSERT(memcmp(stream.data + cursor, &n_type1, sizeof(n_type1)) == 0);
-        cursor += sizeof(n_type1);
-        ASSERT(memval(stream.data + cursor, 0, size - cursor));
-
-        res = aout_stream_write_sv_msg_type(&stream, type1);
-        cursor = 0;
-
-        ASSERT(AOUT_IS_ERR(res));
-        ASSERT(memcmp(stream.data + cursor, &n_type0, sizeof(n_type0)) == 0);
-        cursor += sizeof(n_type0);
-        ASSERT(memcmp(stream.data + cursor, &n_type1, sizeof(n_type1)) == 0);
-        cursor += sizeof(n_type1);
-        ASSERT(memval(stream.data + cursor, 0, size - cursor));
-
-        free(data);
-        data = NULL;
-        PASS();
-}
-
 TEST stream_write_sv_msg_connection(void) {
         size_t const size = sizeof(aout_sv_msg_connection) + 4;
         uint8_t* data = calloc(size, sizeof(*data));
@@ -218,7 +117,7 @@ TEST stream_write_sv_msg_state(void) {
 
 // Depends on enum order of aout_sv_msg_type!
 TEST stream_read_cl_msg_type(void) {
-        uint8_t data[] = { 0, 0, 0, 0, 0, 0, 0, 0, 49, 3 };
+        uint8_t data[] = { 0, 0, 0, 0, 49 };
         aout_stream stream = {
                 .data = data,
                 .data_size = sizeof(data)
@@ -247,7 +146,7 @@ TEST stream_read_cl_msg_type(void) {
 
 // Depends on enum order of aout_sv_msg_type!
 TEST stream_read_sv_msg_type(void) {
-        uint8_t data[] = { 0, 0, 0, 0, 0, 0, 0, 1, 49, 3 };
+        uint8_t data[] = { 0, 0, 0, 1, 49 };
         aout_stream stream = {
                 .data = data,
                 .data_size = sizeof(data)
@@ -343,78 +242,6 @@ TEST stream_read_sv_msg_state(void) {
         PASS();
 }
 
-TEST stream_write_then_read_cl_msg_type(void) {
-        size_t const size = sizeof(aout_cl_msg_type) + 2;
-        uint8_t* data = calloc(size, sizeof(*data));
-
-        ASSERT(data);
-
-        aout_stream stream = {
-                .data = data,
-                .data_size = size
-        };
-
-        aout_res res = { 0 };
-        size_t cursor = 0;
-        aout_cl_msg_type type = AOUT_CL_MSG_TYPE_INPUT;
-        uint32_t n_type = aout_hton_u32((uint32_t) type);
-
-        res = aout_stream_write_cl_msg_type(&stream, type);
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
-        cursor += sizeof(n_type);
-        ASSERT(memval(stream.data + cursor, 0, size - cursor));
-
-        aout_cl_msg_type result = AOUT_CL_MSG_TYPE_INPUT;
-        aout_stream_reset(&stream);
-
-        res = aout_stream_read_cl_msg_type(&stream, &result);
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(result, type);
-
-        free(data);
-        data = NULL;
-        PASS();
-}
-
-TEST stream_write_then_read_sv_msg_type(void) {
-        size_t const size = sizeof(aout_sv_msg_type) + 2;
-        uint8_t* data = calloc(size, sizeof(*data));
-
-        ASSERT(data);
-
-        aout_stream stream = {
-                .data = data,
-                .data_size = size
-        };
-
-        aout_res res = { 0 };
-        size_t cursor = 0;
-        aout_sv_msg_type type = AOUT_SV_MSG_TYPE_CONNECTION;
-        uint32_t n_type = aout_hton_u32((uint32_t) type);
-
-        res = aout_stream_write_sv_msg_type(&stream, type);
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT(memcmp(stream.data + cursor, &n_type, sizeof(n_type)) == 0);
-        cursor += sizeof(n_type);
-        ASSERT(memval(stream.data + cursor, 0, size - cursor));
-
-        aout_sv_msg_type result = AOUT_SV_MSG_TYPE_STATE;
-        aout_stream_reset(&stream);
-
-        res = aout_stream_read_sv_msg_type(&stream, &result);
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(result, type);
-
-        free(data);
-        data = NULL;
-        PASS();
-}
-
 TEST stream_write_then_read_cl_msg_input(void) {
         size_t const size = sizeof(aout_cl_msg_input) + 2;
         uint8_t* data = calloc(size, sizeof(*data));
@@ -471,8 +298,6 @@ TEST stream_write_then_read_cl_msg_input(void) {
 }
 
 SUITE(test_messages) {
-        RUN_TEST(stream_write_cl_msg_type);
-        RUN_TEST(stream_write_sv_msg_type);
         RUN_TEST(stream_write_sv_msg_connection);
         RUN_TEST(stream_write_sv_msg_state);
 
@@ -481,8 +306,6 @@ SUITE(test_messages) {
         RUN_TEST(stream_read_sv_msg_connection);
         RUN_TEST(stream_read_sv_msg_state);
 
-        RUN_TEST(stream_write_then_read_cl_msg_type);
-        RUN_TEST(stream_write_then_read_sv_msg_type);
         RUN_TEST(stream_write_then_read_cl_msg_input);
 }
 

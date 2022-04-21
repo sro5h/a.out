@@ -1,5 +1,6 @@
 #include "server.h"
 
+#include <common/host.h>
 #include <common/log.h>
 
 #include <enet/enet.h>
@@ -23,14 +24,13 @@ static void aout_server_on_receive_msg_input(
                 aout_connection const* connection,
                 aout_stream* stream);
 
-static aout_res aout_server_create_packet(
-                aout_sv_msg_type type,
-                size_t size,
-                ENetPacket** packet,
-                aout_stream* stream);
+static aout_res aout_wrapper_write_sv_msg_connection(
+                aout_stream* self,
+                void* msg);
 
-static uint32_t aout_server_get_packet_flags(
-                aout_sv_msg_type type);
+static aout_res aout_wrapper_write_sv_msg_state(
+                aout_stream* self,
+                void* msg);
 
 aout_server* aout_server_create(
                 aout_server_adapter adapter,
@@ -124,9 +124,17 @@ aout_res aout_server_send_msg_connection(
         assert(peer_id < self->host->peerCount);
         assert(self->host->peers[peer_id].connectID); // TODO: Treat as error?
 
+        return aout_host_send_msg(self->host, peer_id, &(aout_msg_desc) {
+                .type = AOUT_SV_MSG_TYPE_CONNECTION,
+                .size = sizeof(*msg),
+                .flags = ENET_PACKET_FLAG_RELIABLE,
+                .value = msg,
+                .write = aout_wrapper_write_sv_msg_connection,
+        });
+
         // The requested buffer is an upper limit of how much space will be
         // needed and will be shrunken.
-        ENetPacket* packet;
+        /*ENetPacket* packet;
         aout_stream stream;
         aout_res res = aout_server_create_packet(
                 AOUT_SV_MSG_TYPE_CONNECTION,
@@ -165,7 +173,7 @@ error:
         assert(packet); assert(packet->referenceCount == 0);
         enet_packet_destroy(packet);
 
-        return AOUT_ERR;
+        return AOUT_ERR;*/
 }
 
 aout_res aout_server_send_msg_state(
@@ -177,9 +185,18 @@ aout_res aout_server_send_msg_state(
         assert(peer_id < self->host->peerCount);
         assert(self->host->peers[peer_id].connectID); // TODO: Treat as error?
 
+        return aout_host_send_msg(self->host, peer_id, &(aout_msg_desc) {
+                .type = AOUT_SV_MSG_TYPE_STATE,
+                .size = sizeof(*msg),
+                .flags = ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT
+                       | ENET_PACKET_FLAG_UNSEQUENCED,
+               .value = msg,
+               .write = aout_wrapper_write_sv_msg_state,
+        });
+
         // The requested buffer is an upper limit of how much space will be
         // needed and will be shrunken.
-        ENetPacket* packet;
+        /*ENetPacket* packet;
         aout_stream stream;
         aout_res res = aout_server_create_packet(
                 AOUT_SV_MSG_TYPE_STATE,
@@ -215,10 +232,10 @@ error:
         assert(packet); assert(packet->referenceCount == 0);
         enet_packet_destroy(packet);
 
-        return AOUT_ERR;
+        return AOUT_ERR;*/
 }
 
-static void aout_server_on_connect(
+void aout_server_on_connect(
                 aout_server* self,
                 ENetPeer* peer) {
         assert(self); assert(peer);
@@ -248,7 +265,7 @@ static void aout_server_on_connect(
         }
 }
 
-static void aout_server_on_disconnect(
+void aout_server_on_disconnect(
                 aout_server* self,
                 ENetPeer* peer) {
         assert(self); assert(peer);
@@ -268,7 +285,7 @@ static void aout_server_on_disconnect(
         peer->data = NULL;
 }
 
-static void aout_server_on_receive(
+void aout_server_on_receive(
                 aout_server* self,
                 ENetPeer* peer,
                 ENetPacket* packet) {
@@ -301,7 +318,7 @@ static void aout_server_on_receive(
         }
 }
 
-static void aout_server_on_receive_msg_input(
+void aout_server_on_receive_msg_input(
                 aout_server* self,
                 aout_connection const* connection,
                 aout_stream* stream) {
@@ -322,38 +339,14 @@ static void aout_server_on_receive_msg_input(
         }
 }
 
-static aout_res aout_server_create_packet(
-                aout_sv_msg_type type,
-                size_t size,
-                ENetPacket** packet,
-                aout_stream* stream) {
-        assert(packet); assert(stream);
-
-        *packet = enet_packet_create(
-                NULL,
-                sizeof(AOUT_TYPE_SV_MSG_TYPE) + size,
-                aout_server_get_packet_flags(type)
-        );
-
-        assert(*packet);
-
-        *stream = (aout_stream) { // Make sure index is initialised
-                .data = (*packet)->data,
-                .data_size = (*packet)->dataLength
-        };
-
-        return aout_stream_write_sv_msg_type(stream, type);
+aout_res aout_wrapper_write_sv_msg_connection(
+                aout_stream* self,
+                void* msg) {
+        return aout_stream_write_sv_msg_connection(self, msg);
 }
 
-static uint32_t aout_server_get_packet_flags(
-                aout_sv_msg_type type) {
-        switch (type) {
-        case AOUT_SV_MSG_TYPE_CONNECTION:
-                return ENET_PACKET_FLAG_RELIABLE;
-        case AOUT_SV_MSG_TYPE_STATE:
-                return ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT
-                        | ENET_PACKET_FLAG_UNSEQUENCED;
-        default:
-                return ENET_PACKET_FLAG_RELIABLE;
-        }
+aout_res aout_wrapper_write_sv_msg_state(
+                aout_stream* self,
+                void* msg) {
+        return aout_stream_write_sv_msg_state(self, msg);
 }

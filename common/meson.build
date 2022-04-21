@@ -2,6 +2,7 @@ common_sources = [
   'byte_order.c',
   'console.c',
   'dummy.c',
+  'host.c',
   'id_pool.c',
   'log.c',
   'messages.c',
@@ -27,6 +28,7 @@ if build_machine.system() == 'linux'
   common_dependencies += dependency('threads')
 endif
 
+common_dependencies += dependency('libenet')
 common_dependencies += dependency('chipmunk')
 
 build_args = [
