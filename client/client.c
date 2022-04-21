@@ -192,8 +192,10 @@ void aout_client_on_receive(
                 .data_size = packet->dataLength
         };
 
-        aout_sv_msg_type type;
-        if (AOUT_IS_ERR(aout_stream_read_sv_msg_type(&stream, &type))) {
+        aout_msg_type type;
+        static_assert(sizeof(aout_msg_type) == sizeof(uint16_t));
+
+        if (AOUT_IS_ERR(aout_stream_read_u16(&stream, &type))) {
                 aout_loge("could not read sv_msg_type");
                 return;
         }
@@ -226,9 +228,8 @@ void aout_client_on_receive_msg_connection(
                         self->connection.id);
         aout_logd("{ .id = 0x%x, .peer_id = 0x%x }", msg.id, msg.peer_id);
 
-        aout_client_adapter* adapter = &self->adapter;
-        if (adapter->on_msg_connection) {
-                adapter->on_msg_connection(self, &msg, adapter->context);
+        if (self->adapter.on_msg_connection) {
+                self->adapter.on_msg_connection(self, &msg, self->adapter.context);
         }
 }
 
@@ -243,9 +244,8 @@ void aout_client_on_receive_msg_state(
                 return;
         }
 
-        aout_client_adapter* adapter = &self->adapter;
-        if (adapter->on_msg_state) {
-                adapter->on_msg_state(self, &msg, adapter->context);
+        if (self->adapter.on_msg_state) {
+                self->adapter.on_msg_state(self, &msg, self->adapter.context);
         }
 }
 

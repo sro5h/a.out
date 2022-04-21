@@ -115,64 +115,6 @@ TEST stream_write_sv_msg_state(void) {
         PASS();
 }
 
-// Depends on enum order of aout_sv_msg_type!
-TEST stream_read_cl_msg_type(void) {
-        uint8_t data[] = { 0, 0, 0, 0, 49 };
-        aout_stream stream = {
-                .data = data,
-                .data_size = sizeof(data)
-        };
-
-        aout_res res = { 0 };
-        aout_cl_msg_type types[2] = { 0 };
-
-        res = aout_stream_read_cl_msg_type(&stream, &types[0]);
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(types[0], AOUT_CL_MSG_TYPE_INPUT);
-
-        res = aout_stream_read_cl_msg_type(&stream, &types[1]);
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(types[1], AOUT_CL_MSG_TYPE_INPUT);
-
-        res = aout_stream_read_cl_msg_type(&stream, &types[0]);
-
-        ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(types[0], AOUT_CL_MSG_TYPE_INPUT);
-
-        PASS();
-}
-
-// Depends on enum order of aout_sv_msg_type!
-TEST stream_read_sv_msg_type(void) {
-        uint8_t data[] = { 0, 0, 0, 1, 49 };
-        aout_stream stream = {
-                .data = data,
-                .data_size = sizeof(data)
-        };
-
-        aout_res res = { 0 };
-        aout_sv_msg_type types[2] = { 0 };
-
-        res = aout_stream_read_sv_msg_type(&stream, &types[0]);
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(types[0], AOUT_SV_MSG_TYPE_CONNECTION);
-
-        res = aout_stream_read_sv_msg_type(&stream, &types[1]);
-
-        ASSERT(AOUT_IS_OK(res));
-        ASSERT_EQ(types[1], AOUT_SV_MSG_TYPE_STATE);
-
-        res = aout_stream_read_sv_msg_type(&stream, &types[0]);
-
-        ASSERT(AOUT_IS_ERR(res));
-        ASSERT_EQ(types[0], AOUT_SV_MSG_TYPE_CONNECTION);
-
-        PASS();
-}
-
 TEST stream_read_sv_msg_connection(void) {
         uint8_t data[] = { 32, 129, -32, 239, 12, 4, 9, 94, 49, 3 };
         aout_stream stream = {
@@ -301,8 +243,6 @@ SUITE(test_messages) {
         RUN_TEST(stream_write_sv_msg_connection);
         RUN_TEST(stream_write_sv_msg_state);
 
-        RUN_TEST(stream_read_cl_msg_type);
-        RUN_TEST(stream_read_sv_msg_type);
         RUN_TEST(stream_read_sv_msg_connection);
         RUN_TEST(stream_read_sv_msg_state);
 
