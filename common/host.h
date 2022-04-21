@@ -20,4 +20,13 @@ COMMON_API aout_res aout_host_send_msg(
                 uint16_t peer_id,
                 aout_msg_desc* msg_desc);
 
+COMMON_API aout_res aout_host_send_msg_to_all(
+                ENetHost* self,
+                aout_msg_desc* msg_desc);
+
+COMMON_API aout_res aout_host_send_msg_to_all_except(
+                ENetHost* self,
+                uint16_t peer_id,
+                aout_msg_desc* msg_desc);
+
 #endif
