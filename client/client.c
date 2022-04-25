@@ -118,7 +118,7 @@ aout_res aout_client_send_msg_input(
         assert(self->host);
         assert(self->peer);
 
-        uint16_t peer_id = self->connection.peer_id;
+        uint16_t peer_id = self->peer->incomingPeerID;
         return aout_host_send_msg(self->host, peer_id, &(aout_msg_desc) {
                 .type = AOUT_CL_MSG_TYPE_INPUT,
                 .size = sizeof(*msg),
