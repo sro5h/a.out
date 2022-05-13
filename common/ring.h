@@ -12,20 +12,20 @@ typedef struct aout_ring {
         size_t root;
 } aout_ring;
 
-COMMON_API aout_res aout_ring_init(
+COMMON_API void aout_ring_ctor(
                 aout_ring* self,
                 size_t capacity,
                 size_t value_size);
 
-COMMON_API void aout_ring_fini(
+COMMON_API void aout_ring_dtor(
                 aout_ring* self);
 
-COMMON_API aout_ring* aout_ring_create(
+COMMON_API aout_ring* aout_ring_new(
                 size_t capacity,
                 size_t value_size);
 
-COMMON_API void aout_ring_destroy(
-                aout_ring* self);
+COMMON_API void aout_ring_del(
+                aout_ring** out_self);
 
 COMMON_API void aout_ring_clear(
                 aout_ring* self);

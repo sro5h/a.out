@@ -1,4 +1,5 @@
 #include "ring.h"
+#include "memory.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -7,56 +8,44 @@ static size_t aout_ring_byte_index(
                 aout_ring const* self,
                 size_t index);
 
-aout_res aout_ring_init(
+void aout_ring_ctor(
                 aout_ring* self,
                 size_t capacity,
                 size_t value_size) {
-        assert(self);
+        assert(self); assert(capacity > 1); assert(value_size > 0);
 
         // Reserve one dummy value at the end
-        self->values = calloc(capacity + 1, value_size);
-
-        if (!self->values) {
-                return AOUT_ERR;
-        }
+        self->values = aout_acquire((capacity + 1) * value_size);
 
         self->capacity = capacity;
         self->value_size = value_size;
-
-        return AOUT_OK;
 }
 
-void aout_ring_fini(
+void aout_ring_dtor(
                 aout_ring* self) {
         assert(self);
-        free(self->values);
+
+        aout_release(self->values);
+        *self = (aout_ring) { 0 };
 }
 
-aout_ring* aout_ring_create(
+aout_ring* aout_ring_new(
                 size_t capacity,
                 size_t value_size) {
-        aout_ring* self = calloc(1, sizeof(*self));
-
-        if (!self) {
-                goto error;
-        }
-
-        if (AOUT_IS_ERR(aout_ring_init(self, capacity, value_size))) {
-                goto error;
-        }
+        aout_ring* self = aout_acquire(sizeof(*self));
+        aout_ring_ctor(self, capacity, value_size);
 
         return self;
-
-error:
-        aout_ring_destroy(self);
-        return NULL;
 }
 
-void aout_ring_destroy(
-                aout_ring* self) {
-        if (self) {
-                aout_ring_fini(self);
-                free(self);
+void aout_ring_del(
+                aout_ring** out_self) {
+        assert(out_self);
+
+        if (*out_self) {
+                aout_ring_dtor(*out_self);
+                aout_release(*out_self);
+                *out_self = NULL;
         }
 }
 

@@ -85,10 +85,7 @@ aout_application* aout_application_create(
         self->time_step = 1.0 / tick_rate;
         self->sigint_raised = 0;
 
-        self->predictions = aout_ring_create(
-                tick_rate,
-                sizeof(aout_prediction)
-        );
+        self->predictions = aout_ring_new(tick_rate, sizeof(aout_prediction));
 
         if (!self->predictions) {
                 aout_loge("could not create predictions ring");
@@ -221,7 +218,7 @@ void aout_application_destroy(
         aout_debug_draw_destroy(self->debug_draw);
         aout_renderer_destroy(self->renderer);
         glfwDestroyWindow(self->window);
-        aout_ring_destroy(self->predictions);
+        aout_ring_del(&self->predictions);
         free(self);
 }
 
