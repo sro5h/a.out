@@ -23,16 +23,17 @@ COMMON_API uint8_t aout_id_generation(
 
 typedef struct aout_id_pool aout_id_pool;
 
-COMMON_API aout_id_pool* aout_id_pool_create(
+COMMON_API aout_id_pool* aout_id_pool_new(
                 size_t size);
 
-COMMON_API void aout_id_pool_destroy(
+COMMON_API void aout_id_pool_del(
+                aout_id_pool** out_self);
+
+// TODO: Find better name. *_new is expected to allocate memory.
+COMMON_API aout_id aout_id_pool_id_new(
                 aout_id_pool* self);
 
-COMMON_API aout_id aout_id_pool_id_create(
-                aout_id_pool* self);
-
-COMMON_API void aout_id_pool_id_destroy(
+COMMON_API void aout_id_pool_id_del(
                 aout_id_pool* self,
                 aout_id id);
 

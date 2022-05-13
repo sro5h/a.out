@@ -1,4 +1,5 @@
 #include "id_pool.h"
+#include "memory.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -42,42 +43,54 @@ uint8_t aout_id_generation(
         return (uint8_t) (id >> AOUT_ID_POOL_GENERATION_SHIFT);
 }
 
-aout_id_pool* aout_id_pool_create(
+static void aout_id_pool_ctor(
+                aout_id_pool* self,
                 size_t size) {
-        assert(size <= AOUT_ID_POOL_MAX_SIZE);
+        assert(self); assert(size > 0); assert(size <= AOUT_ID_POOL_MAX_SIZE);
 
-        aout_id_pool* self = calloc(1, sizeof(*self));
-        assert(self);
+        // Slots must be zeroed.
+        self->slots = aout_acquire(size * sizeof(*self->slots));
+        self->unused_indices = aout_acquire(size * sizeof(*self->unused_indices));
 
         self->size = size;
         self->unused_indices_top = 0;
 
-        // Slots must be zero
-        self->slots = calloc(self->size, sizeof(*self->slots));
-        assert(self->slots);
-
-        self->unused_indices = calloc(self->size, sizeof(*self->unused_indices));
-        assert(self->unused_indices);
-
-        // Populate unused indices with [size - 1 .. 0]
+        // Populate unused indices with [size - 1 .. 0].
         for (size_t i = 1; i <= self->size; ++i) {
                 self->unused_indices[self->unused_indices_top] = self->size - i;
                 ++self->unused_indices_top;
         }
+}
+
+static void aout_id_pool_dtor(
+                aout_id_pool* self) {
+        assert(self);
+
+        aout_release(self->slots);
+        aout_release(self->unused_indices);
+        *self = (aout_id_pool) { 0 };
+}
+
+aout_id_pool* aout_id_pool_new(
+                size_t size) {
+        aout_id_pool* self = aout_acquire(sizeof(*self));
+        aout_id_pool_ctor(self, size);
 
         return self;
 }
 
-void aout_id_pool_destroy(
-                aout_id_pool* self) {
-        if (self) {
-                free(self->unused_indices);
-                free(self->slots);
-                free(self);
+void aout_id_pool_del(
+                aout_id_pool** out_self) {
+        assert(out_self);
+
+        if (*out_self) {
+                aout_id_pool_dtor(*out_self);
+                aout_release(*out_self);
+                *out_self = NULL;
         }
 }
 
-aout_id aout_id_pool_id_create(
+aout_id aout_id_pool_id_new(
                 aout_id_pool* self) {
         assert(self); assert(self->unused_indices); assert(self->slots);
         assert(self->unused_indices_top <= self->size);
@@ -95,7 +108,7 @@ aout_id aout_id_pool_id_create(
         return aout_id_make(index, slot->generation);
 }
 
-void aout_id_pool_id_destroy(
+void aout_id_pool_id_del(
                 aout_id_pool* self,
                 aout_id id) {
         assert(self); assert(self->unused_indices); assert(self->slots);
