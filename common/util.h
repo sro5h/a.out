@@ -15,8 +15,8 @@ COMMON_API void aout_print_bytes(
 COMMON_API void aout_space_free_children_post_step(
                 cpSpace* space);
 
-COMMON_API void aout_space_free(
-                cpSpace* space);
+COMMON_API void aout_space_del(
+                cpSpace** out_space);
 
 COMMON_API void aout_body_free_children(
                 cpBody* body);

@@ -193,7 +193,7 @@ void aout_application_destroy(
         //assert(self->window); assert(self->client);
 
         aout_client_del(&self->client);
-        aout_space_free(self->space);
+        aout_space_del(&self->space);
         aout_debug_draw_del(&self->debug_draw);
         aout_renderer_del(&self->renderer);
         glfwDestroyWindow(self->window);

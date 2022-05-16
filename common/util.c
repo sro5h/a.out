@@ -80,11 +80,14 @@ void aout_space_free_children_post_step(
         cpSpaceEachBody(space, space_post_body_free, space);
 }
 
-void aout_space_free(
-                cpSpace* space) {
-        if (space) {
-                aout_space_free_children_post_step(space);
-                cpSpaceFree(space);
+void aout_space_del(
+                cpSpace** out_space) {
+        assert(out_space);
+
+        if (*out_space) {
+                aout_space_free_children_post_step(*out_space);
+                cpSpaceFree(*out_space);
+                *out_space = NULL;
         }
 }
 

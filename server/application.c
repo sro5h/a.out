@@ -123,7 +123,7 @@ void aout_application_destroy(
         }
 
         aout_server_destroy(self->server);
-        aout_space_free(self->space);
+        aout_space_del(&self->space);
         free(self);
 }
 
