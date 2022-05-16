@@ -13,12 +13,7 @@ int main(void) {
 
         aout_logd("client");
 
-        aout_application* app = aout_application_create();
-
-        if (!app) {
-                aout_loge("could not create application");
-                goto error;
-        }
+        aout_application* app = aout_application_new();
 
         aout_logd("client started");
 
@@ -26,11 +21,8 @@ int main(void) {
 
         aout_logd("client stopped");
 
-        aout_application_destroy(app);
+        aout_application_del(&app);
         aout_terminate();
-        return AOUT_IS_OK(res) ? EXIT_SUCCESS : EXIT_FAILURE;
 
-error:
-        aout_terminate();
-        return EXIT_FAILURE;
+        return AOUT_IS_OK(res) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

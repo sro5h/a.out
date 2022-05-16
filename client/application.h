@@ -10,14 +10,14 @@
 
 typedef struct aout_application aout_application;
 
-aout_application* aout_application_create(
+aout_application* aout_application_new(
                 void);
 
-void aout_application_destroy(
-                aout_application* self);
+void aout_application_del(
+                aout_application** out_self);
 
-void aout_application_init(
-                aout_application* self);
+/*void aout_application_init(
+                aout_application* self);*/
 
 aout_res aout_application_run(
                 aout_application* self);

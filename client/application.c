@@ -5,7 +5,9 @@
 
 #include <common/console.h>
 #include <common/log.h>
+#include <common/memory.h>
 #include <common/movement.h>
+#include <common/platform.h>
 #include <common/ring.h>
 #include <common/state.h>
 #include <common/util.h>
@@ -70,14 +72,10 @@ static void on_sigint(
                 void* context);
 
 // TODO: add aout_application_desc
-aout_application* aout_application_create(
+aout_application* aout_application_new(
                 //aout_application_desc* desc
                 void) {
-        aout_application* self = calloc(1, sizeof(*self));
-
-        if (!self) {
-                return NULL;
-        }
+        aout_application* self = aout_acquire(sizeof(*self));
 
         size_t const tick_rate = 20;
         self->is_running = true;
@@ -93,11 +91,7 @@ aout_application* aout_application_create(
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         self->window = glfwCreateWindow(640, 480, "client", NULL, NULL);
-
-        if (!self->window) {
-                aout_loge("could not create window");
-                goto error;
-        }
+        aout_abort_if(!self->window);
 
         glfwSetWindowPos(self->window, 0, 0);
         glfwMakeContextCurrent(self->window);
@@ -120,11 +114,7 @@ aout_application* aout_application_create(
         aout_debug_draw_set_view(self->debug_draw, 640, 480);
 
         self->space = cpSpaceNew();
-
-        if (!self->space) {
-                aout_loge("could not create space");
-                goto error;
-        }
+        aout_abort_if(!self->space);
 
         cpSpaceSetIterations(self->space, 10);
         cpSpaceSetSleepTimeThreshold(self->space, 0.5f);
@@ -159,8 +149,8 @@ aout_application* aout_application_create(
 
         // Move somewhere else
         if (AOUT_IS_ERR(aout_client_connect(self->client, 0x7f000001, 42424))) {
-                aout_loge("could not connect to foreign host");
-                goto error;
+                aout_logf("could not connect to foreign host");
+                aout_abort();
         }
 
         aout_res res = aout_on_sigint((aout_sig_handler) {
@@ -169,36 +159,28 @@ aout_application* aout_application_create(
         });
 
         if (AOUT_IS_ERR(res)) {
-                aout_loge("could not set SIGINT handler");
-                goto error;
+                aout_logf("could not set SIGINT handler");
+                aout_abort();
         }
 
         return self;
-
-        // As all pointers are zero initialised, simply call
-        // aout_application_destroy to release all allocated resources.
-        // NULL pointers will be ignored.
-error:
-        aout_application_destroy(self);
-        return NULL;
 }
 
-void aout_application_destroy(
-                aout_application* self) {
-        if (!self) {
-                return;
+void aout_application_del(
+                aout_application** out_self) {
+        assert(out_self);
+
+        aout_application* self = *out_self;
+        if (self) {
+                aout_client_del(&self->client);
+                aout_space_del(&self->space);
+                aout_debug_draw_del(&self->debug_draw);
+                aout_renderer_del(&self->renderer);
+                glfwDestroyWindow(self->window);
+                aout_ring_del(&self->predictions);
+                aout_release(self);
+                *out_self = NULL;
         }
-
-        // NULL is safely handled by *_destroy
-        //assert(self->window); assert(self->client);
-
-        aout_client_del(&self->client);
-        aout_space_del(&self->space);
-        aout_debug_draw_del(&self->debug_draw);
-        aout_renderer_del(&self->renderer);
-        glfwDestroyWindow(self->window);
-        aout_ring_del(&self->predictions);
-        free(self);
 }
 
 aout_res aout_application_run(
