@@ -48,6 +48,8 @@ static void aout_id_pool_ctor(
                 size_t size) {
         assert(self); assert(size > 0); assert(size <= AOUT_ID_POOL_MAX_SIZE);
 
+        *self = (aout_id_pool) { 0 };
+
         // Slots must be zeroed.
         self->slots = aout_acquire(size * sizeof(*self->slots));
         self->unused_indices = aout_acquire(size * sizeof(*self->unused_indices));

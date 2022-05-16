@@ -14,6 +14,8 @@ void aout_ring_ctor(
                 size_t value_size) {
         assert(self); assert(capacity > 1); assert(value_size > 0);
 
+        *self = (aout_ring) { 0 };
+
         // Reserve one dummy value at the end
         self->values = aout_acquire((capacity + 1) * value_size);
 
