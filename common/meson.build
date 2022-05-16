@@ -8,6 +8,7 @@ common_sources = [
   'memory.c',
   'messages.c',
   'movement.c',
+  'platform.c',
   'ring.c',
   'state.c',
   'stream.c',
