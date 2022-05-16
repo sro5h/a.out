@@ -87,11 +87,6 @@ aout_application* aout_application_create(
 
         self->predictions = aout_ring_new(tick_rate, sizeof(aout_prediction));
 
-        if (!self->predictions) {
-                aout_loge("could not create predictions ring");
-                goto error;
-        }
-
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
