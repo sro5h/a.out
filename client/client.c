@@ -3,6 +3,8 @@
 #include <common/byte_order.h>
 #include <common/host.h>
 #include <common/log.h>
+#include <common/memory.h>
+#include <common/platform.h>
 
 #include <enet/enet.h>
 
@@ -31,35 +33,43 @@ static aout_res aout_wrapper_write_cl_msg_input(
                 aout_stream* self,
                 void* msg);
 
-aout_client* aout_client_create(
+void aout_client_ctor(
+                aout_client* self,
                 aout_client_adapter adapter) {
-        aout_client* self = calloc(1, sizeof(*self));
+        assert(self);
 
-        if (!self) {
-                return NULL;
-        }
-
-        self->connection = (aout_connection) { 0 };
-        self->adapter = adapter;
+        *self = (aout_client) { 0 };
 
         self->host = enet_host_create(NULL, 1, 2, 0, 0);
+        aout_abort_if(!self->host);
 
-        if (!self->host) {
-                goto error;
-        }
-
-        return self;
-
-error:
-        aout_client_destroy(self);
-        return NULL;
+        self->adapter = adapter;
 }
 
-void aout_client_destroy(
+void aout_client_dtor(
                 aout_client* self) {
-        if (self) {
-                enet_host_destroy(self->host);
-                free(self);
+        assert(self);
+
+        enet_host_destroy(self->host);
+        *self = (aout_client) { 0 };
+}
+
+aout_client* aout_client_new(
+                aout_client_adapter adapter) {
+        aout_client* self = aout_acquire(sizeof(*self));
+        aout_client_ctor(self, adapter);
+
+        return self;
+}
+
+void aout_client_del(
+                aout_client** out_self) {
+        assert(out_self);
+
+        if (*out_self) {
+                aout_client_dtor(*out_self);
+                aout_release(*out_self);
+                *out_self = NULL;
         }
 }
 

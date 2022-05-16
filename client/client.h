@@ -17,11 +17,18 @@ typedef struct aout_client {
         aout_client_adapter adapter;
 } aout_client;
 
-aout_client* aout_client_create(
+void aout_client_ctor(
+                aout_client* self,
                 aout_client_adapter adapter);
 
-void aout_client_destroy(
+void aout_client_dtor(
                 aout_client* self);
+
+aout_client* aout_client_new(
+                aout_client_adapter adapter);
+
+void aout_client_del(
+                aout_client** out_self);
 
 void aout_client_update(
                 aout_client* self);

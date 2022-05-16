@@ -166,17 +166,12 @@ aout_application* aout_application_create(
         cpShapeSetElasticity(shape, 0.0f);
         cpShapeSetFriction(shape, 0.7f);
 
-        self->client = aout_client_create((aout_client_adapter) {
+        self->client = aout_client_new((aout_client_adapter) {
                 .on_connection = aout_application_on_connection,
                 .on_disconnection = aout_application_on_disconnection,
                 .on_msg_state = aout_application_on_msg_state,
                 .context = self
         });
-
-        if (!self->client) {
-                aout_loge("could not create client");
-                goto error;
-        }
 
         // Move somewhere else
         if (AOUT_IS_ERR(aout_client_connect(self->client, 0x7f000001, 42424))) {
@@ -213,7 +208,7 @@ void aout_application_destroy(
         // NULL is safely handled by *_destroy
         //assert(self->window); assert(self->client);
 
-        aout_client_destroy(self->client);
+        aout_client_del(&self->client);
         aout_space_free(self->space);
         aout_debug_draw_destroy(self->debug_draw);
         aout_renderer_destroy(self->renderer);
