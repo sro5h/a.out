@@ -4,7 +4,7 @@
 #include "mesh.h"
 #include "vertex.h"
 
-aout_mesh aout_mesh_player_create(
+aout_mesh aout_mesh_player_new(
                 aout_rgba8 color);
 
 #endif

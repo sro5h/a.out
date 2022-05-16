@@ -37,7 +37,7 @@ static char const* fs_source =
         "       color = frag.color * outline_mask * mask;\n"
         "}\n";
 
-aout_mesh aout_mesh_player_create(
+aout_mesh aout_mesh_player_new(
                 aout_rgba8 color) {
         aout_vertex const vertices[] = {
                 {

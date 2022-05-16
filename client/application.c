@@ -119,10 +119,10 @@ aout_application* aout_application_create(
         }
 
         aout_renderer_set_view(self->renderer, 640, 480);
-        self->mesh_player = aout_mesh_player_create((aout_rgba8) {
+        self->mesh_player = aout_mesh_player_new((aout_rgba8) {
                 0x74, 0x00, 0xB8, 0xff
         });
-        self->mesh_server = aout_mesh_player_create((aout_rgba8) {
+        self->mesh_server = aout_mesh_player_new((aout_rgba8) {
                 0x5e, 0x60, 0xce, 0xff
         });
 
