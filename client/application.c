@@ -111,14 +111,9 @@ aout_application* aout_application_create(
         // can be enabled.
         glfwSwapInterval(0);
 
-        self->renderer = aout_renderer_create();
-
-        if (!self->renderer) {
-                aout_loge("could not create renderer");
-                goto error;
-        }
-
+        self->renderer = aout_renderer_new();
         aout_renderer_set_view(self->renderer, 640, 480);
+
         self->mesh_player = aout_mesh_player_new((aout_rgba8) {
                 0x74, 0x00, 0xB8, 0xff
         });
@@ -205,7 +200,7 @@ void aout_application_destroy(
         aout_client_del(&self->client);
         aout_space_free(self->space);
         aout_debug_draw_del(&self->debug_draw);
-        aout_renderer_destroy(self->renderer);
+        aout_renderer_del(&self->renderer);
         glfwDestroyWindow(self->window);
         aout_ring_del(&self->predictions);
         free(self);

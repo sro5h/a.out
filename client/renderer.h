@@ -7,11 +7,11 @@
 
 typedef struct aout_renderer aout_renderer;
 
-aout_renderer* aout_renderer_create(
+aout_renderer* aout_renderer_new(
                 void);
 
-void aout_renderer_destroy(
-                aout_renderer* self);
+void aout_renderer_del(
+                aout_renderer** out_self);
 
 void aout_renderer_set_view(
                 aout_renderer* self,

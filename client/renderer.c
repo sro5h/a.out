@@ -1,5 +1,7 @@
 #include "renderer.h"
 
+#include <common/memory.h>
+
 #include <cglm/affine.h>
 #include <cglm/mat4.h>
 #include <stdlib.h>
@@ -10,14 +12,13 @@ struct aout_renderer {
         mat4 view_matrix;
 };
 
-aout_renderer* aout_renderer_create(
-                void) {
-        aout_renderer* self = calloc(1, sizeof(*self));
+static void aout_renderer_ctor(
+                aout_renderer* self) {
+        assert(self);
 
-        if (!self) {
-                return NULL;
-        }
+        *self = (aout_renderer) { 0 };
 
+        // TODO: Should not be called more than once
         sg_setup(&(sg_desc) { 0 });
 
         self->pass_action = (sg_pass_action) {
@@ -28,15 +29,30 @@ aout_renderer* aout_renderer_create(
         };
 
         aout_renderer_set_view(self, 640, 360);
+}
+
+static void aout_renderer_dtor(
+                aout_renderer* self) {
+        assert(self);
+}
+
+aout_renderer* aout_renderer_new(
+                void) {
+        aout_renderer* self = aout_acquire(sizeof(*self));
+        aout_renderer_ctor(self);
 
         return self;
 }
 
-void aout_renderer_destroy(
-                aout_renderer* self) {
-        if (self) {
+void aout_renderer_del(
+                aout_renderer** out_self) {
+        assert(out_self);
+
+        if (*out_self) {
                 sg_shutdown();
-                free(self);
+                aout_renderer_dtor(*out_self);
+                aout_release(*out_self);
+                *out_self = NULL;
         }
 }
 
