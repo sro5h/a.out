@@ -126,13 +126,7 @@ aout_application* aout_application_create(
                 0x5e, 0x60, 0xce, 0xff
         });
 
-        self->debug_draw = aout_debug_draw_create();
-
-        if (!self->debug_draw) {
-                aout_loge("could not create debug draw");
-                goto error;
-        }
-
+        self->debug_draw = aout_debug_draw_new();
         aout_debug_draw_set_view(self->debug_draw, 640, 480);
 
         self->space = cpSpaceNew();
@@ -210,7 +204,7 @@ void aout_application_destroy(
 
         aout_client_del(&self->client);
         aout_space_free(self->space);
-        aout_debug_draw_destroy(self->debug_draw);
+        aout_debug_draw_del(&self->debug_draw);
         aout_renderer_destroy(self->renderer);
         glfwDestroyWindow(self->window);
         aout_ring_del(&self->predictions);

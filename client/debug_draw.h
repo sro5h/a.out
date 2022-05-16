@@ -6,11 +6,17 @@
 
 typedef struct aout_debug_draw aout_debug_draw;
 
-aout_debug_draw* aout_debug_draw_create(
+void aout_debug_draw_ctor(
+                aout_debug_draw* self);
+
+void aout_debug_draw_dtor(
+                aout_debug_draw* self);
+
+aout_debug_draw* aout_debug_draw_new(
                 void);
 
-void aout_debug_draw_destroy(
-                aout_debug_draw* self);
+void aout_debug_draw_del(
+                aout_debug_draw** out_self);
 
 cpSpaceDebugColor aout_debug_draw_color_for_shape(
                 aout_debug_draw* self,

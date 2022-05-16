@@ -1,5 +1,7 @@
 #include "debug_draw.h"
 
+#include <common/memory.h>
+
 #include <cglm/affine.h>
 #include <cglm/mat4.h>
 #include <sokol/sokol_gfx.h>
@@ -69,13 +71,11 @@ cpSpaceDebugColor rgba_to_cp(
         };
 }
 
-aout_debug_draw* aout_debug_draw_create(
-                void) {
-        aout_debug_draw* self = calloc(1, sizeof(*self));
+void aout_debug_draw_ctor(
+                aout_debug_draw* self) {
+        assert(self);
 
-        if (!self) {
-                return NULL;
-        }
+        *self = (aout_debug_draw) { 0 };
 
         sg_buffer vertex_buffer = sg_make_buffer(&(sg_buffer_desc) {
                 .label = "aout_debug_draw vertex buffer",
@@ -182,13 +182,29 @@ aout_debug_draw* aout_debug_draw_create(
                         },
                 },
         });
+}
+
+void aout_debug_draw_dtor(
+                aout_debug_draw* self) {
+        assert(self);
+}
+
+aout_debug_draw* aout_debug_draw_new(
+                void) {
+        aout_debug_draw* self = aout_acquire(sizeof(*self));
+        aout_debug_draw_ctor(self);
 
         return self;
 }
 
-void aout_debug_draw_destroy(
-                aout_debug_draw* self) {
-        free(self);
+void aout_debug_draw_del(
+                aout_debug_draw** out_self) {
+        assert(out_self);
+
+        if (*out_self) {
+                aout_release(*out_self);
+                *out_self = NULL;
+        }
 }
 
 cpSpaceDebugColor aout_debug_draw_color_for_shape(
