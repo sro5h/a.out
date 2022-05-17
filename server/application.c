@@ -2,7 +2,9 @@
 
 #include <common/console.h>
 #include <common/log.h>
+#include <common/memory.h>
 #include <common/movement.h>
+#include <common/platform.h>
 #include <common/util.h>
 
 #include <chipmunk/chipmunk.h>
@@ -64,13 +66,9 @@ static void aout_application_on_msg_input(
 static void on_sigint(
                 void* context);
 
-aout_application* aout_application_create(
+aout_application* aout_application_new(
                 void) {
-        aout_application* self = calloc(1, sizeof(*self));
-
-        if (!self) {
-                return NULL;
-        }
+        aout_application* self = aout_acquire(sizeof(*self));
 
         self->player_count = 0;
         self->is_running = true;
@@ -78,11 +76,7 @@ aout_application* aout_application_create(
         self->sigint_raised = 0;
 
         self->space = cpSpaceNew();
-
-        if (!self->space) {
-                aout_loge("could not create space");
-                goto error;
-        }
+        aout_abort_if(!self->space);
 
         cpSpaceSetIterations(self->space, 10);
         cpSpaceSetSleepTimeThreshold(self->space, 0.5f);
@@ -96,7 +90,7 @@ aout_application* aout_application_create(
 
         if (!self->server) {
                 aout_loge("could not create server");
-                goto error;
+                aout_abort();
         }
 
         aout_res res = aout_on_sigint((aout_sig_handler) {
@@ -105,26 +99,26 @@ aout_application* aout_application_create(
         });
 
         if (AOUT_IS_ERR(res)) {
-                aout_loge("could not set SIGINT handler");
-                goto error;
+                aout_logf("could not set SIGINT handler");
+                aout_abort();
         }
 
         return self;
-
-error:
-        aout_application_destroy(self);
-        return NULL;
 }
 
-void aout_application_destroy(
-                aout_application* self) {
+void aout_application_del(
+                aout_application** out_self) {
+        assert(out_self);
+
+        aout_application* self = *out_self;
         if (!self) {
                 return;
         }
 
         aout_server_destroy(self->server);
         aout_space_del(&self->space);
-        free(self);
+        aout_release(self);
+        *out_self = NULL;
 }
 
 aout_res aout_application_run(
