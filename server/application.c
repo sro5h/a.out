@@ -81,17 +81,12 @@ aout_application* aout_application_new(
         cpSpaceSetIterations(self->space, 10);
         cpSpaceSetSleepTimeThreshold(self->space, 0.5f);
 
-        self->server = aout_server_create((aout_server_adapter) {
+        self->server = aout_server_new((aout_server_adapter) {
                 .on_connection = aout_application_on_connection,
                 .on_disconnection = aout_application_on_disconnection,
                 .on_msg_input = aout_application_on_msg_input,
                 .context = self
         }, SERVER_MAX_CONNECTIONS);
-
-        if (!self->server) {
-                aout_loge("could not create server");
-                aout_abort();
-        }
 
         aout_res res = aout_on_sigint((aout_sig_handler) {
                 .callback = on_sigint,
@@ -115,7 +110,7 @@ void aout_application_del(
                 return;
         }
 
-        aout_server_destroy(self->server);
+        aout_server_del(&self->server);
         aout_space_del(&self->space);
         aout_release(self);
         *out_self = NULL;

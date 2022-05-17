@@ -9,18 +9,27 @@
 
 typedef struct _ENetHost ENetHost;
 
+// TODO: Rename to sv_endpoint
 typedef struct aout_server {
         ENetHost* host;
         aout_connection* connections;
         aout_server_adapter adapter;
 } aout_server;
 
-aout_server* aout_server_create(
+void aout_server_ctor(
+                aout_server* self,
                 aout_server_adapter adapter,
                 size_t connection_count);
 
-void aout_server_destroy(
+void aout_server_dtor(
                 aout_server* self);
+
+aout_server* aout_server_new(
+                aout_server_adapter adapter,
+                size_t connection_count);
+
+void aout_server_del(
+                aout_server** out_self);
 
 void aout_server_update(
                 aout_server* self);

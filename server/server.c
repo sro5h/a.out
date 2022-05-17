@@ -2,6 +2,8 @@
 
 #include <common/host.h>
 #include <common/log.h>
+#include <common/memory.h>
+#include <common/platform.h>
 
 #include <enet/enet.h>
 #include <string.h>
@@ -32,24 +34,16 @@ static aout_res aout_wrapper_write_sv_msg_state(
                 aout_stream* self,
                 void* msg);
 
-aout_server* aout_server_create(
+void aout_server_ctor(
+                aout_server* self,
                 aout_server_adapter adapter,
                 size_t connection_count) {
-        // Connections must be zero
-        aout_server* self = calloc(1, sizeof(*self));
+        assert(self);
 
-        if (!self) {
-                return NULL;
-        }
-
-        self->adapter = adapter;
+        *self = (aout_server) { 0 };
 
         size_t const connection_size = sizeof(*self->connections);
-        self->connections = calloc(connection_count, connection_size);
-
-        if (!self->connections) {
-                goto error;
-        }
+        self->connections = aout_acquire(connection_count * connection_size);
 
         self->host = enet_host_create(
                 &(ENetAddress) {
@@ -61,25 +55,43 @@ aout_server* aout_server_create(
                 0,
                 0
         );
+        aout_abort_if(!self->host);
 
-        if (!self->host) {
-                goto error;
-        }
-
-        return self;
-
-error:
-        aout_server_destroy(self);
-        return NULL;
+        self->adapter = adapter;
 }
 
-void aout_server_destroy(
+void aout_server_dtor(
                 aout_server* self) {
-        if (self) {
-                enet_host_destroy(self->host);
-                free(self->connections);
-                free(self);
+        assert(self);
+
+        enet_host_destroy(self->host);
+        aout_release(self->connections);
+
+        *self = (aout_server) { 0 };
+}
+
+aout_server* aout_server_new(
+                aout_server_adapter adapter,
+                size_t connection_count) {
+        aout_server* self = aout_acquire(sizeof(*self));
+        aout_server_ctor(self, adapter, connection_count);
+
+        return self;
+}
+
+void aout_server_del(
+                aout_server** out_self) {
+        assert(out_self);
+
+        aout_server* self = *out_self;
+        if (!self) {
+                return;
         }
+
+        enet_host_destroy(self->host);
+        aout_release(self->connections);
+        aout_release(self);
+        *out_self = NULL;
 }
 
 void aout_server_update(
