@@ -23,10 +23,13 @@ typedef struct aout_cl_msg_input {
         aout_input inputs[AOUT_CL_MSG_INPUT_BUFFER_COUNT];
 } aout_cl_msg_input;
 
+// TODO: Rename to aout_sv_msg_join_self
 typedef struct aout_sv_msg_connection {
         uint32_t id;
         uint16_t peer_id;
 } aout_sv_msg_connection;
+
+// TODO: Add aout_sv_msg_join
 
 typedef struct aout_sv_msg_state {
         aout_tick tick;
