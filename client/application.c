@@ -171,16 +171,18 @@ void aout_application_del(
         assert(out_self);
 
         aout_application* self = *out_self;
-        if (self) {
-                aout_client_del(&self->client);
-                aout_space_del(&self->space);
-                aout_debug_draw_del(&self->debug_draw);
-                aout_renderer_del(&self->renderer);
-                glfwDestroyWindow(self->window);
-                aout_ring_del(&self->predictions);
-                aout_release(self);
-                *out_self = NULL;
+        if (!self) {
+                return;
         }
+
+        aout_client_del(&self->client);
+        aout_space_del(&self->space);
+        aout_debug_draw_del(&self->debug_draw);
+        aout_renderer_del(&self->renderer);
+        glfwDestroyWindow(self->window);
+        aout_ring_del(&self->predictions);
+        aout_release(self);
+        *out_self = NULL;
 }
 
 aout_res aout_application_run(
