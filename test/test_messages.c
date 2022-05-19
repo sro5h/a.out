@@ -7,8 +7,8 @@ static bool memval(
                 uint8_t value,
                 size_t size);
 
-TEST stream_write_sv_msg_connection(void) {
-        size_t const size = sizeof(aout_sv_msg_connection) + 4;
+TEST stream_write_sv_msg_join(void) {
+        size_t const size = sizeof(aout_sv_msg_join) + 4;
         uint8_t* data = calloc(size, sizeof(*data));
 
         ASSERT(data);
@@ -20,14 +20,14 @@ TEST stream_write_sv_msg_connection(void) {
 
         aout_res res = { 0 };
         size_t cursor = 0;
-        aout_sv_msg_connection msg = {
+        aout_sv_msg_join msg = {
                 .id = 3290323,
                 .peer_id = 23
         };
         uint32_t n_id = aout_hton_u32(msg.id);
         uint16_t n_peer_id = aout_hton_u16(msg.peer_id);
 
-        res = aout_stream_write_sv_msg_connection(&stream, &msg);
+        res = aout_stream_write_sv_msg_join(&stream, &msg);
         cursor = 0;
 
         ASSERT(AOUT_IS_OK(res));
@@ -37,7 +37,7 @@ TEST stream_write_sv_msg_connection(void) {
         cursor += sizeof(n_peer_id);
         ASSERT(memval(stream.data + cursor, 0, size - cursor));
 
-        res = aout_stream_write_sv_msg_connection(&stream, &msg);
+        res = aout_stream_write_sv_msg_join(&stream, &msg);
         cursor = 0;
 
         ASSERT(AOUT_IS_ERR(res));
@@ -115,7 +115,7 @@ TEST stream_write_sv_msg_state(void) {
         PASS();
 }
 
-TEST stream_read_sv_msg_connection(void) {
+TEST stream_read_sv_msg_join(void) {
         uint8_t data[] = { 32, 129, -32, 239, 12, 4, 9, 94, 49, 3 };
         aout_stream stream = {
                 .data = data,
@@ -123,17 +123,17 @@ TEST stream_read_sv_msg_connection(void) {
         };
 
         aout_res res = { 0 };
-        aout_sv_msg_connection msg = { 0 };
+        aout_sv_msg_join msg = { 0 };
         uint32_t h_id = aout_ntoh_u32(*((uint32_t*) &data[0]));
         uint16_t h_peer_id = aout_ntoh_u16(*((uint16_t*) &data[4]));
 
-        res = aout_stream_read_sv_msg_connection(&stream, &msg);
+        res = aout_stream_read_sv_msg_join(&stream, &msg);
 
         ASSERT(AOUT_IS_OK(res));
         ASSERT_EQ(msg.id, h_id);
         ASSERT_EQ(msg.peer_id, h_peer_id);
 
-        res = aout_stream_read_sv_msg_connection(&stream, &msg);
+        res = aout_stream_read_sv_msg_join(&stream, &msg);
 
         ASSERT(AOUT_IS_ERR(res));
 
@@ -239,14 +239,107 @@ TEST stream_write_then_read_cl_msg_input(void) {
         PASS();
 }
 
+TEST stream_write_then_read_sv_msg_join(void) {
+        size_t const size = sizeof(aout_sv_msg_join) + 2;
+        uint8_t* data = calloc(size, sizeof(*data));
+
+        ASSERT(data);
+
+        aout_stream stream = {
+                .data = data,
+                .data_size = size
+        };
+
+        aout_res res = { 0 };
+        aout_sv_msg_join msg = {
+                .id = 1337,
+                .peer_id = 42329,
+        };
+
+        res = aout_stream_write_sv_msg_join(&stream, &msg);
+
+        ASSERT(AOUT_IS_OK(res));
+
+        aout_stream_reset(&stream);
+
+        aout_sv_msg_join dst = { 0 };
+        res = aout_stream_read_sv_msg_join(&stream, &dst);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT_EQ(msg.id, dst.id);
+        ASSERT_EQ(msg.peer_id, dst.peer_id);
+
+        res = aout_stream_read_sv_msg_join(&stream, &dst);
+
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT_EQ(msg.id, dst.id);
+        ASSERT_EQ(msg.peer_id, dst.peer_id);
+
+        free(data);
+        data = NULL;
+        PASS();
+}
+
+TEST stream_write_then_read_sv_msg_state(void) {
+        size_t const size = sizeof(aout_sv_msg_state) + 2;
+        uint8_t* data = calloc(size, sizeof(*data));
+
+        ASSERT(data);
+
+        aout_stream stream = {
+                .data = data,
+                .data_size = size
+        };
+
+        aout_res res = { 0 };
+        aout_sv_msg_state msg = {
+                .tick.value = 3993,
+                .state = {
+                        .p = { .x = 3.14159f, .y = -32.3299f },
+                        .v = { .x = -255.32f, .y = 0.329191f }
+                }
+        };
+
+        res = aout_stream_write_sv_msg_state(&stream, &msg);
+
+        ASSERT(AOUT_IS_OK(res));
+
+        aout_stream_reset(&stream);
+
+        aout_sv_msg_state dst = { 0 };
+        res = aout_stream_read_sv_msg_state(&stream, &dst);
+
+        ASSERT(AOUT_IS_OK(res));
+        ASSERT(aout_tick_cmp(msg.tick, dst.tick) == 0);
+        ASSERT_EQ(msg.state.p.x, dst.state.p.x);
+        ASSERT_EQ(msg.state.p.y, dst.state.p.y);
+        ASSERT_EQ(msg.state.v.x, dst.state.v.x);
+        ASSERT_EQ(msg.state.v.y, dst.state.v.y);
+
+        res = aout_stream_read_sv_msg_state(&stream, &dst);
+
+        ASSERT(AOUT_IS_ERR(res));
+        ASSERT(aout_tick_cmp(msg.tick, dst.tick) == 0);
+        ASSERT_EQ(msg.state.p.x, dst.state.p.x);
+        ASSERT_EQ(msg.state.p.y, dst.state.p.y);
+        ASSERT_EQ(msg.state.v.x, dst.state.v.x);
+        ASSERT_EQ(msg.state.v.y, dst.state.v.y);
+
+        free(data);
+        data = NULL;
+        PASS();
+}
+
 SUITE(test_messages) {
-        RUN_TEST(stream_write_sv_msg_connection);
+        RUN_TEST(stream_write_sv_msg_join);
         RUN_TEST(stream_write_sv_msg_state);
 
-        RUN_TEST(stream_read_sv_msg_connection);
+        RUN_TEST(stream_read_sv_msg_join);
         RUN_TEST(stream_read_sv_msg_state);
 
         RUN_TEST(stream_write_then_read_cl_msg_input);
+        RUN_TEST(stream_write_then_read_sv_msg_join);
+        RUN_TEST(stream_write_then_read_sv_msg_state);
 }
 
 GREATEST_MAIN_DEFS();

@@ -12,7 +12,7 @@ typedef enum aout_cl_msg_type {
 } aout_cl_msg_type;
 
 typedef enum aout_sv_msg_type {
-        AOUT_SV_MSG_TYPE_CONNECTION,
+        AOUT_SV_MSG_TYPE_JOIN,
         AOUT_SV_MSG_TYPE_STATE,
 } aout_sv_msg_type;
 
@@ -23,13 +23,12 @@ typedef struct aout_cl_msg_input {
         aout_input inputs[AOUT_CL_MSG_INPUT_BUFFER_COUNT];
 } aout_cl_msg_input;
 
-// TODO: Rename to aout_sv_msg_join_self
-typedef struct aout_sv_msg_connection {
+typedef struct aout_sv_msg_join {
         uint32_t id;
         uint16_t peer_id;
-} aout_sv_msg_connection;
+} aout_sv_msg_join;
 
-// TODO: Add aout_sv_msg_join
+// TODO: Add aout_sv_msg_join_self if needed
 
 typedef struct aout_sv_msg_state {
         aout_tick tick;
@@ -40,9 +39,9 @@ COMMON_API aout_res aout_stream_write_cl_msg_input(
                 aout_stream* self,
                 aout_cl_msg_input* msg);
 
-COMMON_API aout_res aout_stream_write_sv_msg_connection(
+COMMON_API aout_res aout_stream_write_sv_msg_join(
                 aout_stream* self,
-                aout_sv_msg_connection* msg);
+                aout_sv_msg_join* msg);
 
 COMMON_API aout_res aout_stream_write_sv_msg_state(
                 aout_stream* self,
@@ -52,9 +51,9 @@ COMMON_API aout_res aout_stream_read_cl_msg_input(
                 aout_stream* self,
                 aout_cl_msg_input* msg);
 
-COMMON_API aout_res aout_stream_read_sv_msg_connection(
+COMMON_API aout_res aout_stream_read_sv_msg_join(
                 aout_stream* self,
-                aout_sv_msg_connection* msg);
+                aout_sv_msg_join* msg);
 
 COMMON_API aout_res aout_stream_read_sv_msg_state(
                 aout_stream* self,

@@ -21,7 +21,7 @@ static void aout_client_on_receive(
                 ENetPeer* peer, // TODO: Maybe use peer_id or aout_connection
                 ENetPacket* packet);
 
-static void aout_client_on_receive_msg_connection(
+static void aout_client_on_receive_msg_join(
                 aout_client* self,
                 aout_stream* stream);
 
@@ -211,8 +211,8 @@ void aout_client_on_receive(
         }
 
         switch (type) {
-        case AOUT_SV_MSG_TYPE_CONNECTION:
-                aout_client_on_receive_msg_connection(self, &stream);
+        case AOUT_SV_MSG_TYPE_JOIN:
+                aout_client_on_receive_msg_join(self, &stream);
                 break;
         case AOUT_SV_MSG_TYPE_STATE:
                 aout_client_on_receive_msg_state(self, &stream);
@@ -223,23 +223,23 @@ void aout_client_on_receive(
         }
 }
 
-void aout_client_on_receive_msg_connection(
+void aout_client_on_receive_msg_join(
                 aout_client* self,
                 aout_stream* stream) {
         assert(self); assert(stream);
 
-        aout_sv_msg_connection msg;
-        if (AOUT_IS_ERR(aout_stream_read_sv_msg_connection(stream, &msg))) {
-                aout_loge("could not read sv_msg_connection");
+        aout_sv_msg_join msg;
+        if (AOUT_IS_ERR(aout_stream_read_sv_msg_join(stream, &msg))) {
+                aout_loge("could not read sv_msg_join");
                 return;
         }
 
-        aout_logd("[0x%08x] sv_msg_connection received: ",
+        aout_logd("[0x%08x] sv_msg_join received: ",
                         self->connection.id);
         aout_logd("{ .id = 0x%x, .peer_id = 0x%x }", msg.id, msg.peer_id);
 
-        if (self->adapter.on_msg_connection) {
-                self->adapter.on_msg_connection(self, &msg, self->adapter.context);
+        if (self->adapter.on_msg_join) {
+                self->adapter.on_msg_join(self, &msg, self->adapter.context);
         }
 }
 

@@ -38,10 +38,9 @@ void aout_server_flush(
                 aout_server* self);
 
 // TODO: Rename to aout_server_queue_msg_*
-aout_res aout_server_send_msg_connection(
+aout_res aout_server_send_msg_join(
                 aout_server* self,
-                uint16_t peer_id,
-                aout_sv_msg_connection* msg);
+                aout_sv_msg_join* msg);
 
 aout_res aout_server_send_msg_state(
                 aout_server* self,

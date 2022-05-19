@@ -30,9 +30,9 @@ aout_res aout_stream_write_cl_msg_input(
         return AOUT_OK;
 }
 
-aout_res aout_stream_write_sv_msg_connection(
+aout_res aout_stream_write_sv_msg_join(
                 aout_stream* self,
-                aout_sv_msg_connection* msg) {
+                aout_sv_msg_join* msg) {
         assert(self); assert(msg);
 
         // Make sure there is enough space to write each type on its own. This
@@ -109,12 +109,12 @@ aout_res aout_stream_read_cl_msg_input(
         return AOUT_OK;
 }
 
-aout_res aout_stream_read_sv_msg_connection(
+aout_res aout_stream_read_sv_msg_join(
                 aout_stream* self,
-                aout_sv_msg_connection* msg) {
+                aout_sv_msg_join* msg) {
         assert(self); assert(msg);
 
-        aout_sv_msg_connection tmp;
+        aout_sv_msg_join tmp;
 
         if (AOUT_IS_ERR(aout_stream_read_u32(self, &tmp.id))) {
                 return AOUT_ERR;

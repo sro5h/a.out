@@ -26,7 +26,7 @@ static void aout_server_on_receive_msg_input(
                 aout_connection const* connection,
                 aout_stream* stream);
 
-static aout_res aout_wrapper_write_sv_msg_connection(
+static aout_res aout_wrapper_write_sv_msg_join(
                 aout_stream* self,
                 void* msg);
 
@@ -127,21 +127,18 @@ void aout_server_flush(
         enet_host_flush(self->host);
 }
 
-aout_res aout_server_send_msg_connection(
+aout_res aout_server_send_msg_join(
                 aout_server* self,
-                uint16_t peer_id,
-                aout_sv_msg_connection* msg) {
+                aout_sv_msg_join* msg) {
         assert(self); assert(msg);
         assert(self->host);
-        assert(peer_id < self->host->peerCount);
-        assert(self->host->peers[peer_id].connectID); // TODO: Treat as error?
 
-        return aout_host_send_msg(self->host, peer_id, &(aout_msg_desc) {
-                .type = AOUT_SV_MSG_TYPE_CONNECTION,
+        return aout_host_send_msg_to_all(self->host, &(aout_msg_desc) {
+                .type = AOUT_SV_MSG_TYPE_JOIN,
                 .size = sizeof(*msg),
                 .flags = ENET_PACKET_FLAG_RELIABLE,
                 .value = msg,
-                .write = aout_wrapper_write_sv_msg_connection,
+                .write = aout_wrapper_write_sv_msg_join,
         });
 }
 
@@ -180,12 +177,10 @@ void aout_server_on_connect(
         aout_logd("[0x%08x] connection", connection->id);
 
         // Should be sent to all the other connected peers!
-        aout_res res = aout_server_send_msg_connection(
-                self, connection->peer_id, &(aout_sv_msg_connection) {
-                        .id = connection->id,
-                        .peer_id = connection->peer_id
-                }
-        );
+        aout_res res = aout_server_send_msg_join(self, &(aout_sv_msg_join) {
+                .id = connection->id,
+                .peer_id = connection->peer_id
+        });
         assert(AOUT_IS_OK(res)); // TODO: Maybe print error message
 
         aout_server_adapter* adapter = &self->adapter;
@@ -266,10 +261,10 @@ void aout_server_on_receive_msg_input(
         }
 }
 
-aout_res aout_wrapper_write_sv_msg_connection(
+aout_res aout_wrapper_write_sv_msg_join(
                 aout_stream* self,
                 void* msg) {
-        return aout_stream_write_sv_msg_connection(self, msg);
+        return aout_stream_write_sv_msg_join(self, msg);
 }
 
 aout_res aout_wrapper_write_sv_msg_state(
